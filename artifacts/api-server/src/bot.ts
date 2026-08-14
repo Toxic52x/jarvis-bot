@@ -84,14 +84,8 @@ const staydownCommand = new SlashCommandBuilder()
   .setName("staydown")
   .setDescription("Acknowledge breach, clear alarm, and unlock the audit channel.");
 
-const jarvisCommand = new SlashCommandBuilder()
-  .setName("jarvis")
-  .setDescription("Ask Jarvis anything — powered by AI.")
-  .addStringOption((o) =>
-    o.setName("question")
-      .setDescription("What would you like to ask Jarvis?")
-      .setRequired(true),
-  );
+// Active sessions: userId → awaiting follow-up question
+const activeSessions = new Set<string>();
 
 // ─── Rank helpers ─────────────────────────────────────────────────────────────
 
@@ -574,60 +568,67 @@ async function handleStaydown(interaction: ChatInputCommandInteraction): Promise
   }
 }
 
-async function handleJarvis(interaction: ChatInputCommandInteraction): Promise<void> {
-  const member = interaction.guild
-    ? await interaction.guild.members.fetch(interaction.user.id).catch(() => null)
-    : null;
+// ─── Jarvis keyword conversation ──────────────────────────────────────────────
 
-  // Only Owner and Fire Lord can use the AI command
-  if (!member || (getJarvisRank(member) !== "owner" && getJarvisRank(member) !== "second")) {
-    await interaction.reply({
-      content: "Access Denied — only the Owner or Fire Lord can speak directly with Jarvis.",
-      ephemeral: true,
-    });
+async function handleMessageCreate(message: {
+  author: { bot: boolean; id: string };
+  guild: null | { id: string };
+  member: null | GuildMember;
+  content: string;
+  reply: (text: string) => Promise<unknown>;
+  channel: { sendTyping: () => Promise<void> };
+}): Promise<void> {
+  if (message.author.bot || !message.guild || !message.member) return;
+
+  const rank = getJarvisRank(message.member);
+  if (rank !== "owner" && rank !== "second") return;
+
+  const text = message.content.trim();
+
+  if (activeSessions.has(message.author.id)) {
+    // This is the follow-up question — anything goes
+    activeSessions.delete(message.author.id);
+    await message.channel.sendTyping();
+
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are Jarvis, a sophisticated, precise, and loyal AI assistant serving the leadership of a military-themed Discord community called the Fire Division. " +
+              "You speak with calm confidence and military brevity. You address the Owner and Fire Lord as 'Sir'. " +
+              "Keep responses concise and direct. Do not use emojis.",
+          },
+          { role: "user", content: text },
+        ],
+        max_tokens: 800,
+      });
+
+      const reply =
+        completion.choices[0]?.message?.content ??
+        "I apologize, Sir — I was unable to generate a response.";
+
+      // Discord hard limit is 2000 chars — split if needed
+      if (reply.length > 2000) {
+        for (let i = 0; i < reply.length; i += 2000) {
+          await message.reply(reply.slice(i, i + 2000));
+        }
+      } else {
+        await message.reply(reply);
+      }
+    } catch (error) {
+      logger.error({ err: error }, "OpenAI API request failed");
+      await message.reply("I encountered an error communicating with my neural core, Sir.");
+    }
     return;
   }
 
-  await interaction.deferReply();
-
-  const question = interaction.options.getString("question", true);
-
-  try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are Jarvis, a sophisticated, precise, and loyal AI assistant serving the leadership of a military-themed Discord community called the Fire Division. " +
-            "You speak with calm confidence and military brevity. You address the Owner and Fire Lord as 'Sir'. " +
-            "Keep responses concise and direct. Do not use emojis.",
-        },
-        { role: "user", content: question },
-      ],
-      max_tokens: 800,
-    });
-
-    const reply =
-      completion.choices[0]?.message?.content ??
-      "I apologize, Sir — I was unable to generate a response.";
-
-    // Discord message limit is 2000 chars
-    if (reply.length > 2000) {
-      const embed = new EmbedBuilder()
-        .setTitle("JARVIS // RESPONSE")
-        .setDescription(reply.slice(0, 4096))
-        .setColor(FIRE_RED)
-        .setTimestamp();
-      await interaction.editReply({ embeds: [embed] });
-    } else {
-      await interaction.editReply(reply);
-    }
-  } catch (error) {
-    logger.error({ err: error }, "OpenAI API request failed");
-    await interaction.editReply(
-      "I encountered an error communicating with my neural core, Sir. Please try again.",
-    );
+  // Only trigger on the exact word "Jarvis" (case-insensitive), nothing else
+  if (text.toLowerCase() === "jarvis") {
+    activeSessions.add(message.author.id);
+    await message.reply("Yes, Sir?");
   }
 }
 
@@ -644,7 +645,6 @@ async function handleInteraction(interaction: ChatInputCommandInteraction): Prom
     case "merithistory":  await handleMeritHistory(interaction);break;
     case "resetdata":     await handleResetData(interaction);   break;
     case "staydown":      await handleStaydown(interaction);    break;
-    case "jarvis":        await handleJarvis(interaction);      break;
   }
 }
 
@@ -717,7 +717,13 @@ export async function startBot(): Promise<void> {
     return;
   }
 
-  const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+  const client = new Client({
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent, // privileged — must be enabled in Discord Developer Portal
+    ],
+  });
 
   client.once(Events.ClientReady, async (ready) => {
     const commands = [
@@ -728,7 +734,6 @@ export async function startBot(): Promise<void> {
       createHrCommand.toJSON(),
       resetDataCommand.toJSON(),
       staydownCommand.toJSON(),
-      jarvisCommand.toJSON(),
     ];
     const rest = new REST({ version: "10" }).setToken(token);
     const guildId = await resolveGuildId(ready);
@@ -749,6 +754,12 @@ export async function startBot(): Promise<void> {
   client.on(Events.InteractionCreate, (interaction) => {
     void handleInteraction(interaction as ChatInputCommandInteraction).catch((e) =>
       logger.error({ err: e }, "Discord interaction failed"),
+    );
+  });
+
+  client.on(Events.MessageCreate, (message) => {
+    void handleMessageCreate(message as Parameters<typeof handleMessageCreate>[0]).catch((e) =>
+      logger.error({ err: e }, "MessageCreate handler failed"),
     );
   });
 
