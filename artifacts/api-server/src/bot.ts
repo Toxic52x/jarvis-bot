@@ -91,8 +91,19 @@ const staydownCommand = new SlashCommandBuilder()
 type ChatMessage = { role: "user" | "assistant"; content: string };
 const activeSessions = new Map<string, ChatMessage[]>();
 
-// Phrases that end the conversation
-const DISMISSAL = /^(thanks?(\s+you)?\s*(jarvis|j\.?a\.?r\.?v\.?i\.?s\.?)?|that'?s?\s+all(\s+jarvis)?|goodbye(\s+jarvis)?|dismiss(ed)?(\s+jarvis)?)$/i;
+// Ends the session if the message loosely contains a dismissal phrase anywhere
+function isDismissal(text: string): boolean {
+  const t = text.toLowerCase();
+  return (
+    /thank(s|\s+you)/.test(t) ||
+    /that'?ll\s+be\s+all/.test(t) ||
+    /that'?s\s+all/.test(t) ||
+    /good\s*bye/.test(t) ||
+    /dismiss(ed)?/.test(t) ||
+    /you'?re?\s+(free|dismissed)/.test(t) ||
+    /\ball\s+good\b/.test(t)
+  );
+}
 
 // ─── Rank helpers ─────────────────────────────────────────────────────────────
 
@@ -606,7 +617,7 @@ async function handleMessageCreate(message: {
 
   if (history !== undefined) {
     // Active session — check for dismissal first
-    if (DISMISSAL.test(text)) {
+    if (isDismissal(text)) {
       activeSessions.delete(message.author.id);
       await message.reply("Of course, Sir. I'll be standing by should you need me.");
       return;
