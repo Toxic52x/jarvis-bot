@@ -1,6 +1,6 @@
 # Jarvis Merit Bot
 
-Jarvis is a Discord HR operations bot that records fleet merits, validates proof links, and writes owner-facing audit logs.
+Jarvis is a Discord HR operations bot that records merits, validates proof links, and writes owner-facing audit logs.
 
 ## Run & Operate
 

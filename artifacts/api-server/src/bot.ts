@@ -208,7 +208,7 @@ function buildLeaderboardEmbed(
   );
 
   return new EmbedBuilder()
-    .setTitle("JARVIS // FLEET MERIT COMMAND")
+    .setTitle("JARVIS // MERIT COMMAND")
     .setDescription(
       `**TOP 30 PERSONNEL RANKING**\n\n${lines.join("\n")}`,
     )
@@ -266,7 +266,7 @@ async function writeOwnerAuditLog(
 
   const embed = new EmbedBuilder()
     .setTitle("JARVIS // MERIT AWARD AUDIT")
-    .setDescription("A fleet merit transaction has been authorized and recorded.")
+    .setDescription("A merit transaction has been authorized and recorded.")
     .setColor(FIRE_RED)
     .addFields(
       { name: "RECIPIENTS", value: memberLines.slice(0, 1024) },
@@ -412,7 +412,7 @@ async function handleMerits(interaction: ChatInputCommandInteraction): Promise<v
     const total = Number(result?.total ?? 0);
     const embed = new EmbedBuilder()
       .setTitle("JARVIS // PERSONNEL MERIT RECORD")
-      .setDescription("Current fleet standing for the selected personnel.")
+      .setDescription("Current standing for the selected personnel.")
       .setColor(FIRE_RED)
       .addFields(
         { name: "PERSONNEL", value: target.tag, inline: true },
