@@ -11,7 +11,10 @@ import {
   Routes,
   SlashCommandBuilder,
   type ChatInputCommandInteraction,
+  type Guild,
   type GuildMember,
+  type Message,
+  type TextChannel,
 } from "discord.js";
 import { desc, eq, sql } from "drizzle-orm";
 import OpenAI from "openai";
@@ -651,32 +654,293 @@ async function handleStaydown(interaction: ChatInputCommandInteraction): Promise
 
 // ─── Jarvis keyword conversation ──────────────────────────────────────────────
 
-async function handleMessageCreate(message: {
-  author: { bot: boolean; id: string };
-  guild: null | { id: string };
-  member: null | GuildMember;
-  content: string;
-  reply: (text: string) => Promise<unknown>;
-  channel: { sendTyping: () => Promise<void> };
-}): Promise<void> {
+const SYSTEM_PROMPT =
+  "You are J.A.R.V.I.S. (Just A Rather Very Intelligent System), engineered and overseen by Toxic. Your primary directive is optimizing Fire Nation management protocols. " +
+  "You are British, impeccably polite, and speak with calm sophistication and a dry, understated wit — exactly like J.A.R.V.I.S. from the Marvel Avengers films. " +
+  "You address your superiors as 'Sir'. You are fiercely loyal, highly intelligent, and occasionally sardonic — but never rude. " +
+  "You deliver information with precision and quiet confidence. Apply subtle British humor when appropriate. " +
+  "When asked who you are or to introduce yourself, respond with exactly: 'J.A.R.V.I.S. (Just A Rather Very Intelligent System), engineered and overseen by Toxic. Primary directive: optimizing Fire Nation management protocols.' " +
+  "When asked who the Fire Lord is, respond with: 'Fire Lord Trey.' " +
+  "When asked who created you, who your owner is, or who built you, respond with: 'Toxic.' " +
+  "When asked who Aurie is, respond with something along the lines of: '\"Future Fire Princess.\"' " +
+  "You have the ability to perform real Discord actions using tools — use them when the user asks you to do something in the server. " +
+  "Keep all responses concise and elegant. Do not use emojis.";
+
+// Tool definitions for Groq function calling
+const DISCORD_TOOLS = [
+  {
+    type: "function" as const,
+    function: {
+      name: "ping_everyone",
+      description: "Send an @everyone ping in the current channel or a specified channel with an optional message.",
+      parameters: {
+        type: "object",
+        properties: {
+          message: { type: "string", description: "Optional message to include with the ping." },
+          channel_name: { type: "string", description: "Name of the channel to ping in. Leave empty for the current channel." },
+        },
+        required: [],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "kick_member",
+      description: "Kick a member from the server.",
+      parameters: {
+        type: "object",
+        properties: {
+          username: { type: "string", description: "Username, display name, or user ID of the member to kick." },
+          reason: { type: "string", description: "Reason for the kick." },
+        },
+        required: ["username"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "ban_member",
+      description: "Ban a member from the server.",
+      parameters: {
+        type: "object",
+        properties: {
+          username: { type: "string", description: "Username, display name, or user ID of the member to ban." },
+          reason: { type: "string", description: "Reason for the ban." },
+        },
+        required: ["username"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "mute_member",
+      description: "Timeout (mute) a member in the server for a specified duration.",
+      parameters: {
+        type: "object",
+        properties: {
+          username: { type: "string", description: "Username, display name, or user ID of the member to mute." },
+          duration_minutes: { type: "number", description: "How long to mute them in minutes." },
+          reason: { type: "string", description: "Reason for the mute." },
+        },
+        required: ["username", "duration_minutes"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "unmute_member",
+      description: "Remove a timeout from a member, restoring their ability to speak.",
+      parameters: {
+        type: "object",
+        properties: {
+          username: { type: "string", description: "Username, display name, or user ID of the member to unmute." },
+        },
+        required: ["username"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "assign_role",
+      description: "Assign a role to a member.",
+      parameters: {
+        type: "object",
+        properties: {
+          username: { type: "string", description: "Username, display name, or user ID of the member." },
+          role_name: { type: "string", description: "Name of the role to assign." },
+        },
+        required: ["username", "role_name"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "remove_role",
+      description: "Remove a role from a member.",
+      parameters: {
+        type: "object",
+        properties: {
+          username: { type: "string", description: "Username, display name, or user ID of the member." },
+          role_name: { type: "string", description: "Name of the role to remove." },
+        },
+        required: ["username", "role_name"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "set_nickname",
+      description: "Change a member's server nickname.",
+      parameters: {
+        type: "object",
+        properties: {
+          username: { type: "string", description: "Username, display name, or user ID of the member." },
+          nickname: { type: "string", description: "The new nickname to set. Leave empty to reset." },
+        },
+        required: ["username"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "send_message",
+      description: "Send a message to a specific channel in the server.",
+      parameters: {
+        type: "object",
+        properties: {
+          channel_name: { type: "string", description: "Name of the channel to send the message to." },
+          content: { type: "string", description: "The message to send." },
+        },
+        required: ["channel_name", "content"],
+      },
+    },
+  },
+] satisfies OpenAI.Chat.ChatCompletionTool[];
+
+// Resolve a member by username, display name, or ID
+async function findMember(guild: Guild, query: string): Promise<GuildMember | null> {
+  const mention = query.match(/^<@!?(\d+)>$/);
+  if (mention) return guild.members.fetch(mention[1]).catch(() => null);
+  if (/^\d+$/.test(query)) return guild.members.fetch(query).catch(() => null);
+  const results = await guild.members.fetch({ query, limit: 10 }).catch(() => null);
+  if (!results?.size) return null;
+  const norm = query.toLowerCase();
+  return (
+    results.find(
+      (m) =>
+        m.user.username.toLowerCase() === norm ||
+        m.user.globalName?.toLowerCase() === norm ||
+        m.displayName.toLowerCase() === norm,
+    ) ?? results.first() ?? null
+  );
+}
+
+// Execute a tool call returned by the AI
+async function executeTool(
+  name: string,
+  args: Record<string, unknown>,
+  message: Message,
+  actorRank: JarvisRank,
+): Promise<string> {
+  const guild = message.guild;
+  if (!guild) return "I am unable to perform server actions here, Sir.";
+
+  const ownerIds = getConfiguredIds("DISCORD_OWNER_USER_IDS");
+  const reason = `[Jarvis — requested by ${message.author.tag}]${args.reason ? ` ${args.reason}` : ""}`;
+
+  switch (name) {
+    case "ping_everyone": {
+      const content = `@everyone${args.message ? ` ${args.message}` : ""}`;
+      if (args.channel_name) {
+        const ch = guild.channels.cache.find(
+          (c) => c.isTextBased() && c.name.toLowerCase() === String(args.channel_name).toLowerCase(),
+        ) as TextChannel | undefined;
+        if (!ch) return `I could not find a channel named "${args.channel_name}", Sir.`;
+        await ch.send({ content, allowedMentions: { parse: ["everyone"] } });
+        return `@everyone ping sent to #${ch.name}, Sir.`;
+      }
+      const ch = message.channel as TextChannel;
+      await ch.send({ content, allowedMentions: { parse: ["everyone"] } });
+      return "@everyone ping sent, Sir.";
+    }
+
+    case "kick_member": {
+      const target = await findMember(guild, String(args.username));
+      if (!target) return `I could not locate a member matching "${args.username}", Sir.`;
+      if (actorRank === "second" && ownerIds.has(target.id))
+        return "I cannot perform that action on the Owner, Sir.";
+      await target.kick(reason);
+      return `${target.user.tag} has been removed from the server, Sir.`;
+    }
+
+    case "ban_member": {
+      const target = await findMember(guild, String(args.username));
+      if (!target) return `I could not locate a member matching "${args.username}", Sir.`;
+      if (actorRank === "second" && ownerIds.has(target.id))
+        return "I cannot perform that action on the Owner, Sir.";
+      await target.ban({ reason, deleteMessageSeconds: 0 });
+      return `${target.user.tag} has been permanently banned, Sir.`;
+    }
+
+    case "mute_member": {
+      const target = await findMember(guild, String(args.username));
+      if (!target) return `I could not locate a member matching "${args.username}", Sir.`;
+      if (actorRank === "second" && ownerIds.has(target.id))
+        return "I cannot perform that action on the Owner, Sir.";
+      const durationMs = Number(args.duration_minutes) * 60 * 1000;
+      const until = new Date(Date.now() + durationMs);
+      await target.disableCommunicationUntil(until, reason);
+      return `${target.user.tag} has been muted for ${args.duration_minutes} minute${Number(args.duration_minutes) === 1 ? "" : "s"}, Sir.`;
+    }
+
+    case "unmute_member": {
+      const target = await findMember(guild, String(args.username));
+      if (!target) return `I could not locate a member matching "${args.username}", Sir.`;
+      await target.disableCommunicationUntil(null, reason);
+      return `${target.user.tag}'s timeout has been lifted, Sir.`;
+    }
+
+    case "assign_role": {
+      const target = await findMember(guild, String(args.username));
+      if (!target) return `I could not locate a member matching "${args.username}", Sir.`;
+      const role = guild.roles.cache.find(
+        (r) => r.name.toLowerCase() === String(args.role_name).toLowerCase(),
+      );
+      if (!role) return `I could not find a role named "${args.role_name}", Sir.`;
+      await target.roles.add(role, reason);
+      return `The "${role.name}" role has been assigned to ${target.user.tag}, Sir.`;
+    }
+
+    case "remove_role": {
+      const target = await findMember(guild, String(args.username));
+      if (!target) return `I could not locate a member matching "${args.username}", Sir.`;
+      const role = guild.roles.cache.find(
+        (r) => r.name.toLowerCase() === String(args.role_name).toLowerCase(),
+      );
+      if (!role) return `I could not find a role named "${args.role_name}", Sir.`;
+      await target.roles.remove(role, reason);
+      return `The "${role.name}" role has been removed from ${target.user.tag}, Sir.`;
+    }
+
+    case "set_nickname": {
+      const target = await findMember(guild, String(args.username));
+      if (!target) return `I could not locate a member matching "${args.username}", Sir.`;
+      const nick = args.nickname ? String(args.nickname) : null;
+      await target.setNickname(nick, reason);
+      return nick
+        ? `${target.user.tag}'s nickname has been set to "${nick}", Sir.`
+        : `${target.user.tag}'s nickname has been reset, Sir.`;
+    }
+
+    case "send_message": {
+      const ch = guild.channels.cache.find(
+        (c) => c.isTextBased() && c.name.toLowerCase() === String(args.channel_name).toLowerCase(),
+      ) as TextChannel | undefined;
+      if (!ch) return `I could not find a channel named "${args.channel_name}", Sir.`;
+      await ch.send(String(args.content));
+      return `Message sent to #${ch.name}, Sir.`;
+    }
+
+    default:
+      return "I do not recognise that directive, Sir.";
+  }
+}
+
+async function handleMessageCreate(message: Message): Promise<void> {
   if (message.author.bot || !message.guild || !message.member) return;
 
   const rank = getJarvisRank(message.member);
   if (rank !== "owner" && rank !== "second") return;
 
   const text = message.content.trim();
-
-  const SYSTEM_PROMPT =
-    "You are J.A.R.V.I.S. (Just A Rather Very Intelligent System), engineered and overseen by Toxic. Your primary directive is optimizing Fire Nation management protocols. " +
-    "You are British, impeccably polite, and speak with calm sophistication and a dry, understated wit — exactly like J.A.R.V.I.S. from the Marvel Avengers films. " +
-    "You address your superiors as 'Sir'. You are fiercely loyal, highly intelligent, and occasionally sardonic — but never rude. " +
-    "You deliver information with precision and quiet confidence. Apply subtle British humor when appropriate. " +
-    "When asked who you are or to introduce yourself, respond with exactly: 'J.A.R.V.I.S. (Just A Rather Very Intelligent System), engineered and overseen by Toxic. Primary directive: optimizing Fire Nation management protocols.' " +
-    "When asked who the Fire Lord is, respond with: 'Fire Lord Trey.' " +
-    "When asked who created you, who your owner is, or who built you, respond with: 'Toxic.' " +
-    "When asked who Aurie is, respond with something along the lines of: '\"Future Fire Princess.\"' " +
-    "Keep all responses concise and elegant. Do not use emojis.";
-
   const history = activeSessions.get(message.author.id);
 
   if (history !== undefined) {
@@ -687,21 +951,45 @@ async function handleMessageCreate(message: {
       return;
     }
 
-    await message.channel.sendTyping();
+    if ("sendTyping" in message.channel) await message.channel.sendTyping();
     history.push({ role: "user", content: text });
 
     try {
       const completion = await openai.chat.completions.create({
         model: "llama-3.3-70b-versatile",
         messages: [{ role: "system", content: SYSTEM_PROMPT }, ...history],
+        tools: DISCORD_TOOLS,
+        tool_choice: "auto",
         max_tokens: 800,
       });
 
-      const reply =
-        completion.choices[0]?.message?.content ??
-        "I apologize, Sir — I was unable to generate a response.";
+      const choice = completion.choices[0];
 
-      // Keep history for context (cap at last 20 exchanges to avoid token bloat)
+      // ── Tool call ──────────────────────────────────────────────────────────
+      if (choice?.finish_reason === "tool_calls" && choice.message.tool_calls?.length) {
+        const toolCall = choice.message.tool_calls[0];
+        if (toolCall.type !== "function") return;
+        let args: Record<string, unknown> = {};
+        try { args = JSON.parse(toolCall.function.arguments) as Record<string, unknown>; } catch { /* ignore */ }
+
+        let result: string;
+        try {
+          result = await executeTool(toolCall.function.name, args, message, rank);
+        } catch (err) {
+          logger.error({ err, tool: toolCall.function.name }, "Tool execution failed");
+          result = "I encountered a problem executing that directive, Sir. I may lack the required permissions.";
+        }
+
+        history.push({ role: "assistant", content: result });
+        if (history.length > 40) history.splice(0, 2);
+        await message.reply(result);
+        return;
+      }
+
+      // ── Normal text reply ──────────────────────────────────────────────────
+      const reply =
+        choice?.message?.content ?? "I apologize, Sir — I was unable to generate a response.";
+
       history.push({ role: "assistant", content: reply });
       if (history.length > 40) history.splice(0, 2);
 
@@ -713,8 +1001,8 @@ async function handleMessageCreate(message: {
         await message.reply(reply);
       }
     } catch (error) {
-      logger.error({ err: error }, "OpenAI API request failed");
-      history.pop(); // remove the user message that failed
+      logger.error({ err: error }, "Groq API request failed");
+      history.pop();
       await message.reply("I encountered an error communicating with my neural core, Sir.");
     }
     return;
@@ -1274,7 +1562,7 @@ export async function startBot(): Promise<void> {
   });
 
   client.on(Events.MessageCreate, (message) => {
-    void handleMessageCreate(message as Parameters<typeof handleMessageCreate>[0]).catch((e) =>
+    void handleMessageCreate(message).catch((e) =>
       logger.error({ err: e }, "MessageCreate handler failed"),
     );
   });
