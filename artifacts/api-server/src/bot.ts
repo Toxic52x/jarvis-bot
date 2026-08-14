@@ -1594,4 +1594,5 @@ export async function startBot(): Promise<void> {
   });
 
   await client.login(token);
+
 }
