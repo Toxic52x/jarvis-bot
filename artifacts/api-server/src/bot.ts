@@ -1303,7 +1303,7 @@ async function handleLookup(interaction: ChatInputCommandInteraction): Promise<v
     const userId = resolved.id;
 
     // Fetch all data in parallel
-    const [userInfo, friendData, groupsData, favGamesData, followersData, followingsData, avatarData] =
+    const [userInfo, friendData, groupsData, favGamesData, followersData, followingsData, platformBadgesData, avatarData] =
       await Promise.all([
         fetch(`https://users.roblox.com/v1/users/${userId}`).then((r) => r.json()),
         fetch(`https://friends.roblox.com/v1/users/${userId}/friends/count`).then((r) => r.json()).catch(() => ({ count: 0 })),
@@ -1311,6 +1311,7 @@ async function handleLookup(interaction: ChatInputCommandInteraction): Promise<v
         fetch(`https://games.roblox.com/v2/users/${userId}/favorite/games?pageSize=50&sortOrder=Desc`).then((r) => r.json()).catch(() => ({ data: [], nextPageCursor: null })),
         fetch(`https://friends.roblox.com/v1/users/${userId}/followers/count`).then((r) => r.json()).catch(() => ({ count: 0 })),
         fetch(`https://friends.roblox.com/v1/users/${userId}/followings/count`).then((r) => r.json()).catch(() => ({ count: 0 })),
+        fetch(`https://accountinformation.roblox.com/v1/users/${userId}/roblox-badges`).then((r) => r.json()).catch(() => []),
         fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png`).then((r) => r.json()).catch(() => null),
       ]);
 
@@ -1319,6 +1320,9 @@ async function handleLookup(interaction: ChatInputCommandInteraction): Promise<v
     const friends = (friendData as { count?: number }).count ?? 0;
     const followers = (followersData as { count?: number }).count ?? 0;
     const following = (followingsData as { count?: number }).count ?? 0;
+    type PlatformBadge = { name: string };
+    const platformBadges: PlatformBadge[] = Array.isArray(platformBadgesData) ? platformBadgesData as PlatformBadge[] : [];
+    const hasVeteran = platformBadges.some((b) => b.name === "Veteran");
     const groups = ((groupsData as { data?: unknown[] }).data) ?? [];
     const favGames = ((favGamesData as { data?: unknown[]; nextPageCursor?: string | null }).data) ?? [];
     const favGamesHasMore = !!((favGamesData as { nextPageCursor?: string | null }).nextPageCursor);
@@ -1364,6 +1368,16 @@ async function handleLookup(interaction: ChatInputCommandInteraction): Promise<v
       flags.push("📭 **Zero followers** — no social footprint");
       score += 1;
     }
+    if (platformBadges.length === 0 && accountAgeDays > 180) {
+      flags.push(`🏅 **No Roblox platform badges** on a ${accountAgeDays}-day-old account — no recorded activity milestones`);
+      score += 2;
+    } else if (platformBadges.length <= 2 && accountAgeDays > 365) {
+      flags.push(`🏅 Only **${platformBadges.length}** platform badge${platformBadges.length === 1 ? "" : "s"} on a ${Math.floor(accountAgeDays / 365)}-year-old account — very low activity`);
+      score += 1;
+    } else if (!hasVeteran && accountAgeDays > 730) {
+      flags.push("🏅 No **Veteran** badge despite being 2+ years old — account may not have been actively played");
+      score += 1;
+    }
     if (favGames.length === 0) {
       flags.push("🎮 **No favorited games**");
       score += 1;
@@ -1406,6 +1420,7 @@ async function handleLookup(interaction: ChatInputCommandInteraction): Promise<v
         { name: "FOLLOWERS", value: String(followers), inline: true },
         { name: "FOLLOWING", value: String(following), inline: true },
         { name: "GROUPS", value: String(groups.length), inline: true },
+        { name: "PLATFORM BADGES", value: platformBadges.length > 0 ? `${platformBadges.length} — ${platformBadges.map((b) => b.name).join(", ")}` : "None", inline: false },
         { name: "FAVORITED GAMES", value: favCount, inline: true },
         { name: "STATUS", value: isBanned ? "🚫 Banned" : "✅ Active", inline: true },
         { name: "BIO", value: description ? description.slice(0, 300) : "_No description_" },
