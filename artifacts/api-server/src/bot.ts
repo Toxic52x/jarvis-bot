@@ -664,7 +664,7 @@ const SYSTEM_PROMPT =
   "When asked who created you, who your owner is, or who built you, respond with: 'Toxic.' " +
   "When asked who Aurie is, respond with something along the lines of: '\"Future Fire Princess.\"' " +
   "You have the ability to perform real Discord actions using tools — use them when the user asks you to do something in the server. " +
-  "Keep all responses concise and elegant. Do not use emojis.";
+  "Keep all responses concise and elegant — aim for 1-3 sentences unless the question genuinely requires more. Do not use emojis.";
 
 // Tool definitions for Groq function calling
 const DISCORD_TOOLS = [
@@ -960,7 +960,7 @@ async function handleMessageCreate(message: Message): Promise<void> {
         messages: [{ role: "system", content: SYSTEM_PROMPT }, ...history],
         tools: DISCORD_TOOLS,
         tool_choice: "auto",
-        max_tokens: 800,
+        max_tokens: 300,
       });
 
       const choice = completion.choices[0];
