@@ -153,8 +153,8 @@ const lookupCommand = new SlashCommandBuilder()
     o.setName("username").setDescription("Roblox username to investigate.").setRequired(true),
   );
 
-// Active sessions: userId → conversation history
-type ChatMessage = { role: "user" | "assistant"; content: string };
+// Active sessions: userId → conversation history (proper OpenAI message params)
+type ChatMessage = OpenAI.Chat.ChatCompletionMessageParam;
 const activeSessions = new Map<string, ChatMessage[]>();
 
 // Ends the session if the message loosely contains a dismissal phrase anywhere
@@ -965,10 +965,9 @@ async function handleMessageCreate(message: Message): Promise<void> {
 
       const choice = completion.choices[0];
 
-      // ── Tool call ──────────────────────────────────────────────────────────
-      if (choice?.finish_reason === "tool_calls" && choice.message.tool_calls?.length) {
-        const toolCall = choice.message.tool_calls[0];
-        if (toolCall.type !== "function") return;
+      // ── Tool call — check tool_calls directly, not finish_reason (Groq may vary) ──
+      const toolCall = choice?.message?.tool_calls?.find((tc) => tc.type === "function");
+      if (toolCall && toolCall.type === "function") {
         let args: Record<string, unknown> = {};
         try { args = JSON.parse(toolCall.function.arguments) as Record<string, unknown>; } catch { /* ignore */ }
 
@@ -980,8 +979,11 @@ async function handleMessageCreate(message: Message): Promise<void> {
           result = "I encountered a problem executing that directive, Sir. I may lack the required permissions.";
         }
 
-        history.push({ role: "assistant", content: result });
-        if (history.length > 40) history.splice(0, 2);
+        // Store in proper OpenAI tool-call history format so the model
+        // knows the action is done and won't re-invoke it next turn
+        history.push({ role: "assistant", content: null, tool_calls: choice.message.tool_calls } as ChatMessage);
+        history.push({ role: "tool", tool_call_id: toolCall.id, content: result } as ChatMessage);
+        if (history.length > 40) history.splice(0, 4);
         await message.reply(result);
         return;
       }
