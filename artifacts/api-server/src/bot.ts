@@ -506,6 +506,9 @@ export async function startBot(): Promise<void> {
       await rest.put(Routes.applicationGuildCommands(readyClient.user.id, guildId), {
         body: commands,
       });
+      await rest.put(Routes.applicationCommands(readyClient.user.id), {
+        body: [],
+      });
       logger.info({ guildId }, "Jarvis commands registered for guild");
     } else {
       await rest.put(Routes.applicationCommands(readyClient.user.id), {
