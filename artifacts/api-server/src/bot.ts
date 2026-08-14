@@ -30,7 +30,10 @@ const DISCORD_MESSAGE_URL =
 
 // ─── OpenAI client ────────────────────────────────────────────────────────────
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: "https://api.groq.com/openai/v1",
+});
 
 // ─── Slash command definitions ────────────────────────────────────────────────
 
@@ -592,7 +595,7 @@ async function handleMessageCreate(message: {
 
     try {
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "llama-3.3-70b-versatile",
         messages: [
           {
             role: "system",
