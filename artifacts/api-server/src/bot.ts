@@ -15,6 +15,8 @@ import { logger } from "./lib/logger";
 
 const MAX_MEMBERS_PER_AWARD = 25;
 const HR_ROLE_NAME = "HR";
+const FIRE_RED = 0xb91c1c;
+const FIRE_ORANGE = 0xf97316;
 const DISCORD_MESSAGE_URL =
   /^https:\/\/(?:(?:canary|ptb)\.)?(?:discord\.com|discordapp\.com)\/channels\/\d+\/\d+\/\d+(?:[/?#].*)?$/i;
 
@@ -197,6 +199,24 @@ function validateProofUrl(proof: string): string {
   return trimmedProof;
 }
 
+function buildLeaderboardEmbed(
+  leaderboard: ReadonlyArray<{ memberTag: string; total: number }>,
+): EmbedBuilder {
+  const lines = leaderboard.map(
+    (entry, index) =>
+      `**${String(index + 1).padStart(2, "0")}**  ${entry.memberTag.slice(0, 45)}  —  **${Number(entry.total)}**`,
+  );
+
+  return new EmbedBuilder()
+    .setTitle("JARVIS // FLEET MERIT COMMAND")
+    .setDescription(
+      `**TOP 30 PERSONNEL RANKING**\n\n${lines.join("\n")}`,
+    )
+    .setColor(FIRE_RED)
+    .setFooter({ text: "FIRE DIVISION • MERIT LEDGER • AUTHORIZED PERSONNEL ONLY" })
+    .setTimestamp();
+}
+
 async function awardMerits(
   interaction: ChatInputCommandInteraction,
   members: GuildMember[],
@@ -245,16 +265,23 @@ async function writeOwnerAuditLog(
     .join("\n");
 
   const embed = new EmbedBuilder()
-    .setTitle("Merit Award Recorded")
-    .setColor(0x4f46e5)
+    .setTitle("JARVIS // MERIT AWARD AUDIT")
+    .setDescription("A fleet merit transaction has been authorized and recorded.")
+    .setColor(FIRE_RED)
     .addFields(
-      { name: "Recipients", value: memberLines.slice(0, 1024) },
-      { name: "Proof", value: proofUrl },
+      { name: "RECIPIENTS", value: memberLines.slice(0, 1024) },
       {
-        name: "Awarded by",
+        name: "MERIT VALUE",
+        value: `**+${amount}** merit${amount === 1 ? "" : "s"} per recipient`,
+        inline: true,
+      },
+      { name: "PROOF OF ACTION", value: proofUrl, inline: true },
+      {
+        name: "AUTHORIZED BY",
         value: `${interaction.user.tag} (${interaction.user.id})`,
       },
     )
+    .setFooter({ text: "FIRE DIVISION • OWNER AUDIT CHANNEL" })
     .setTimestamp();
 
   await channel.send({ embeds: [embed] });
@@ -382,9 +409,23 @@ async function handleMerits(interaction: ChatInputCommandInteraction): Promise<v
         ),
       );
 
-    await interaction.editReply(
-      `**${target.tag}** has **${Number(result?.total ?? 0)}** merit${Number(result?.total ?? 0) === 1 ? "" : "s"}.`,
-    );
+    const total = Number(result?.total ?? 0);
+    const embed = new EmbedBuilder()
+      .setTitle("JARVIS // PERSONNEL MERIT RECORD")
+      .setDescription("Current fleet standing for the selected personnel.")
+      .setColor(FIRE_RED)
+      .addFields(
+        { name: "PERSONNEL", value: target.tag, inline: true },
+        {
+          name: "TOTAL MERITS",
+          value: `**${total}**`,
+          inline: true,
+        },
+      )
+      .setFooter({ text: "FIRE DIVISION • MERIT LEDGER" })
+      .setTimestamp();
+
+    await interaction.editReply({ embeds: [embed] });
     return;
   }
 
@@ -405,11 +446,7 @@ async function handleMerits(interaction: ChatInputCommandInteraction): Promise<v
     return;
   }
 
-  const lines = leaderboard.map(
-    (entry, index) =>
-      `**${index + 1}.** ${entry.memberTag.slice(0, 45)} — **${Number(entry.total)}**`,
-  );
-  await interaction.editReply(`**Merit leaderboard — Top 30**\n${lines.join("\n")}`);
+  await interaction.editReply({ embeds: [buildLeaderboardEmbed(leaderboard)] });
 }
 
 async function handleLeaderboard(
@@ -440,11 +477,7 @@ async function handleLeaderboard(
     return;
   }
 
-  const lines = leaderboard.map(
-    (entry, index) =>
-      `**${index + 1}.** ${entry.memberTag.slice(0, 45)} — **${Number(entry.total)}**`,
-  );
-  await interaction.editReply(`**Merit leaderboard — Top 30**\n${lines.join("\n")}`);
+  await interaction.editReply({ embeds: [buildLeaderboardEmbed(leaderboard)] });
 }
 
 async function handleMeritHistory(
@@ -476,11 +509,18 @@ async function handleMeritHistory(
 
   const lines = history.map(
     (award) =>
-      `• **+${award.amount}** — <${award.proofUrl}> — <t:${Math.floor(award.createdAt.getTime() / 1000)}:R>`,
+      `**+${award.amount}**  •  [Proof of action](${award.proofUrl})  •  <t:${Math.floor(award.createdAt.getTime() / 1000)}:R>`,
   );
-  await interaction.editReply(
-    `**Recent merit history for ${target.tag}**\n${lines.join("\n")}`,
-  );
+  const embed = new EmbedBuilder()
+    .setTitle("JARVIS // MERIT HISTORY")
+    .setDescription(
+      `**PERSONNEL:** ${target.tag}\n\n${lines.join("\n")}`,
+    )
+    .setColor(FIRE_ORANGE)
+    .setFooter({ text: "FIRE DIVISION • VERIFIED ACTION HISTORY" })
+    .setTimestamp();
+
+  await interaction.editReply({ embeds: [embed] });
 }
 
 async function handleInteraction(
