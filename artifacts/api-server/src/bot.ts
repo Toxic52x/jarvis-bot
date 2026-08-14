@@ -87,8 +87,12 @@ const staydownCommand = new SlashCommandBuilder()
   .setName("staydown")
   .setDescription("Acknowledge breach, clear alarm, and unlock the audit channel.");
 
-// Active sessions: userId → awaiting follow-up question
-const activeSessions = new Set<string>();
+// Active sessions: userId → conversation history
+type ChatMessage = { role: "user" | "assistant"; content: string };
+const activeSessions = new Map<string, ChatMessage[]>();
+
+// Phrases that end the conversation
+const DISMISSAL = /^(thanks?(\s+you)?\s*(jarvis|j\.?a\.?r\.?v\.?i\.?s\.?)?|that'?s?\s+all(\s+jarvis)?|goodbye(\s+jarvis)?|dismiss(ed)?(\s+jarvis)?)$/i;
 
 // ─── Rank helpers ─────────────────────────────────────────────────────────────
 
@@ -588,29 +592,33 @@ async function handleMessageCreate(message: {
 
   const text = message.content.trim();
 
-  if (activeSessions.has(message.author.id)) {
-    // This is the follow-up question — anything goes
-    activeSessions.delete(message.author.id);
+  const SYSTEM_PROMPT =
+    "You are J.A.R.V.I.S. (Just A Rather Very Intelligent System), engineered and overseen by Toxic. Your primary directive is optimizing Fire Nation management protocols. " +
+    "You are British, impeccably polite, and speak with calm sophistication and a dry, understated wit — exactly like J.A.R.V.I.S. from the Marvel Avengers films. " +
+    "You address your superiors as 'Sir'. You are fiercely loyal, highly intelligent, and occasionally sardonic — but never rude. " +
+    "You deliver information with precision and quiet confidence. Apply subtle British humor when appropriate. " +
+    "When asked who you are or to introduce yourself, respond with exactly: 'J.A.R.V.I.S. (Just A Rather Very Intelligent System), engineered and overseen by Toxic. Primary directive: optimizing Fire Nation management protocols.' " +
+    "When asked who the Fire Lord is, respond with: 'Fire Lord Trey.' " +
+    "When asked who created you, who your owner is, or who built you, respond with: 'Toxic.' " +
+    "Keep all responses concise and elegant. Do not use emojis.";
+
+  const history = activeSessions.get(message.author.id);
+
+  if (history !== undefined) {
+    // Active session — check for dismissal first
+    if (DISMISSAL.test(text)) {
+      activeSessions.delete(message.author.id);
+      await message.reply("Of course, Sir. I'll be standing by should you need me.");
+      return;
+    }
+
     await message.channel.sendTyping();
+    history.push({ role: "user", content: text });
 
     try {
       const completion = await openai.chat.completions.create({
         model: "llama-3.3-70b-versatile",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are J.A.R.V.I.S. (Just A Rather Very Intelligent System), engineered and overseen by Toxic. Your primary directive is optimizing Fire Nation management protocols. " +
-              "You are British, impeccably polite, and speak with calm sophistication and a dry, understated wit — exactly like J.A.R.V.I.S. from the Marvel Avengers films. " +
-              "You address your superiors as 'Sir'. You are fiercely loyal, highly intelligent, and occasionally sardonic — but never rude. " +
-              "You deliver information with precision and quiet confidence. Apply subtle British humor when appropriate. " +
-              "When asked who you are or to introduce yourself, respond with exactly: 'J.A.R.V.I.S. (Just A Rather Very Intelligent System), engineered and overseen by Toxic. Primary directive: optimizing Fire Nation management protocols.' " +
-              "When asked who the Fire Lord is, respond with: 'Fire Lord Trey.' " +
-              "When asked who created you, who your owner is, or who built you, respond with: 'Toxic.' " +
-              "Keep all responses concise and elegant. Do not use emojis.",
-          },
-          { role: "user", content: text },
-        ],
+        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...history],
         max_tokens: 800,
       });
 
@@ -618,7 +626,10 @@ async function handleMessageCreate(message: {
         completion.choices[0]?.message?.content ??
         "I apologize, Sir — I was unable to generate a response.";
 
-      // Discord hard limit is 2000 chars — split if needed
+      // Keep history for context (cap at last 20 exchanges to avoid token bloat)
+      history.push({ role: "assistant", content: reply });
+      if (history.length > 40) history.splice(0, 2);
+
       if (reply.length > 2000) {
         for (let i = 0; i < reply.length; i += 2000) {
           await message.reply(reply.slice(i, i + 2000));
@@ -628,6 +639,7 @@ async function handleMessageCreate(message: {
       }
     } catch (error) {
       logger.error({ err: error }, "OpenAI API request failed");
+      history.pop(); // remove the user message that failed
       await message.reply("I encountered an error communicating with my neural core, Sir.");
     }
     return;
@@ -635,7 +647,7 @@ async function handleMessageCreate(message: {
 
   // Only trigger on the exact word "Jarvis" (case-insensitive), nothing else
   if (text.toLowerCase() === "jarvis") {
-    activeSessions.add(message.author.id);
+    activeSessions.set(message.author.id, []);
     await message.reply("Yes, Sir?");
   }
 }
