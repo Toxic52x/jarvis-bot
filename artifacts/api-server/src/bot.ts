@@ -1308,8 +1308,8 @@ async function handleLookup(interaction: ChatInputCommandInteraction): Promise<v
         fetch(`https://users.roblox.com/v1/users/${userId}`).then((r) => r.json()),
         fetch(`https://friends.roblox.com/v1/users/${userId}/friends/count`).then((r) => r.json()).catch(() => ({ count: 0 })),
         fetch(`https://groups.roblox.com/v2/users/${userId}/groups/roles`).then((r) => r.json()).catch(() => ({ data: [] })),
-        fetch(`https://games.roblox.com/v2/users/${userId}/favorite/games?pageSize=10&sortOrder=Asc`).then((r) => r.json()).catch(() => ({ data: [] })),
-        fetch(`https://badges.roblox.com/v1/users/${userId}/badges?limit=10&sortOrder=Desc`).then((r) => r.json()).catch(() => ({ data: [] })),
+        fetch(`https://games.roblox.com/v2/users/${userId}/favorite/games?pageSize=50&sortOrder=Asc`).then((r) => r.json()).catch(() => ({ data: [], nextPageCursor: null })),
+        fetch(`https://badges.roblox.com/v1/users/${userId}/badges?limit=100&sortOrder=Desc`).then((r) => r.json()).catch(() => ({ data: [], nextPageCursor: null })),
         fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png`).then((r) => r.json()).catch(() => null),
       ]);
 
@@ -1317,8 +1317,10 @@ async function handleLookup(interaction: ChatInputCommandInteraction): Promise<v
     const accountAgeDays = Math.floor((Date.now() - accountCreated.getTime()) / 86_400_000);
     const friends = (friendData as { count?: number }).count ?? 0;
     const groups = ((groupsData as { data?: unknown[] }).data) ?? [];
-    const favGames = ((favGamesData as { data?: unknown[] }).data) ?? [];
-    const badges = ((badgesData as { data?: unknown[] }).data) ?? [];
+    const favGames = ((favGamesData as { data?: unknown[]; nextPageCursor?: string | null }).data) ?? [];
+    const favGamesHasMore = !!((favGamesData as { nextPageCursor?: string | null }).nextPageCursor);
+    const badges = ((badgesData as { data?: unknown[]; nextPageCursor?: string | null }).data) ?? [];
+    const badgesHasMore = !!((badgesData as { nextPageCursor?: string | null }).nextPageCursor);
     const description = ((userInfo as { description?: string }).description ?? "").trim();
     const displayName = (userInfo as { displayName?: string }).displayName ?? resolved.name;
     const isBanned = (userInfo as { isBanned?: boolean }).isBanned ?? false;
@@ -1385,8 +1387,8 @@ async function handleLookup(interaction: ChatInputCommandInteraction): Promise<v
             .join("\n") + (groups.length > 5 ? `\n_…and ${groups.length - 5} more_` : "")
         : "_None_";
 
-    const badgeCount = badges.length === 10 ? "10+" : String(badges.length);
-    const favCount = favGames.length === 10 ? "10+" : String(favGames.length);
+    const badgeCount = badgesHasMore ? `${badges.length}+` : String(badges.length);
+    const favCount = favGamesHasMore ? `${favGames.length}+` : String(favGames.length);
 
     const embed = new EmbedBuilder()
       .setTitle("JARVIS // ROBLOX ACCOUNT INVESTIGATION")
