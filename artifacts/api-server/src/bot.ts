@@ -60,6 +60,10 @@ const historyCommand = new SlashCommandBuilder()
     option.setName("user").setDescription("The member whose history to view."),
   );
 
+const leaderboardCommand = new SlashCommandBuilder()
+  .setName("leaderboard")
+  .setDescription("View the top 30 members by merit total.");
+
 const createHrCommand = new SlashCommandBuilder()
   .setName("createhr")
   .setDescription("Create the Jarvis HR role with no elevated Discord permissions.");
@@ -394,7 +398,7 @@ async function handleMerits(interaction: ChatInputCommandInteraction): Promise<v
     .where(eq(meritAwardsTable.guildId, interaction.guild.id))
     .groupBy(meritAwardsTable.memberId, meritAwardsTable.memberTag)
     .orderBy(desc(sql`sum(${meritAwardsTable.amount})`))
-    .limit(10);
+    .limit(30);
 
   if (leaderboard.length === 0) {
     await interaction.editReply("No merits have been recorded for this server yet.");
@@ -403,9 +407,44 @@ async function handleMerits(interaction: ChatInputCommandInteraction): Promise<v
 
   const lines = leaderboard.map(
     (entry, index) =>
-      `**${index + 1}.** ${entry.memberTag} — **${Number(entry.total)}**`,
+      `**${index + 1}.** ${entry.memberTag.slice(0, 45)} — **${Number(entry.total)}**`,
   );
-  await interaction.editReply(`**Merit leaderboard**\n${lines.join("\n")}`);
+  await interaction.editReply(`**Merit leaderboard — Top 30**\n${lines.join("\n")}`);
+}
+
+async function handleLeaderboard(
+  interaction: ChatInputCommandInteraction,
+): Promise<void> {
+  if (!interaction.guild) {
+    await interaction.reply({
+      content: "This command can only be used inside a server.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  await interaction.deferReply();
+  const leaderboard = await db
+    .select({
+      memberTag: meritAwardsTable.memberTag,
+      total: sql<number>`sum(${meritAwardsTable.amount})`,
+    })
+    .from(meritAwardsTable)
+    .where(eq(meritAwardsTable.guildId, interaction.guild.id))
+    .groupBy(meritAwardsTable.memberId, meritAwardsTable.memberTag)
+    .orderBy(desc(sql`sum(${meritAwardsTable.amount})`))
+    .limit(30);
+
+  if (leaderboard.length === 0) {
+    await interaction.editReply("No merits have been recorded for this server yet.");
+    return;
+  }
+
+  const lines = leaderboard.map(
+    (entry, index) =>
+      `**${index + 1}.** ${entry.memberTag.slice(0, 45)} — **${Number(entry.total)}**`,
+  );
+  await interaction.editReply(`**Merit leaderboard — Top 30**\n${lines.join("\n")}`);
 }
 
 async function handleMeritHistory(
@@ -457,6 +496,8 @@ async function handleInteraction(
     await handleCreateHr(interaction);
   } else if (interaction.commandName === "merits") {
     await handleMerits(interaction);
+  } else if (interaction.commandName === "leaderboard") {
+    await handleLeaderboard(interaction);
   } else if (interaction.commandName === "merithistory") {
     await handleMeritHistory(interaction);
   }
@@ -497,6 +538,7 @@ export async function startBot(): Promise<void> {
       addMeritCommand.toJSON(),
       meritsCommand.toJSON(),
       historyCommand.toJSON(),
+      leaderboardCommand.toJSON(),
       createHrCommand.toJSON(),
     ];
     const rest = new REST({ version: "10" }).setToken(token);
