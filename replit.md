@@ -11,7 +11,7 @@ Jarvis is a Discord HR operations bot that records fleet merits, validates proof
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string
 - Required secret: `DISCORD_BOT_TOKEN` — stored through Replit Secrets, never in source or chat
-- Optional env: `DISCORD_GUILD_ID`, `DISCORD_HR_ROLE_IDS`, `DISCORD_OWNER_USER_IDS`, `DISCORD_OWNER_LOG_CHANNEL_ID`
+- Optional env: `DISCORD_GUILD_ID`, `DISCORD_HR_ROLE_IDS`, `DISCORD_OWNER_USER_IDS`, `DISCORD_SECOND_IN_COMMAND_USER_IDS`, `DISCORD_OWNER_LOG_CHANNEL_ID`
 
 ## Stack
 
@@ -36,6 +36,7 @@ Jarvis is a Discord HR operations bot that records fleet merits, validates proof
 ## Product
 
 - `/addmerit` awards the same amount to up to 25 members from one HR command.
+- `/createhr` lets the Owner or Fire Lord create the no-elevated-permissions HR rank.
 - `/merits` shows a member total or the top-ten server leaderboard.
 - `/merithistory` shows the ten most recent awards and their proof links.
 - Every accepted award is posted to the configured owner audit channel.
@@ -47,6 +48,8 @@ _Populate as you build — explicit user instructions worth remembering across s
 ## Gotchas
 
 - Set `DISCORD_HR_ROLE_IDS` and `DISCORD_OWNER_LOG_CHANNEL_ID` before using `/addmerit`.
+- The built-in `HR` role is also recognized, so `/createhr` can be used before a role ID is known.
+- Fire Lord is a second-in-command rank and cannot award merits to configured Owner IDs.
 - Discord command names are lowercase, so the command is `/addmerit`.
 
 ## Pointers

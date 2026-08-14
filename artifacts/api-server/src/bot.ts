@@ -3,7 +3,6 @@ import {
   EmbedBuilder,
   Events,
   GatewayIntentBits,
-  PermissionFlagsBits,
   REST,
   Routes,
   SlashCommandBuilder,
@@ -15,6 +14,7 @@ import { db, meritAwardsTable } from "@workspace/db";
 import { logger } from "./lib/logger";
 
 const MAX_MEMBERS_PER_AWARD = 25;
+const HR_ROLE_NAME = "HR";
 const DISCORD_MESSAGE_URL =
   /^https:\/\/(?:(?:canary|ptb)\.)?(?:discord\.com|discordapp\.com)\/channels\/\d+\/\d+\/\d+(?:[/?#].*)?$/i;
 
@@ -60,6 +60,10 @@ const historyCommand = new SlashCommandBuilder()
     option.setName("user").setDescription("The member whose history to view."),
   );
 
+const createHrCommand = new SlashCommandBuilder()
+  .setName("createhr")
+  .setDescription("Create the Jarvis HR role with no elevated Discord permissions.");
+
 function getConfiguredIds(name: string): Set<string> {
   return new Set(
     (process.env[name] ?? "")
@@ -69,16 +73,41 @@ function getConfiguredIds(name: string): Set<string> {
   );
 }
 
-function isAuthorizedHr(member: GuildMember): boolean {
+type JarvisRank = "owner" | "second" | "hr" | "none";
+
+function getJarvisRank(member: GuildMember): JarvisRank {
   const hrRoleIds = getConfiguredIds("DISCORD_HR_ROLE_IDS");
   const ownerIds = getConfiguredIds("DISCORD_OWNER_USER_IDS");
-
-  return (
-    [...hrRoleIds].some((roleId) => member.roles.cache.has(roleId)) ||
-    ownerIds.has(member.id) ||
-    member.permissions.has(PermissionFlagsBits.ManageGuild) ||
-    member.permissions.has(PermissionFlagsBits.Administrator)
+  const secondInCommandIds = getConfiguredIds(
+    "DISCORD_SECOND_IN_COMMAND_USER_IDS",
   );
+
+  if (ownerIds.has(member.id)) {
+    return "owner";
+  }
+
+  if (secondInCommandIds.has(member.id)) {
+    return "second";
+  }
+
+  if (
+    [...hrRoleIds].some((roleId) => member.roles.cache.has(roleId)) ||
+    member.roles.cache.some((role) => role.name === HR_ROLE_NAME)
+  ) {
+    return "hr";
+  }
+
+  return "none";
+}
+
+function canAwardMerits(member: GuildMember): boolean {
+  const rank = getJarvisRank(member);
+  return rank === "owner" || rank === "second" || rank === "hr";
+}
+
+function canManageJarvis(member: GuildMember): boolean {
+  const rank = getJarvisRank(member);
+  return rank === "owner" || rank === "second";
 }
 
 function parseUserReferences(rawUsers: string): string[] {
@@ -239,9 +268,9 @@ async function handleAddMerit(
   }
 
   const member = await interaction.guild.members.fetch(interaction.user.id);
-  if (!isAuthorizedHr(member)) {
+  if (!canAwardMerits(member)) {
     await interaction.reply({
-      content: "Only configured HR members, server managers, or owners can award merits.",
+      content: "Only the Owner, Fire Lord, or members with the HR role can award merits.",
       ephemeral: true,
     });
     return;
@@ -256,6 +285,14 @@ async function handleAddMerit(
       interaction.options.getString("proof", true),
     );
     const members = await resolveMembers(interaction, rawUsers);
+    const actorRank = getJarvisRank(member);
+    const ownerIds = getConfiguredIds("DISCORD_OWNER_USER_IDS");
+    if (
+      actorRank === "second" &&
+      members.some((recipient) => ownerIds.has(recipient.id))
+    ) {
+      throw new Error("Fire Lord cannot run merit commands that affect the Owner.");
+    }
 
     await awardMerits(interaction, members, amount, proofUrl);
     await writeOwnerAuditLog(interaction, members, amount, proofUrl);
@@ -267,6 +304,55 @@ async function handleAddMerit(
     const message = error instanceof Error ? error.message : "The merit award failed.";
     logger.warn({ err: error, userId: interaction.user.id }, "Merit award rejected");
     await interaction.editReply(`Could not record the award: ${message}`);
+  }
+}
+
+async function handleCreateHr(
+  interaction: ChatInputCommandInteraction,
+): Promise<void> {
+  if (!interaction.guild) {
+    await interaction.reply({
+      content: "This command can only be used inside a server.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  const member = await interaction.guild.members.fetch(interaction.user.id);
+  if (!canManageJarvis(member)) {
+    await interaction.reply({
+      content: "Only the Owner or Fire Lord can create the HR role.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  await interaction.deferReply({ ephemeral: true });
+
+  try {
+    const existingRole = interaction.guild.roles.cache.find(
+      (role) => role.name === HR_ROLE_NAME,
+    );
+    if (existingRole) {
+      await interaction.editReply(
+        `The ${HR_ROLE_NAME} role already exists: ${existingRole}. Jarvis will recognize it for limited bot access.`,
+      );
+      return;
+    }
+
+    const role = await interaction.guild.roles.create({
+      name: HR_ROLE_NAME,
+      permissions: [],
+      reason: "Jarvis HR rank created by an authorized administrator",
+    });
+    await interaction.editReply(
+      `Created ${role} with no elevated Discord permissions. Assign it to HR members to grant Jarvis HR access.`,
+    );
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "The HR role could not be created.";
+    logger.warn({ err: error, userId: interaction.user.id }, "HR role creation failed");
+    await interaction.editReply(`Could not create the HR role: ${message}`);
   }
 }
 
@@ -367,6 +453,8 @@ async function handleInteraction(
 
   if (interaction.commandName === "addmerit") {
     await handleAddMerit(interaction);
+  } else if (interaction.commandName === "createhr") {
+    await handleCreateHr(interaction);
   } else if (interaction.commandName === "merits") {
     await handleMerits(interaction);
   } else if (interaction.commandName === "merithistory") {
@@ -390,6 +478,7 @@ export async function startBot(): Promise<void> {
       addMeritCommand.toJSON(),
       meritsCommand.toJSON(),
       historyCommand.toJSON(),
+      createHrCommand.toJSON(),
     ];
     const rest = new REST({ version: "10" }).setToken(token);
     const guildId = process.env.DISCORD_GUILD_ID?.trim();
