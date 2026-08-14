@@ -143,6 +143,13 @@ const requestGuardsCommand = new SlashCommandBuilder()
     o.setName("location").setDescription("Where is the exam taking place?").setRequired(true),
   );
 
+const lookupCommand = new SlashCommandBuilder()
+  .setName("lookup")
+  .setDescription("Investigate a Roblox account for red flags and alt account indicators.")
+  .addStringOption((o) =>
+    o.setName("username").setDescription("Roblox username to investigate.").setRequired(true),
+  );
+
 // Active sessions: userId → conversation history
 type ChatMessage = { role: "user" | "assistant"; content: string };
 const activeSessions = new Map<string, ChatMessage[]>();
@@ -969,6 +976,165 @@ async function handleRequestGuards(interaction: ChatInputCommandInteraction): Pr
   await interaction.editReply("Guard request sent successfully.");
 }
 
+// ─── Roblox lookup handler ────────────────────────────────────────────────────
+
+async function handleLookup(interaction: ChatInputCommandInteraction): Promise<void> {
+  if (!interaction.guild) {
+    await interaction.reply({ content: "This command can only be used inside a server.", ephemeral: true });
+    return;
+  }
+  const member = await interaction.guild.members.fetch(interaction.user.id);
+  if (!canAwardMerits(member)) {
+    await interaction.reply({ content: "Access Denied — only HR and above can use the lookup command.", ephemeral: true });
+    return;
+  }
+
+  await interaction.deferReply();
+  const username = interaction.options.getString("username", true).trim();
+
+  try {
+    // Resolve username → userId
+    const usernameRes = await fetch("https://users.roblox.com/v1/usernames/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ usernames: [username], excludeBannedUsers: false }),
+    });
+    const usernameData = await usernameRes.json() as {
+      data: Array<{ id: number; name: string; displayName: string }>;
+    };
+
+    if (!usernameData.data?.length) {
+      await interaction.editReply(`No Roblox account found with the username **${username}**.`);
+      return;
+    }
+
+    const resolved = usernameData.data[0];
+    const userId = resolved.id;
+
+    // Fetch all data in parallel
+    const [userInfo, friendData, groupsData, favGamesData, badgesData, avatarData] =
+      await Promise.all([
+        fetch(`https://users.roblox.com/v1/users/${userId}`).then((r) => r.json()),
+        fetch(`https://friends.roblox.com/v1/users/${userId}/friends/count`).then((r) => r.json()).catch(() => ({ count: 0 })),
+        fetch(`https://groups.roblox.com/v2/users/${userId}/groups/roles`).then((r) => r.json()).catch(() => ({ data: [] })),
+        fetch(`https://games.roblox.com/v2/users/${userId}/favorite/games?pageSize=10&sortOrder=Asc`).then((r) => r.json()).catch(() => ({ data: [] })),
+        fetch(`https://badges.roblox.com/v1/users/${userId}/badges?limit=10&sortOrder=Desc`).then((r) => r.json()).catch(() => ({ data: [] })),
+        fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png`).then((r) => r.json()).catch(() => null),
+      ]);
+
+    const accountCreated = new Date((userInfo as { created: string }).created);
+    const accountAgeDays = Math.floor((Date.now() - accountCreated.getTime()) / 86_400_000);
+    const friends = (friendData as { count?: number }).count ?? 0;
+    const groups = ((groupsData as { data?: unknown[] }).data) ?? [];
+    const favGames = ((favGamesData as { data?: unknown[] }).data) ?? [];
+    const badges = ((badgesData as { data?: unknown[] }).data) ?? [];
+    const description = ((userInfo as { description?: string }).description ?? "").trim();
+    const displayName = (userInfo as { displayName?: string }).displayName ?? resolved.name;
+    const isBanned = (userInfo as { isBanned?: boolean }).isBanned ?? false;
+    const avatarUrl = (avatarData as { data?: Array<{ imageUrl: string }> } | null)?.data?.[0]?.imageUrl ?? null;
+
+    // ── Red flag scoring ───────────────────────────────────────────────────────
+    const flags: string[] = [];
+    let score = 0;
+
+    if (isBanned) {
+      flags.push("🚫 Account is currently **banned** on Roblox");
+      score += 2;
+    }
+    if (accountAgeDays < 30) {
+      flags.push(`🆕 Created only **${accountAgeDays} day${accountAgeDays === 1 ? "" : "s"} ago** — extremely new`);
+      score += 3;
+    } else if (accountAgeDays < 180) {
+      flags.push(`📅 Account is only **${accountAgeDays} days old** (under 6 months)`);
+      score += 2;
+    } else if (accountAgeDays < 365) {
+      flags.push(`📅 Account is **${accountAgeDays} days old** (under 1 year)`);
+      score += 1;
+    }
+    if (friends === 0) {
+      flags.push("👥 **Zero friends** — no social connections at all");
+      score += 3;
+    } else if (friends < 5) {
+      flags.push(`👥 Only **${friends} friend${friends === 1 ? "" : "s"}** — very low social presence`);
+      score += 1;
+    }
+    if (groups.length === 0) {
+      flags.push("🏠 Not a member of **any groups**");
+      score += 1;
+    }
+    if (!description) {
+      flags.push("📝 **No bio or description** set");
+      score += 1;
+    }
+    if (badges.length === 0) {
+      flags.push("🎖️ **No badges** — no recorded in-game activity");
+      score += 2;
+    }
+    if (favGames.length === 0) {
+      flags.push("🎮 **No favorited games**");
+      score += 1;
+    }
+    if (displayName !== resolved.name && accountAgeDays < 90) {
+      flags.push(`✏️ Display name **"${displayName}"** differs from username on a new account`);
+      score += 1;
+    }
+
+    const riskLabel =
+      score >= 7 ? "🚨 HIGH RISK — Very Likely Alt / Threat"
+      : score >= 4 ? "⚠️ MEDIUM RISK — Suspicious"
+      : "✅ LOW RISK — Appears Legitimate";
+    const riskColor = score >= 7 ? FIRE_RED : score >= 4 ? FIRE_ORANGE : 0x16a34a;
+
+    type GroupEntry = { group: { name: string; id: number } };
+    const groupList =
+      groups.length > 0
+        ? (groups as GroupEntry[])
+            .slice(0, 5)
+            .map((g) => `• [${g.group.name}](https://www.roblox.com/groups/${g.group.id})`)
+            .join("\n") + (groups.length > 5 ? `\n_…and ${groups.length - 5} more_` : "")
+        : "_None_";
+
+    const badgeCount = badges.length === 10 ? "10+" : String(badges.length);
+    const favCount = favGames.length === 10 ? "10+" : String(favGames.length);
+
+    const embed = new EmbedBuilder()
+      .setTitle("JARVIS // ROBLOX ACCOUNT INVESTIGATION")
+      .setDescription(
+        `**[${resolved.name}](https://www.roblox.com/users/${userId}/profile)**` +
+        (displayName !== resolved.name ? ` *(display: ${displayName})*` : "") +
+        `\n\n**VERDICT: ${riskLabel}**`,
+      )
+      .setColor(riskColor)
+      .addFields(
+        { name: "USER ID", value: `\`${userId}\``, inline: true },
+        { name: "ACCOUNT AGE", value: `${accountAgeDays} day${accountAgeDays === 1 ? "" : "s"}`, inline: true },
+        { name: "CREATED", value: `<t:${Math.floor(accountCreated.getTime() / 1000)}:D>`, inline: true },
+        { name: "FRIENDS", value: String(friends), inline: true },
+        { name: "GROUPS", value: String(groups.length), inline: true },
+        { name: "BADGES", value: badgeCount, inline: true },
+        { name: "FAVORITED GAMES", value: favCount, inline: true },
+        { name: "STATUS", value: isBanned ? "🚫 Banned" : "✅ Active", inline: true },
+        { name: "BIO", value: description ? description.slice(0, 300) : "_No description_" },
+        { name: `GROUPS (${groups.length})`, value: groupList },
+        {
+          name: `RED FLAGS (${flags.length}) — Score: ${score}`,
+          value: flags.length > 0 ? flags.join("\n") : "✅ No red flags detected",
+        },
+      )
+      .setFooter({ text: `FIRE DIVISION • INTEL REPORT • Requested by ${interaction.user.tag}` })
+      .setTimestamp();
+
+    if (avatarUrl) embed.setThumbnail(avatarUrl);
+
+    await interaction.editReply({ embeds: [embed] });
+  } catch (error) {
+    logger.error({ err: error }, "Roblox lookup failed");
+    await interaction.editReply(
+      "I was unable to complete the investigation, Sir. The Roblox API may be temporarily unavailable.",
+    );
+  }
+}
+
 // ─── Interaction router ───────────────────────────────────────────────────────
 
 async function handleInteraction(interaction: ChatInputCommandInteraction): Promise<void> {
@@ -987,6 +1153,7 @@ async function handleInteraction(interaction: ChatInputCommandInteraction): Prom
     case "globalmute":      await handleGlobalMute(interaction);    break;
     case "royalguard":      await handleRoyalGuard(interaction);    break;
     case "requestguards":   await handleRequestGuards(interaction); break;
+    case "lookup":          await handleLookup(interaction);        break;
   }
 }
 
@@ -1081,6 +1248,7 @@ export async function startBot(): Promise<void> {
       globalMuteCommand.toJSON(),
       royalGuardCommand.toJSON(),
       requestGuardsCommand.toJSON(),
+      lookupCommand.toJSON(),
     ];
     const rest = new REST({ version: "10" }).setToken(token);
     const guildId = await resolveGuildId(ready);
