@@ -462,6 +462,25 @@ async function handleInteraction(
   }
 }
 
+async function resolveRegistrationGuildId(client: Client): Promise<string | null> {
+  const configuredGuildId = process.env.DISCORD_GUILD_ID?.trim();
+  if (configuredGuildId) {
+    return configuredGuildId;
+  }
+
+  const logChannelId = process.env.DISCORD_OWNER_LOG_CHANNEL_ID?.trim();
+  if (!logChannelId) {
+    return null;
+  }
+
+  const channel = await client.channels.fetch(logChannelId).catch(() => null);
+  if (!channel || !("guildId" in channel)) {
+    return null;
+  }
+
+  return typeof channel.guildId === "string" ? channel.guildId : null;
+}
+
 export async function startBot(): Promise<void> {
   const token = process.env.DISCORD_BOT_TOKEN?.trim();
   if (!token) {
@@ -481,7 +500,7 @@ export async function startBot(): Promise<void> {
       createHrCommand.toJSON(),
     ];
     const rest = new REST({ version: "10" }).setToken(token);
-    const guildId = process.env.DISCORD_GUILD_ID?.trim();
+    const guildId = await resolveRegistrationGuildId(readyClient);
 
     if (guildId) {
       await rest.put(Routes.applicationGuildCommands(readyClient.user.id, guildId), {
