@@ -1303,24 +1303,25 @@ async function handleLookup(interaction: ChatInputCommandInteraction): Promise<v
     const userId = resolved.id;
 
     // Fetch all data in parallel
-    const [userInfo, friendData, groupsData, favGamesData, badgesData, avatarData] =
+    const [userInfo, friendData, groupsData, favGamesData, followersData, followingsData, avatarData] =
       await Promise.all([
         fetch(`https://users.roblox.com/v1/users/${userId}`).then((r) => r.json()),
         fetch(`https://friends.roblox.com/v1/users/${userId}/friends/count`).then((r) => r.json()).catch(() => ({ count: 0 })),
         fetch(`https://groups.roblox.com/v2/users/${userId}/groups/roles`).then((r) => r.json()).catch(() => ({ data: [] })),
-        fetch(`https://games.roblox.com/v2/users/${userId}/favorite/games?pageSize=50&sortOrder=Asc`).then((r) => r.json()).catch(() => ({ data: [], nextPageCursor: null })),
-        fetch(`https://badges.roblox.com/v1/users/${userId}/badges?limit=100&sortOrder=Desc`).then((r) => r.json()).catch(() => ({ data: [], nextPageCursor: null })),
+        fetch(`https://games.roblox.com/v2/users/${userId}/favorite/games?pageSize=50&sortOrder=Desc`).then((r) => r.json()).catch(() => ({ data: [], nextPageCursor: null })),
+        fetch(`https://friends.roblox.com/v1/users/${userId}/followers/count`).then((r) => r.json()).catch(() => ({ count: 0 })),
+        fetch(`https://friends.roblox.com/v1/users/${userId}/followings/count`).then((r) => r.json()).catch(() => ({ count: 0 })),
         fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png`).then((r) => r.json()).catch(() => null),
       ]);
 
     const accountCreated = new Date((userInfo as { created: string }).created);
     const accountAgeDays = Math.floor((Date.now() - accountCreated.getTime()) / 86_400_000);
     const friends = (friendData as { count?: number }).count ?? 0;
+    const followers = (followersData as { count?: number }).count ?? 0;
+    const following = (followingsData as { count?: number }).count ?? 0;
     const groups = ((groupsData as { data?: unknown[] }).data) ?? [];
     const favGames = ((favGamesData as { data?: unknown[]; nextPageCursor?: string | null }).data) ?? [];
     const favGamesHasMore = !!((favGamesData as { nextPageCursor?: string | null }).nextPageCursor);
-    const badges = ((badgesData as { data?: unknown[]; nextPageCursor?: string | null }).data) ?? [];
-    const badgesHasMore = !!((badgesData as { nextPageCursor?: string | null }).nextPageCursor);
     const description = ((userInfo as { description?: string }).description ?? "").trim();
     const displayName = (userInfo as { displayName?: string }).displayName ?? resolved.name;
     const isBanned = (userInfo as { isBanned?: boolean }).isBanned ?? false;
@@ -1359,9 +1360,9 @@ async function handleLookup(interaction: ChatInputCommandInteraction): Promise<v
       flags.push("📝 **No bio or description** set");
       score += 1;
     }
-    if (badges.length === 0) {
-      flags.push("🎖️ **No badges** — no recorded in-game activity");
-      score += 2;
+    if (followers === 0 && accountAgeDays < 365) {
+      flags.push("📭 **Zero followers** — no social footprint");
+      score += 1;
     }
     if (favGames.length === 0) {
       flags.push("🎮 **No favorited games**");
@@ -1387,7 +1388,6 @@ async function handleLookup(interaction: ChatInputCommandInteraction): Promise<v
             .join("\n") + (groups.length > 5 ? `\n_…and ${groups.length - 5} more_` : "")
         : "_None_";
 
-    const badgeCount = badgesHasMore ? `${badges.length}+` : String(badges.length);
     const favCount = favGamesHasMore ? `${favGames.length}+` : String(favGames.length);
 
     const embed = new EmbedBuilder()
@@ -1403,8 +1403,9 @@ async function handleLookup(interaction: ChatInputCommandInteraction): Promise<v
         { name: "ACCOUNT AGE", value: `${accountAgeDays} day${accountAgeDays === 1 ? "" : "s"}`, inline: true },
         { name: "CREATED", value: `<t:${Math.floor(accountCreated.getTime() / 1000)}:D>`, inline: true },
         { name: "FRIENDS", value: String(friends), inline: true },
+        { name: "FOLLOWERS", value: String(followers), inline: true },
+        { name: "FOLLOWING", value: String(following), inline: true },
         { name: "GROUPS", value: String(groups.length), inline: true },
-        { name: "BADGES", value: badgeCount, inline: true },
         { name: "FAVORITED GAMES", value: favCount, inline: true },
         { name: "STATUS", value: isBanned ? "🚫 Banned" : "✅ Active", inline: true },
         { name: "BIO", value: description ? description.slice(0, 300) : "_No description_" },
