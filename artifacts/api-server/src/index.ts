@@ -1,4 +1,5 @@
 import app from "./app";
+import { startBot } from "./bot";
 import { logger } from "./lib/logger";
 
 const rawPort = process.env["PORT"];
@@ -22,4 +23,8 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+});
+
+void startBot().catch((error) => {
+  logger.error({ err: error }, "Jarvis failed to connect to Discord");
 });

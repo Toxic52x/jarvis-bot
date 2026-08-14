@@ -1,6 +1,6 @@
-# [Project name]
+# Jarvis Merit Bot
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Jarvis is a Discord HR operations bot that records fleet merits, validates proof links, and writes owner-facing audit logs.
 
 ## Run & Operate
 
@@ -10,6 +10,8 @@ _Replace the heading above with the project's name, and this line with one sente
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string
+- Required secret: `DISCORD_BOT_TOKEN` — stored through Replit Secrets, never in source or chat
+- Optional env: `DISCORD_GUILD_ID`, `DISCORD_HR_ROLE_IDS`, `DISCORD_OWNER_USER_IDS`, `DISCORD_OWNER_LOG_CHANNEL_ID`
 
 ## Stack
 
@@ -22,15 +24,21 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/api-server/src/bot.ts` — Discord client, slash commands, authorization, proof validation, and audit logging
+- `lib/db/src/schema/meritAwards.ts` — persistent merit ledger
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Merit awards are append-only ledger entries, so totals and history remain auditable.
+- Proof links must be Discord message URLs before an award is written.
+- Merit entries are stored per guild and member to keep multiple servers isolated.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- `/addmerit` awards the same amount to up to 25 members from one HR command.
+- `/merits` shows a member total or the top-ten server leaderboard.
+- `/merithistory` shows the ten most recent awards and their proof links.
+- Every accepted award is posted to the configured owner audit channel.
 
 ## User preferences
 
@@ -38,7 +46,8 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Set `DISCORD_HR_ROLE_IDS` and `DISCORD_OWNER_LOG_CHANNEL_ID` before using `/addmerit`.
+- Discord command names are lowercase, so the command is `/addmerit`.
 
 ## Pointers
 
