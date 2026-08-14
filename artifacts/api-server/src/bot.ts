@@ -25,6 +25,8 @@ const MAX_MERITS_HR = 7;          // HR cap; Owner and Fire Lord are uncapped
 const HR_ROLE_NAME = "HR";
 const FIRE_RED = 0xb91c1c;
 const FIRE_ORANGE = 0xf97316;
+const ROYAL_GUARD_CHANNEL_ID = "1537883295419863151";
+const NORMAL_GUARD_CHANNEL_ID = "1537883309684691055";
 const DISCORD_MESSAGE_URL =
   /^https:\/\/(?:(?:canary|ptb)\.)?(?:discord\.com|discordapp\.com)\/channels\/\d+\/\d+\/\d+(?:[/?#].*)?$/i;
 
@@ -86,6 +88,60 @@ const resetDataCommand = new SlashCommandBuilder()
 const staydownCommand = new SlashCommandBuilder()
   .setName("staydown")
   .setDescription("Acknowledge breach, clear alarm, and unlock the audit channel.");
+
+const globalKickCommand = new SlashCommandBuilder()
+  .setName("globalkick")
+  .setDescription("Kick a user from every server Jarvis is in.")
+  .addUserOption((o) =>
+    o.setName("user").setDescription("The user to kick.").setRequired(true),
+  )
+  .addStringOption((o) =>
+    o.setName("reason").setDescription("Reason for the kick."),
+  );
+
+const globalBanCommand = new SlashCommandBuilder()
+  .setName("globalban")
+  .setDescription("Ban a user from every server Jarvis is in.")
+  .addUserOption((o) =>
+    o.setName("user").setDescription("The user to ban.").setRequired(true),
+  )
+  .addStringOption((o) =>
+    o.setName("reason").setDescription("Reason for the ban."),
+  );
+
+const globalMuteCommand = new SlashCommandBuilder()
+  .setName("globalmute")
+  .setDescription("Timeout a user across every server Jarvis is in.")
+  .addUserOption((o) =>
+    o.setName("user").setDescription("The user to mute.").setRequired(true),
+  )
+  .addIntegerOption((o) =>
+    o.setName("duration")
+      .setDescription("Duration in minutes.")
+      .setRequired(true)
+      .setMinValue(1)
+      .setMaxValue(40320),
+  )
+  .addStringOption((o) =>
+    o.setName("reason").setDescription("Reason for the mute."),
+  );
+
+const royalGuardCommand = new SlashCommandBuilder()
+  .setName("royalguard")
+  .setDescription("Notify Royal Guards that a royal is in game.")
+  .addStringOption((o) =>
+    o.setName("location").setDescription("Location of the royal (optional)."),
+  );
+
+const requestGuardsCommand = new SlashCommandBuilder()
+  .setName("requestguards")
+  .setDescription("Request guards for an HR exam.")
+  .addStringOption((o) =>
+    o.setName("when").setDescription("When is the exam taking place?").setRequired(true),
+  )
+  .addStringOption((o) =>
+    o.setName("location").setDescription("Where is the exam taking place?").setRequired(true),
+  );
 
 // Active sessions: userId → conversation history
 type ChatMessage = { role: "user" | "assistant"; content: string };
@@ -663,6 +719,256 @@ async function handleMessageCreate(message: {
   }
 }
 
+// ─── Global moderation handlers ───────────────────────────────────────────────
+
+async function handleGlobalKick(interaction: ChatInputCommandInteraction): Promise<void> {
+  if (!interaction.guild) {
+    await interaction.reply({ content: "This command can only be used inside a server.", ephemeral: true });
+    return;
+  }
+  const member = await interaction.guild.members.fetch(interaction.user.id);
+  if (!canManageJarvis(member)) {
+    await interaction.reply({ content: "Access Denied — only the Owner or Fire Lord can issue global kicks.", ephemeral: true });
+    return;
+  }
+
+  await interaction.deferReply({ ephemeral: true });
+  const target = interaction.options.getUser("user", true);
+  const reason = interaction.options.getString("reason") ?? "No reason provided.";
+  const ownerIds = getConfiguredIds("DISCORD_OWNER_USER_IDS");
+
+  if (getJarvisRank(member) === "second" && ownerIds.has(target.id)) {
+    await interaction.editReply("Fire Lord cannot run global actions that affect the Owner.");
+    return;
+  }
+
+  const guilds = [...interaction.client.guilds.cache.values()];
+  let success = 0, skipped = 0, failed = 0;
+
+  for (const guild of guilds) {
+    try {
+      const targetMember = await guild.members.fetch(target.id).catch(() => null);
+      if (!targetMember) { skipped++; continue; }
+      await targetMember.kick(`[Jarvis Global Kick] ${reason} — by ${interaction.user.tag}`);
+      success++;
+    } catch { failed++; }
+  }
+
+  const embed = new EmbedBuilder()
+    .setTitle("JARVIS // GLOBAL KICK EXECUTED")
+    .setColor(FIRE_RED)
+    .addFields(
+      { name: "TARGET", value: `${target.tag} (${target.id})` },
+      { name: "REASON", value: reason },
+      { name: "RESULTS", value: `✅ Kicked: **${success}** | ⏭️ Not found: **${skipped}** | ❌ Failed: **${failed}**` },
+      { name: "AUTHORIZED BY", value: `${interaction.user.tag}` },
+    )
+    .setFooter({ text: "FIRE DIVISION • GLOBAL ENFORCEMENT" })
+    .setTimestamp();
+
+  await interaction.editReply({ embeds: [embed] });
+
+  const logId = process.env.DISCORD_OWNER_LOG_CHANNEL_ID?.trim();
+  if (logId) {
+    const ch = await interaction.client.channels.fetch(logId).catch(() => null);
+    if (ch && ch.isTextBased() && "send" in ch) await ch.send({ embeds: [embed] }).catch(() => null);
+  }
+}
+
+async function handleGlobalBan(interaction: ChatInputCommandInteraction): Promise<void> {
+  if (!interaction.guild) {
+    await interaction.reply({ content: "This command can only be used inside a server.", ephemeral: true });
+    return;
+  }
+  const member = await interaction.guild.members.fetch(interaction.user.id);
+  if (!canManageJarvis(member)) {
+    await interaction.reply({ content: "Access Denied — only the Owner or Fire Lord can issue global bans.", ephemeral: true });
+    return;
+  }
+
+  await interaction.deferReply({ ephemeral: true });
+  const target = interaction.options.getUser("user", true);
+  const reason = interaction.options.getString("reason") ?? "No reason provided.";
+  const ownerIds = getConfiguredIds("DISCORD_OWNER_USER_IDS");
+
+  if (getJarvisRank(member) === "second" && ownerIds.has(target.id)) {
+    await interaction.editReply("Fire Lord cannot run global actions that affect the Owner.");
+    return;
+  }
+
+  const guilds = [...interaction.client.guilds.cache.values()];
+  let success = 0, skipped = 0, failed = 0;
+
+  for (const guild of guilds) {
+    try {
+      await guild.bans.create(target.id, {
+        reason: `[Jarvis Global Ban] ${reason} — by ${interaction.user.tag}`,
+        deleteMessageSeconds: 0,
+      });
+      success++;
+    } catch (e: unknown) {
+      const code = (e as { code?: number }).code;
+      if (code === 10007 || code === 10013) skipped++; // Unknown member / unknown user
+      else failed++;
+    }
+  }
+
+  const embed = new EmbedBuilder()
+    .setTitle("JARVIS // GLOBAL BAN EXECUTED")
+    .setColor(FIRE_RED)
+    .addFields(
+      { name: "TARGET", value: `${target.tag} (${target.id})` },
+      { name: "REASON", value: reason },
+      { name: "RESULTS", value: `✅ Banned: **${success}** | ⏭️ Not found: **${skipped}** | ❌ Failed: **${failed}**` },
+      { name: "AUTHORIZED BY", value: `${interaction.user.tag}` },
+    )
+    .setFooter({ text: "FIRE DIVISION • GLOBAL ENFORCEMENT" })
+    .setTimestamp();
+
+  await interaction.editReply({ embeds: [embed] });
+
+  const logId = process.env.DISCORD_OWNER_LOG_CHANNEL_ID?.trim();
+  if (logId) {
+    const ch = await interaction.client.channels.fetch(logId).catch(() => null);
+    if (ch && ch.isTextBased() && "send" in ch) await ch.send({ embeds: [embed] }).catch(() => null);
+  }
+}
+
+async function handleGlobalMute(interaction: ChatInputCommandInteraction): Promise<void> {
+  if (!interaction.guild) {
+    await interaction.reply({ content: "This command can only be used inside a server.", ephemeral: true });
+    return;
+  }
+  const member = await interaction.guild.members.fetch(interaction.user.id);
+  if (!canManageJarvis(member)) {
+    await interaction.reply({ content: "Access Denied — only the Owner or Fire Lord can issue global mutes.", ephemeral: true });
+    return;
+  }
+
+  await interaction.deferReply({ ephemeral: true });
+  const target = interaction.options.getUser("user", true);
+  const durationMin = interaction.options.getInteger("duration", true);
+  const reason = interaction.options.getString("reason") ?? "No reason provided.";
+  const ownerIds = getConfiguredIds("DISCORD_OWNER_USER_IDS");
+
+  if (getJarvisRank(member) === "second" && ownerIds.has(target.id)) {
+    await interaction.editReply("Fire Lord cannot run global actions that affect the Owner.");
+    return;
+  }
+
+  const until = new Date(Date.now() + durationMin * 60 * 1000);
+  const guilds = [...interaction.client.guilds.cache.values()];
+  let success = 0, skipped = 0, failed = 0;
+
+  for (const guild of guilds) {
+    try {
+      const targetMember = await guild.members.fetch(target.id).catch(() => null);
+      if (!targetMember) { skipped++; continue; }
+      await targetMember.disableCommunicationUntil(
+        until,
+        `[Jarvis Global Mute] ${reason} — by ${interaction.user.tag}`,
+      );
+      success++;
+    } catch { failed++; }
+  }
+
+  const embed = new EmbedBuilder()
+    .setTitle("JARVIS // GLOBAL MUTE EXECUTED")
+    .setColor(FIRE_RED)
+    .addFields(
+      { name: "TARGET", value: `${target.tag} (${target.id})` },
+      { name: "DURATION", value: `**${durationMin}** minute${durationMin === 1 ? "" : "s"}`, inline: true },
+      { name: "EXPIRES", value: `<t:${Math.floor(until.getTime() / 1000)}:R>`, inline: true },
+      { name: "REASON", value: reason },
+      { name: "RESULTS", value: `✅ Muted: **${success}** | ⏭️ Not found: **${skipped}** | ❌ Failed: **${failed}**` },
+      { name: "AUTHORIZED BY", value: `${interaction.user.tag}` },
+    )
+    .setFooter({ text: "FIRE DIVISION • GLOBAL ENFORCEMENT" })
+    .setTimestamp();
+
+  await interaction.editReply({ embeds: [embed] });
+
+  const logId = process.env.DISCORD_OWNER_LOG_CHANNEL_ID?.trim();
+  if (logId) {
+    const ch = await interaction.client.channels.fetch(logId).catch(() => null);
+    if (ch && ch.isTextBased() && "send" in ch) await ch.send({ embeds: [embed] }).catch(() => null);
+  }
+}
+
+// ─── Notification handlers ────────────────────────────────────────────────────
+
+async function handleRoyalGuard(interaction: ChatInputCommandInteraction): Promise<void> {
+  if (!interaction.guild) {
+    await interaction.reply({ content: "This command can only be used inside a server.", ephemeral: true });
+    return;
+  }
+  const member = await interaction.guild.members.fetch(interaction.user.id);
+  if (!canManageJarvis(member)) {
+    await interaction.reply({ content: "Access Denied — only the Owner or Fire Lord can call the Royal Guard.", ephemeral: true });
+    return;
+  }
+
+  await interaction.deferReply({ ephemeral: true });
+  const location = interaction.options.getString("location");
+
+  const channel = await interaction.client.channels.fetch(ROYAL_GUARD_CHANNEL_ID).catch(() => null);
+  if (!channel || !channel.isTextBased() || !("send" in channel)) {
+    await interaction.editReply("Could not reach the Royal Guard channel.");
+    return;
+  }
+
+  const embed = new EmbedBuilder()
+    .setTitle("🛡️ ROYAL GUARD ALERT")
+    .setDescription("A Royal is currently in game and requires escort.")
+    .setColor(FIRE_RED)
+    .addFields(
+      { name: "ROYAL", value: `${interaction.user.tag}` },
+      ...(location ? [{ name: "LOCATION", value: location }] : []),
+    )
+    .setFooter({ text: "FIRE DIVISION • ROYAL PROTECTION PROTOCOL" })
+    .setTimestamp();
+
+  await channel.send({ content: "@everyone", embeds: [embed] });
+  await interaction.editReply("Royal Guard has been notified.");
+}
+
+async function handleRequestGuards(interaction: ChatInputCommandInteraction): Promise<void> {
+  if (!interaction.guild) {
+    await interaction.reply({ content: "This command can only be used inside a server.", ephemeral: true });
+    return;
+  }
+  const member = await interaction.guild.members.fetch(interaction.user.id);
+  if (!canAwardMerits(member)) {
+    await interaction.reply({ content: "Access Denied — only HR and above can request guards.", ephemeral: true });
+    return;
+  }
+
+  await interaction.deferReply({ ephemeral: true });
+  const when = interaction.options.getString("when", true);
+  const location = interaction.options.getString("location", true);
+
+  const channel = await interaction.client.channels.fetch(NORMAL_GUARD_CHANNEL_ID).catch(() => null);
+  if (!channel || !channel.isTextBased() || !("send" in channel)) {
+    await interaction.editReply("Could not reach the Guard channel.");
+    return;
+  }
+
+  const embed = new EmbedBuilder()
+    .setTitle("📋 GUARD REQUEST — HR EXAM")
+    .setDescription("Guards are needed for an HR examination. Please respond if available.")
+    .setColor(FIRE_ORANGE)
+    .addFields(
+      { name: "REQUESTED BY", value: `${interaction.user.tag}` },
+      { name: "WHEN", value: when, inline: true },
+      { name: "LOCATION", value: location, inline: true },
+    )
+    .setFooter({ text: "FIRE DIVISION • EXAM SECURITY PROTOCOL" })
+    .setTimestamp();
+
+  await channel.send({ content: "@everyone", embeds: [embed] });
+  await interaction.editReply("Guard request sent successfully.");
+}
+
 // ─── Interaction router ───────────────────────────────────────────────────────
 
 async function handleInteraction(interaction: ChatInputCommandInteraction): Promise<void> {
@@ -674,8 +980,13 @@ async function handleInteraction(interaction: ChatInputCommandInteraction): Prom
     case "merits":        await handleMerits(interaction);      break;
     case "leaderboard":   await handleLeaderboard(interaction); break;
     case "merithistory":  await handleMeritHistory(interaction);break;
-    case "resetdata":     await handleResetData(interaction);   break;
-    case "staydown":      await handleStaydown(interaction);    break;
+    case "resetdata":       await handleResetData(interaction);     break;
+    case "staydown":        await handleStaydown(interaction);      break;
+    case "globalkick":      await handleGlobalKick(interaction);    break;
+    case "globalban":       await handleGlobalBan(interaction);     break;
+    case "globalmute":      await handleGlobalMute(interaction);    break;
+    case "royalguard":      await handleRoyalGuard(interaction);    break;
+    case "requestguards":   await handleRequestGuards(interaction); break;
   }
 }
 
@@ -765,6 +1076,11 @@ export async function startBot(): Promise<void> {
       createHrCommand.toJSON(),
       resetDataCommand.toJSON(),
       staydownCommand.toJSON(),
+      globalKickCommand.toJSON(),
+      globalBanCommand.toJSON(),
+      globalMuteCommand.toJSON(),
+      royalGuardCommand.toJSON(),
+      requestGuardsCommand.toJSON(),
     ];
     const rest = new REST({ version: "10" }).setToken(token);
     const guildId = await resolveGuildId(ready);
