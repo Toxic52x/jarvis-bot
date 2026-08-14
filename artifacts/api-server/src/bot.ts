@@ -1,5 +1,9 @@
 import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
   Client,
+  ComponentType,
   EmbedBuilder,
   Events,
   GatewayIntentBits,
@@ -9,16 +13,26 @@ import {
   type ChatInputCommandInteraction,
   type GuildMember,
 } from "discord.js";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { db, meritAwardsTable } from "@workspace/db";
 import { logger } from "./lib/logger";
+import OpenAI from "openai"; // Added OpenAI import
 
 const MAX_MEMBERS_PER_AWARD = 25;
+const MAX_MERITS_PER_COMMAND = 7;
 const HR_ROLE_NAME = "HR";
 const FIRE_RED = 0xb91c1c;
 const FIRE_ORANGE = 0xf97316;
 const DISCORD_MESSAGE_URL =
   /^https:\/\/(?:(?:canary|ptb)\.)?(?:discord\.com|discordapp\.com)\/channels\/\d+\/\d+\/\d+(?:[/?#].*)?$/i;
+
+// Initialize OpenAI Client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+// Tracks users who triggered "Jarvis" and are awaiting a follow-up command
+const activePromptSessions = new Set<string>();
 
 const addMeritCommand = new SlashCommandBuilder()
   .setName("addmerit")
@@ -36,7 +50,6 @@ const addMeritCommand = new SlashCommandBuilder()
       .setName("amount")
       .setDescription("Number of merits to award to each member.")
       .setMinValue(1)
-      .setMaxValue(100)
       .setRequired(true),
   )
   .addStringOption((option) =>
@@ -48,27 +61,35 @@ const addMeritCommand = new SlashCommandBuilder()
 
 const meritsCommand = new SlashCommandBuilder()
   .setName("merits")
-  .setDescription("View a member's merit total or the server leaderboard.")
+  .setDescription("View a member's global merit total or the global leaderboard.")
   .addUserOption((option) =>
     option
       .setName("user")
-      .setDescription("The member to look up. Leave empty for the leaderboard."),
+      .setDescription("The member to look up. Leave empty for the global leaderboard."),
   );
 
 const historyCommand = new SlashCommandBuilder()
   .setName("merithistory")
-  .setDescription("View a member's recent merit awards.")
+  .setDescription("View a member's recent global merit awards.")
   .addUserOption((option) =>
     option.setName("user").setDescription("The member whose history to view."),
   );
 
 const leaderboardCommand = new SlashCommandBuilder()
   .setName("leaderboard")
-  .setDescription("View the top 30 members by merit total.");
+  .setDescription("View the global top 30 members by merit total.");
 
 const createHrCommand = new SlashCommandBuilder()
   .setName("createhr")
   .setDescription("Create the Jarvis HR role with no elevated Discord permissions.");
+
+const resetDataCommand = new SlashCommandBuilder()
+  .setName("resetdata")
+  .setDescription("Wipe all global merit data. Exports a backup leaderboard before resetting.");
+
+const staydownCommand = new SlashCommandBuilder()
+  .setName("staydown")
+  .setDescription("Acknowledge breach, clear alarm, and unlock the audit channel.");
 
 function getConfiguredIds(name: string): Set<string> {
   return new Set(
@@ -204,16 +225,16 @@ function buildLeaderboardEmbed(
 ): EmbedBuilder {
   const lines = leaderboard.map(
     (entry, index) =>
-      `**${String(index + 1).padStart(2, "0")}**  ${entry.memberTag.slice(0, 45)}  —  **${Number(entry.total)}**`,
+      `**${String(index + 1).padStart(2, "0")}** ${entry.memberTag.slice(0, 45)}  —  **${Number(entry.total)}**`,
   );
 
   return new EmbedBuilder()
-    .setTitle("JARVIS // MERIT COMMAND")
+    .setTitle("JARVIS // GLOBAL MERIT RANKINGS")
     .setDescription(
-      `**TOP 30 PERSONNEL RANKING**\n\n${lines.join("\n")}`,
+      `**TOP PERSONNEL RANKING (UNIVERSAL)**\n\n${lines.join("\n")}`,
     )
     .setColor(FIRE_RED)
-    .setFooter({ text: "FIRE DIVISION • MERIT LEDGER • AUTHORIZED PERSONNEL ONLY" })
+    .setFooter({ text: "FIRE NATION • UNIVERSAL MERIT SYSTEM" })
     .setTimestamp();
 }
 
@@ -266,9 +287,10 @@ async function writeOwnerAuditLog(
 
   const embed = new EmbedBuilder()
     .setTitle("JARVIS // MERIT AWARD AUDIT")
-    .setDescription("A merit transaction has been authorized and recorded.")
+    .setDescription("A global merit transaction has been authorized and recorded.")
     .setColor(FIRE_RED)
     .addFields(
+      { name: "SERVER", value: `${interaction.guild?.name ?? "Unknown"} (${interaction.guild?.id})` },
       { name: "RECIPIENTS", value: memberLines.slice(0, 1024) },
       {
         name: "MERIT VALUE",
@@ -281,7 +303,7 @@ async function writeOwnerAuditLog(
         value: `${interaction.user.tag} (${interaction.user.id})`,
       },
     )
-    .setFooter({ text: "FIRE DIVISION • OWNER AUDIT CHANNEL" })
+    .setFooter({ text: "FIRE NATION • OWNER AUDIT CHANNEL" })
     .setTimestamp();
 
   await channel.send({ embeds: [embed] });
@@ -301,7 +323,7 @@ async function handleAddMerit(
   const member = await interaction.guild.members.fetch(interaction.user.id);
   if (!canAwardMerits(member)) {
     await interaction.reply({
-      content: "Only the Owner, Fire Lord, or members with the HR role can award merits.",
+      content: "Access Denied: Only the Owner, Fire Lord, or members with the HR role can award merits.",
       ephemeral: true,
     });
     return;
@@ -312,12 +334,20 @@ async function handleAddMerit(
   try {
     const rawUsers = interaction.options.getString("users", true);
     const amount = interaction.options.getInteger("amount", true);
+    const actorRank = getJarvisRank(member);
+
+    if (actorRank === "hr" && amount > MAX_MERITS_PER_COMMAND) {
+      throw new Error(
+        `HR personnel can award a maximum of ${MAX_MERITS_PER_COMMAND} merits per recipient.`,
+      );
+    }
+
     const proofUrl = validateProofUrl(
       interaction.options.getString("proof", true),
     );
     const members = await resolveMembers(interaction, rawUsers);
-    const actorRank = getJarvisRank(member);
     const ownerIds = getConfiguredIds("DISCORD_OWNER_USER_IDS");
+
     if (
       actorRank === "second" &&
       members.some((recipient) => ownerIds.has(recipient.id))
@@ -329,7 +359,7 @@ async function handleAddMerit(
     await writeOwnerAuditLog(interaction, members, amount, proofUrl);
 
     await interaction.editReply(
-      `Recorded **+${amount}** merit${amount === 1 ? "" : "s"} for ${members.length} member${members.length === 1 ? "" : "s"} and logged the proof for owners.`,
+      `Recorded **+${amount}** global merit${amount === 1 ? "" : "s"} for ${members.length} member${members.length === 1 ? "" : "s"} and logged proof.`,
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "The merit award failed.";
@@ -402,27 +432,22 @@ async function handleMerits(interaction: ChatInputCommandInteraction): Promise<v
         total: sql<number>`coalesce(sum(${meritAwardsTable.amount}), 0)`,
       })
       .from(meritAwardsTable)
-      .where(
-        and(
-          eq(meritAwardsTable.guildId, interaction.guild.id),
-          eq(meritAwardsTable.memberId, target.id),
-        ),
-      );
+      .where(eq(meritAwardsTable.memberId, target.id));
 
     const total = Number(result?.total ?? 0);
     const embed = new EmbedBuilder()
       .setTitle("JARVIS // PERSONNEL MERIT RECORD")
-      .setDescription("Current standing for the selected personnel.")
+      .setDescription("Global standing for the selected personnel.")
       .setColor(FIRE_RED)
       .addFields(
         { name: "PERSONNEL", value: target.tag, inline: true },
         {
-          name: "TOTAL MERITS",
+          name: "TOTAL MERITS (GLOBAL)",
           value: `**${total}**`,
           inline: true,
         },
       )
-      .setFooter({ text: "FIRE DIVISION • MERIT LEDGER" })
+      .setFooter({ text: "FIRE NATION • UNIVERSAL MERIT SYSTEM" })
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
@@ -436,13 +461,12 @@ async function handleMerits(interaction: ChatInputCommandInteraction): Promise<v
       total: sql<number>`sum(${meritAwardsTable.amount})`,
     })
     .from(meritAwardsTable)
-    .where(eq(meritAwardsTable.guildId, interaction.guild.id))
     .groupBy(meritAwardsTable.memberId, meritAwardsTable.memberTag)
     .orderBy(desc(sql`sum(${meritAwardsTable.amount})`))
     .limit(30);
 
   if (leaderboard.length === 0) {
-    await interaction.editReply("No merits have been recorded for this server yet.");
+    await interaction.editReply("No global merits have been recorded yet.");
     return;
   }
 
@@ -467,13 +491,12 @@ async function handleLeaderboard(
       total: sql<number>`sum(${meritAwardsTable.amount})`,
     })
     .from(meritAwardsTable)
-    .where(eq(meritAwardsTable.guildId, interaction.guild.id))
     .groupBy(meritAwardsTable.memberId, meritAwardsTable.memberTag)
     .orderBy(desc(sql`sum(${meritAwardsTable.amount})`))
     .limit(30);
 
   if (leaderboard.length === 0) {
-    await interaction.editReply("No merits have been recorded for this server yet.");
+    await interaction.editReply("No global merits have been recorded yet.");
     return;
   }
 
@@ -490,37 +513,187 @@ async function handleMeritHistory(
 
   await interaction.deferReply({ ephemeral: true });
   const target = interaction.options.getUser("user") ?? interaction.user;
+
   const history = await db
     .select()
     .from(meritAwardsTable)
-    .where(
-      and(
-        eq(meritAwardsTable.guildId, interaction.guild.id),
-        eq(meritAwardsTable.memberId, target.id),
-      ),
-    )
+    .where(eq(meritAwardsTable.memberId, target.id))
     .orderBy(desc(meritAwardsTable.createdAt))
     .limit(10);
 
   if (history.length === 0) {
-    await interaction.editReply(`No merit history found for **${target.tag}**.`);
+    await interaction.editReply(`No global merit history found for **${target.tag}**.`);
     return;
   }
 
   const lines = history.map(
     (award) =>
-      `**+${award.amount}**  •  [Proof of action](${award.proofUrl})  •  <t:${Math.floor(award.createdAt.getTime() / 1000)}:R>`,
+      `**+${award.amount}** •  [Proof of action](${award.proofUrl})  •  <t:${Math.floor(award.createdAt.getTime() / 1000)}:R>`,
   );
   const embed = new EmbedBuilder()
-    .setTitle("JARVIS // MERIT HISTORY")
+    .setTitle("JARVIS // GLOBAL MERIT HISTORY")
     .setDescription(
       `**PERSONNEL:** ${target.tag}\n\n${lines.join("\n")}`,
     )
     .setColor(FIRE_ORANGE)
-    .setFooter({ text: "FIRE DIVISION • VERIFIED ACTION HISTORY" })
+    .setFooter({ text: "FIRE NATION • VERIFIED GLOBAL HISTORY" })
     .setTimestamp();
 
   await interaction.editReply({ embeds: [embed] });
+}
+
+async function handleResetData(
+  interaction: ChatInputCommandInteraction,
+): Promise<void> {
+  if (!interaction.guild || !interaction.channel) {
+    await interaction.reply({
+      content: "This command can only be used inside a server channel.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  const member = await interaction.guild.members.fetch(interaction.user.id);
+  if (!canManageJarvis(member)) {
+    await interaction.reply({
+      content: "Access Denied: Only the Owner or Fire Lord can reset system data.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  const confirmBtn = new ButtonBuilder()
+    .setCustomId("confirm_reset")
+    .setLabel("Yes, Reset Everything")
+    .setStyle(ButtonStyle.Danger);
+
+  const cancelBtn = new ButtonBuilder()
+    .setCustomId("cancel_reset")
+    .setLabel("Cancel")
+    .setStyle(ButtonStyle.Secondary);
+
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmBtn, cancelBtn);
+
+  await interaction.reply({
+    content: "⚠️ **ARE YOU SURE YOU WANT TO RESET ALL MERIT DATA?**\nThis will permanently wipe all user merits across every server. A full backup leaderboard will be generated before wipe.",
+    components: [row],
+    ephemeral: true,
+  });
+
+  const collector = interaction.channel.createMessageComponentCollector({
+    componentType: ComponentType.Button,
+    filter: (i) =>
+      i.user.id === interaction.user.id &&
+      (i.customId === "confirm_reset" || i.customId === "cancel_reset"),
+    time: 30_000,
+  });
+
+  collector.on("collect", async (buttonInteraction) => {
+    try {
+      if (buttonInteraction.customId === "confirm_reset") {
+        await buttonInteraction.deferUpdate();
+
+        const fullLeaderboard = await db
+          .select({
+            memberId: meritAwardsTable.memberId,
+            memberTag: meritAwardsTable.memberTag,
+            total: sql<number>`sum(${meritAwardsTable.amount})`,
+          })
+          .from(meritAwardsTable)
+          .groupBy(meritAwardsTable.memberId, meritAwardsTable.memberTag)
+          .orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
+
+        const backupLines = fullLeaderboard.length > 0
+          ? fullLeaderboard.map(
+              (e, i) => `\`[ID: ${e.memberId}]\` **#${i + 1}** ${e.memberTag} — **${Number(e.total)}** merits`,
+            ).join("\n")
+          : "No data was recorded prior to reset.";
+
+        const backupEmbed = new EmbedBuilder()
+          .setTitle("JARVIS // SYSTEM DATA BACKUP & RESET EXPORT")
+          .setDescription(`**DATA BACKUP CREATED AT RESET**\n\n${backupLines.slice(0, 4000)}`)
+          .setColor(FIRE_RED)
+          .setFooter({ text: `RESET EXECUTED BY ${interaction.user.tag}` })
+          .setTimestamp();
+
+        const logChannelId = process.env.DISCORD_OWNER_LOG_CHANNEL_ID?.trim();
+        if (logChannelId) {
+          const auditChannel = await interaction.client.channels.fetch(logChannelId).catch(() => null);
+          if (auditChannel && auditChannel.isTextBased() && "send" in auditChannel) {
+            await auditChannel.send({ embeds: [backupEmbed] }).catch((err) => {
+              logger.warn({ err }, "Failed to send backup to audit channel");
+            });
+          }
+        }
+
+        await db.delete(meritAwardsTable);
+
+        await interaction.editReply({
+          content: "✅ **ALL MERIT DATA HAS BEEN RESET.** Below is your final restore backup log:",
+          embeds: [backupEmbed],
+          components: [],
+        });
+        collector.stop("reset_completed");
+      } else {
+        await buttonInteraction.update({
+          content: "❌ Data reset operation cancelled.",
+          components: [],
+        });
+        collector.stop("reset_cancelled");
+      }
+    } catch (err) {
+      logger.error({ err }, "Failed inside resetdata collector handler");
+      await interaction.editReply({
+        content: "❌ An error occurred while executing the data reset.",
+        components: [],
+      }).catch(() => null);
+    }
+  });
+
+  collector.on("end", async (_, reason) => {
+    if (reason === "time") {
+      await interaction.editReply({
+        content: "⏱️ Confirmation timed out. Data reset cancelled.",
+        components: [],
+      }).catch(() => null);
+    }
+  });
+}
+
+async function handleStaydown(
+  interaction: ChatInputCommandInteraction,
+): Promise<void> {
+  if (!interaction.guild || !interaction.channel) return;
+
+  const member = await interaction.guild.members.fetch(interaction.user.id);
+  if (!canManageJarvis(member)) {
+    await interaction.reply({
+      content: "Access Denied: Only the Owner or Fire Lord can silence alarms and unlock the channel.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  await interaction.deferReply();
+
+  try {
+    if ("permissionOverwrites" in interaction.channel) {
+      await interaction.channel.permissionOverwrites.edit(
+        interaction.guild.roles.everyone,
+        { 
+          ViewChannel: null, 
+          SendMessages: null 
+        },
+      );
+    }
+
+    await interaction.editReply(
+      `🟢 **SECURITY LOCKDOWN LIFTED:** ${interaction.user.tag} acknowledged the breach and unlocked the channel.`,
+    );
+  } catch (error) {
+    logger.error({ err: error }, "Failed to unlock channel");
+    await interaction.editReply("❌ Failed to restore channel permissions.");
+  }
 }
 
 async function handleInteraction(
@@ -540,26 +713,11 @@ async function handleInteraction(
     await handleLeaderboard(interaction);
   } else if (interaction.commandName === "merithistory") {
     await handleMeritHistory(interaction);
+  } else if (interaction.commandName === "resetdata") {
+    await handleResetData(interaction);
+  } else if (interaction.commandName === "staydown") {
+    await handleStaydown(interaction);
   }
-}
-
-async function resolveRegistrationGuildId(client: Client): Promise<string | null> {
-  const configuredGuildId = process.env.DISCORD_GUILD_ID?.trim();
-  if (configuredGuildId) {
-    return configuredGuildId;
-  }
-
-  const logChannelId = process.env.DISCORD_OWNER_LOG_CHANNEL_ID?.trim();
-  if (!logChannelId) {
-    return null;
-  }
-
-  const channel = await client.channels.fetch(logChannelId).catch(() => null);
-  if (!channel || !("guildId" in channel)) {
-    return null;
-  }
-
-  return typeof channel.guildId === "string" ? channel.guildId : null;
 }
 
 export async function startBot(): Promise<void> {
@@ -570,7 +728,11 @@ export async function startBot(): Promise<void> {
   }
 
   const client = new Client({
-    intents: [GatewayIntentBits.Guilds],
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,
+    ],
   });
 
   client.once(Events.ClientReady, async (readyClient) => {
@@ -580,24 +742,15 @@ export async function startBot(): Promise<void> {
       historyCommand.toJSON(),
       leaderboardCommand.toJSON(),
       createHrCommand.toJSON(),
+      resetDataCommand.toJSON(),
+      staydownCommand.toJSON(),
     ];
     const rest = new REST({ version: "10" }).setToken(token);
-    const guildId = await resolveRegistrationGuildId(readyClient);
 
-    if (guildId) {
-      await rest.put(Routes.applicationGuildCommands(readyClient.user.id, guildId), {
-        body: commands,
-      });
-      await rest.put(Routes.applicationCommands(readyClient.user.id), {
-        body: [],
-      });
-      logger.info({ guildId }, "Jarvis commands registered for guild");
-    } else {
-      await rest.put(Routes.applicationCommands(readyClient.user.id), {
-        body: commands,
-      });
-      logger.info("Jarvis commands registered globally");
-    }
+    await rest.put(Routes.applicationCommands(readyClient.user.id), {
+      body: commands,
+    });
+    logger.info("Jarvis commands registered globally across all servers.");
 
     logger.info({ botUser: readyClient.user.tag }, "Jarvis connected to Discord");
   });
@@ -606,6 +759,105 @@ export async function startBot(): Promise<void> {
     void handleInteraction(interaction as ChatInputCommandInteraction).catch((error) => {
       logger.error({ err: error }, "Discord interaction failed");
     });
+  });
+
+  // Updated Conversation Listener for Owner & Second in Command connected to OpenAI
+  client.on(Events.MessageCreate, async (message) => {
+    try {
+      if (message.author.bot || !message.guild || !message.member) return;
+
+      const rank = getJarvisRank(message.member);
+      // Only Owner and Second in Command trigger this conversation
+      if (rank !== "owner" && rank !== "second") return;
+
+      const trimmedText = message.content.trim();
+
+      // Check if the user has an active session (sent "Jarvis" in previous message)
+      if (activePromptSessions.has(message.author.id)) {
+        activePromptSessions.delete(message.author.id);
+
+        // Show typing indicator while calling OpenAI
+        await message.channel.sendTyping();
+
+        try {
+          const completion = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+              { role: "system", content: "You are Jarvis, a sophisticated, polite, and helpful AI assistant." },
+              { role: "user", content: trimmedText }
+            ],
+          });
+
+          const aiReply = completion.choices[0]?.message?.content ?? "I apologize, Sir, but I couldn't generate a response.";
+
+          // Split response if it goes over Discord's 2000 character limit
+          if (aiReply.length > 2000) {
+            for (let i = 0; i < aiReply.length; i += 2000) {
+              await message.reply(aiReply.slice(i, i + 2000));
+            }
+          } else {
+            await message.reply(aiReply);
+          }
+        } catch (apiError) {
+          logger.error({ err: apiError }, "OpenAI API request failed");
+          await message.reply("I encountered an error communicating with my neural core, Sir.");
+        }
+        return;
+      }
+
+      // Check if message is exactly "Jarvis" (case-insensitive)
+      if (trimmedText.toLowerCase() === "jarvis") {
+        activePromptSessions.add(message.author.id);
+        await message.reply("Yes, Sir?");
+      }
+    } catch (error) {
+      logger.error({ err: error }, "Error handling conversational prompt");
+    }
+  });
+
+  client.on(Events.MessageDelete, async (message) => {
+    try {
+      const logChannelId = process.env.DISCORD_OWNER_LOG_CHANNEL_ID?.trim();
+      if (!logChannelId || message.channelId !== logChannelId) return;
+
+      const channel = message.channel;
+      if (
+        channel.isTextBased() &&
+        "send" in channel &&
+        "permissionOverwrites" in channel &&
+        message.guild
+      ) {
+        await channel.permissionOverwrites.edit(
+          message.guild.roles.everyone,
+          { 
+            ViewChannel: false, 
+            SendMessages: false 
+          },
+        );
+
+        const authorMention = message.author
+          ? `<@${message.author.id}> (${message.author.tag})`
+          : "An unknown user";
+
+        const breachEmbed = new EmbedBuilder()
+          .setTitle("🚨 SYSTEM BREACH DETECTED — CHANNEL LOCKED")
+          .setDescription(
+            `**A MESSAGE WAS DELETED FROM THE AUDIT LOGS!**\n\n` +
+            `**Target User:** ${authorMention}\n` +
+            `**Status:** 🔒 CHANNEL LOCKED DOWN\n\n` +
+            `An Owner or Fire Lord must run \`/staydown\` to acknowledge the breach and unlock this channel.`
+          )
+          .setColor(FIRE_RED)
+          .setTimestamp();
+
+        await channel.send({
+          content: "@everyone",
+          embeds: [breachEmbed],
+        });
+      }
+    } catch (error) {
+      logger.error({ err: error }, "Failed to process deleted message in audit log channel");
+    }
   });
 
   await client.login(token);
