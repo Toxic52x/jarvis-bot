@@ -403,7 +403,7 @@ function buildLeaderboardEmbed(
     .setTitle("JARVIS // MERIT COMMAND")
     .setDescription(`**TOP 30 PERSONNEL RANKING**\n\n${lines.join("\n")}`)
     .setColor(FIRE_RED)
-    .setFooter({ text: "FIRE DIVISION • MERIT LEDGER • AUTHORIZED PERSONNEL ONLY" })
+    .setFooter({ text: "FIRE DIVISION • MERIT SYSTEM • AUTHORIZED PERSONNEL ONLY" })
     .setTimestamp();
 }
 
@@ -695,7 +695,7 @@ async function handleMerits(interaction: ChatInputCommandInteraction): Promise<v
         { name: "PERSONNEL", value: target.tag, inline: true },
         { name: "TOTAL MERITS", value: `**${total}**`, inline: true },
       )
-      .setFooter({ text: "FIRE DIVISION • MERIT LEDGER" })
+      .setFooter({ text: "FIRE DIVISION • MERIT SYSTEM" })
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
