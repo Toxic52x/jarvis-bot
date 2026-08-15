@@ -52,33 +52,48 @@ const openai = new OpenAI({
 const addMeritCommand = new SlashCommandBuilder()
   .setName("addmerit")
   .setDescription("Award merits based on activity type.")
-  .addStringOption((o) =>
-    o.setName("type")
-      .setDescription("The type of activity being awarded.")
-      .setRequired(true)
-      .addChoices(
-        { name: "Exam  (1 merit — HR, Advisor, Fire Lord, Owner)", value: "exam" },
-        { name: "Event (1 merit — HR, Advisor, Fire Lord, Owner)", value: "event" },
-        { name: "Raid  (3 merits — Advisor, Fire Lord, Owner only)", value: "raid" },
-        { name: "Bonus (1–7 merits — specific user)", value: "bonus" },
+  .addSubcommand((sub) =>
+    sub.setName("exam")
+      .setDescription("Award 1 merit to all participants. Paste the conclusion announcement.")
+      .addStringOption((o) =>
+        o.setName("announcement")
+          .setDescription("Paste the full exam conclusion — Jarvis extracts every @mention automatically.")
+          .setRequired(true),
       ),
   )
-  .addStringOption((o) =>
-    o.setName("users")
-      .setDescription("Exam/Event/Raid: mentions or IDs of participants (you are included automatically).")
-      .setRequired(false),
+  .addSubcommand((sub) =>
+    sub.setName("event")
+      .setDescription("Award 1 merit to all participants. Paste the conclusion announcement.")
+      .addStringOption((o) =>
+        o.setName("announcement")
+          .setDescription("Paste the full event conclusion — Jarvis extracts every @mention automatically.")
+          .setRequired(true),
+      ),
   )
-  .addUserOption((o) =>
-    o.setName("user")
-      .setDescription("Bonus only: the specific member to award.")
-      .setRequired(false),
+  .addSubcommand((sub) =>
+    sub.setName("raid")
+      .setDescription("Award 3 merits to all participants. Advisor and above only.")
+      .addStringOption((o) =>
+        o.setName("announcement")
+          .setDescription("Paste the full raid conclusion — Jarvis extracts every @mention automatically.")
+          .setRequired(true),
+      ),
   )
-  .addIntegerOption((o) =>
-    o.setName("amount")
-      .setDescription("Bonus only: merit amount (1–7).")
-      .setMinValue(1)
-      .setMaxValue(7)
-      .setRequired(false),
+  .addSubcommand((sub) =>
+    sub.setName("bonus")
+      .setDescription("Award 1–7 bonus merits to a specific member.")
+      .addUserOption((o) =>
+        o.setName("user")
+          .setDescription("The member to award.")
+          .setRequired(true),
+      )
+      .addIntegerOption((o) =>
+        o.setName("amount")
+          .setDescription("Merit amount (1–7).")
+          .setMinValue(1)
+          .setMaxValue(7)
+          .setRequired(true),
+      ),
   );
 
 const meritsCommand = new SlashCommandBuilder()
@@ -312,6 +327,17 @@ function parseUserReferences(rawUsers: string): string[] {
   return [...new Set(refs)];
 }
 
+/** Extract every unique user ID from an announcement blob containing <@ID> or <@!ID> mentions. */
+function extractMentionIds(text: string): string[] {
+  const seen = new Set<string>();
+  const pattern = /<@!?(\d+)>/g;
+  let match;
+  while ((match = pattern.exec(text)) !== null) {
+    seen.add(match[1]);
+  }
+  return [...seen];
+}
+
 function getMemberIdFromReference(ref: string): string | null {
   const mention = ref.match(/^<@!?(\d+)>$/);
   if (mention) return mention[1];
@@ -462,22 +488,19 @@ async function handleAddMerit(interaction: ChatInputCommandInteraction): Promise
   await interaction.deferReply({ ephemeral: true });
 
   try {
-    const type = interaction.options.getString("type", true) as "exam" | "event" | "raid" | "bonus";
+    const sub = interaction.options.getSubcommand() as "exam" | "event" | "raid" | "bonus";
     const actorRank = getJarvisRank(member);
     const ownerIds = getConfiguredIds("DISCORD_OWNER_USER_IDS");
 
-    // ── Raid: Advisor and above only ─────────────────────────────────────────
-    if (type === "raid" && actorRank === "hr") {
+    // ── Raid: Advisor and above only ──────────────────────────────────────────
+    if (sub === "raid" && actorRank === "hr") {
       throw new Error("Only Advisors and above can award Raid merits.");
     }
 
     // ── Bonus: single user + explicit amount ──────────────────────────────────
-    if (type === "bonus") {
-      const targetUser = interaction.options.getUser("user");
-      const bonusAmount = interaction.options.getInteger("amount");
-      if (!targetUser || bonusAmount === null) {
-        throw new Error("Bonus requires a target user and an amount (1–7).");
-      }
+    if (sub === "bonus") {
+      const targetUser = interaction.options.getUser("user", true);
+      const bonusAmount = interaction.options.getInteger("amount", true);
       if (actorRank === "second" && ownerIds.has(targetUser.id)) {
         throw new Error("Fire Lord cannot award merits to the Owner.");
       }
@@ -490,22 +513,33 @@ async function handleAddMerit(interaction: ChatInputCommandInteraction): Promise
       return;
     }
 
-    // ── Exam / Event / Raid: all mentioned users + command user ───────────────
-    const rawUsers = interaction.options.getString("users");
-    if (!rawUsers) {
-      const label = type.charAt(0).toUpperCase() + type.slice(1);
-      throw new Error(`${label} requires at least one participant. Use the users field.`);
+    // ── Exam / Event / Raid: extract @mentions from pasted announcement ───────
+    const announcement = interaction.options.getString("announcement", true);
+    const mentionIds = extractMentionIds(announcement);
+    if (mentionIds.length === 0) {
+      throw new Error("No @mentions found in the announcement. Make sure you pasted the full conclusion text.");
     }
 
-    const meritAmount = type === "raid" ? 3 : 1;
-    const label = type.charAt(0).toUpperCase() + type.slice(1);
-    const mentioned = await resolveMembers(interaction, rawUsers);
+    const label = sub.charAt(0).toUpperCase() + sub.slice(1);
+    const meritAmount = sub === "raid" ? 3 : 1;
+
+    // Fetch all mentioned members in parallel; silently skip anyone who left the server
+    const fetchResults = await Promise.allSettled(
+      mentionIds.map((id) => interaction.guild!.members.fetch(id)),
+    );
+    const mentioned = fetchResults
+      .filter((r): r is PromiseFulfilledResult<GuildMember> => r.status === "fulfilled")
+      .map((r) => r.value);
+
+    if (mentioned.length === 0) {
+      throw new Error("None of the mentioned users are currently in the server.");
+    }
 
     if (actorRank === "second" && mentioned.some((m) => ownerIds.has(m.id))) {
       throw new Error("Fire Lord cannot award merits that affect the Owner.");
     }
 
-    // Include the command user if not already in the list
+    // Include the command user automatically if not already in the list
     const allMembers = [...mentioned];
     if (!allMembers.some((m) => m.id === member.id)) {
       allMembers.push(member);
@@ -514,8 +548,10 @@ async function handleAddMerit(interaction: ChatInputCommandInteraction): Promise
     await awardMerits(interaction, allMembers, meritAmount, label);
     await writeOwnerAuditLog(interaction, allMembers, meritAmount, label, actorRank);
 
+    const skipped = mentionIds.length - mentioned.length;
+    const skippedNote = skipped > 0 ? ` (${skipped} mention${skipped === 1 ? "" : "s"} not found in server — skipped)` : "";
     await interaction.editReply(
-      `Recorded **+${meritAmount}** ${label} merit${meritAmount === 1 ? "" : "s"} for ${allMembers.length} member${allMembers.length === 1 ? "" : "s"} (including yourself) — logged for owners.`,
+      `Recorded **+${meritAmount}** ${label} merit${meritAmount === 1 ? "" : "s"} for **${allMembers.length}** member${allMembers.length === 1 ? "" : "s"} (including yourself)${skippedNote} — logged for owners.`,
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "The merit award failed.";
