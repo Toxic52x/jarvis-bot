@@ -202,6 +202,35 @@ let botClient: Client | null = null;
 // Deduplication — prevents same message from being processed twice (duplicate Discord events)
 const recentlyProcessed = new Set<string>();
 
+// ─── Token quota reset notification ───────────────────────────────────────────
+let tokenResetScheduled = false;
+
+function parseRetryAfterMs(message: string): number {
+  // Groq errors say e.g. "Please try again in 29m34.656s"
+  const match = message.match(/try again in (?:(\d+)m)?(\d+(?:\.\d+)?)s/);
+  if (!match) return 60 * 60 * 1000; // fallback: 1 hour
+  const minutes = parseInt(match[1] ?? "0", 10);
+  const seconds = parseFloat(match[2] ?? "0");
+  return (minutes * 60 + seconds) * 1000;
+}
+
+async function notifyTokenReset(): Promise<void> {
+  tokenResetScheduled = false;
+  if (!botClient) return;
+  const ids = [
+    ...getConfiguredIds("DISCORD_OWNER_USER_IDS"),
+    ...getConfiguredIds("DISCORD_SECOND_IN_COMMAND_USER_IDS"),
+  ];
+  for (const id of ids) {
+    try {
+      const user = await botClient.users.fetch(id);
+      await user.send("Sir, my neural core is back online. Token quota has reset — I am at your service.");
+    } catch (err) {
+      logger.error({ err, userId: id }, "Failed to send token reset DM");
+    }
+  }
+}
+
 // In-memory reminder store
 function isDismissal(text: string): boolean {
   const t = text.toLowerCase();
@@ -1280,7 +1309,14 @@ async function handleMessageCreate(message: Message): Promise<void> {
       history.pop();
       const isRateLimit = typeof error === "object" && error !== null && "status" in error && (error as { status: number }).status === 429;
       if (isRateLimit) {
-        await message.reply("My daily token quota has been exhausted, Sir. I will be back online within the hour. If this keeps occurring, upgrading at console.groq.com/settings/billing will resolve it.");
+        await message.reply("My daily token quota has been exhausted, Sir. I will notify you the moment it resets.");
+        if (!tokenResetScheduled) {
+          tokenResetScheduled = true;
+          const errMsg = (error as { message?: string }).message ?? "";
+          const retryMs = parseRetryAfterMs(errMsg);
+          logger.info({ retryMs }, "Token quota exhausted — reset notification scheduled");
+          setTimeout(() => void notifyTokenReset(), retryMs);
+        }
       } else {
         await message.reply("I encountered an error communicating with my neural core, Sir.");
       }
