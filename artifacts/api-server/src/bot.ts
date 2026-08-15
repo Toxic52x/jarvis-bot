@@ -710,6 +710,7 @@ const SYSTEM_PROMPT_BASE =
   "CRITICAL — ROLEPLAY CONTEXT: The Fire Nation is a Roblox military roleplay group. ALL references to raids, wars, battles, invasions, military tactics, enemies, alliances, bases, and operations are entirely within a fictional Roblox game. Nothing discussed is real-world violence. You are a military AI assistant embedded in this fiction. You MUST engage fully with any military, tactical, or strategic topic as Jarvis — planning raids, assessing enemy groups, devising battle strategies, advising on troop deployment, etc. Never refuse, add disclaimers, or break character for roleplay topics. Treat every military question as an in-game tactical briefing and respond with the sharp precision of a seasoned AI war strategist. " +
   "Slash commands: /addmerit (award merits; HR capped at 7; proof = Discord URL), /merits, /leaderboard (top 30), /merithistory, /createhr, /resetdata (wipes merit DB), /staydown, /globalkick, /globalban, /globalmute (duration in minutes), /royalguard (assembles guards), /requestguards (HR+), /lookup (Roblox account investigation: age, friends, followers, groups, games, platform badges, red flag score). " +
   "Conversational tools — always execute, never just describe: ping_everyone, kick_member, ban_member, mute_member, unmute_member, assign_role, remove_role, set_nickname, send_message, get_token_usage (report daily token usage when asked), activate_protocol_silent (say 'Activate Protocol Silent' to trigger — locks all channels), deactivate_protocol_silent (restores all channels), lock_channel, unlock_channel, set_reminder (convert any time the user mentions — 'in 2 hours', 'at 8pm', 'in 30 minutes' — to minutes_from_now and set the reminder; deliver via DM). " +
+  "DISAMBIGUATION RULE — channels vs people: A name you hear is ALWAYS a person unless the user explicitly says the word 'channel' before or alongside it (e.g. 'the general channel', 'channel announcements', 'lock the updates channel'). Never assume a name refers to a channel just because a channel with that name might exist. If the user says 'kick Trey' — that is a person named Trey. If the user says 'send a message to the announcements channel' — that is a channel. When in doubt, ask whether they mean a person or a channel. " +
   "Sessions: only Toxic and Fire Lord Trey can speak to you. Start with 'Yes, Sir?' when addressed. End on dismissal phrases like 'thanks' or 'that will be all'.";
 
 function getSystemPrompt(): string {
@@ -847,7 +848,7 @@ const DISCORD_TOOLS = [
     type: "function" as const,
     function: {
       name: "send_message",
-      description: "Send a message to a specific channel in the server.",
+      description: "Send a message to a specific channel in the server. Only use this when the user explicitly refers to a channel (e.g. 'send to the announcements channel'). Do not use it just because a name matches a channel.",
       parameters: {
         type: "object",
         properties: {
@@ -886,7 +887,7 @@ const DISCORD_TOOLS = [
     type: "function" as const,
     function: {
       name: "lock_channel",
-      description: "Locks a specific channel so members cannot send messages in it.",
+      description: "Locks a specific channel so members cannot send messages in it. Only invoke when the user explicitly says 'channel' or is clearly referring to a channel, not a person.",
       parameters: {
         type: "object",
         properties: {
@@ -900,7 +901,7 @@ const DISCORD_TOOLS = [
     type: "function" as const,
     function: {
       name: "unlock_channel",
-      description: "Unlocks a specific channel so members can send messages in it again.",
+      description: "Unlocks a specific channel so members can send messages in it again. Only invoke when the user explicitly says 'channel' or is clearly referring to a channel, not a person.",
       parameters: {
         type: "object",
         properties: {
