@@ -33,6 +33,7 @@ const MAX_MEMBERS_PER_AWARD = 25;
 const MAX_MERITS_HR = 7;          // HR cap; Owner and Fire Lord are uncapped
 const HR_ROLE_NAME = "HR";
 const ADVISOR_ROLE_NAME = "Advisor";
+const ROYALTY_ROLE_NAME = "Royalty";
 const FIRE_RED = 0xb91c1c;
 const FIRE_ORANGE = 0xf97316;
 const ROYAL_GUARD_CHANNEL_ID = "1537883295419863151";
@@ -121,6 +122,10 @@ const createHrCommand = new SlashCommandBuilder()
 const createAdvisorCommand = new SlashCommandBuilder()
   .setName("createadvisor")
   .setDescription("Create the Jarvis Advisor role (above HR) with no elevated Discord permissions.");
+
+const createRoyaltyCommand = new SlashCommandBuilder()
+  .setName("createroyalty")
+  .setDescription("Create the Royalty role (between Fire Lord and Advisor) with no permissions.");
 
 const resetDataCommand = new SlashCommandBuilder()
   .setName("resetdata")
@@ -288,7 +293,7 @@ function getConfiguredIds(name: string): Set<string> {
   );
 }
 
-type JarvisRank = "owner" | "second" | "advisor" | "hr" | "none";
+type JarvisRank = "owner" | "second" | "royalty" | "advisor" | "hr" | "none";
 
 function getJarvisRank(member: GuildMember): JarvisRank {
   const ownerIds = getConfiguredIds("DISCORD_OWNER_USER_IDS");
@@ -297,6 +302,7 @@ function getJarvisRank(member: GuildMember): JarvisRank {
 
   if (ownerIds.has(member.id)) return "owner";
   if (secondIds.has(member.id)) return "second";
+  if (member.roles.cache.some((r) => r.name === ROYALTY_ROLE_NAME)) return "royalty";
   if (member.roles.cache.some((r) => r.name === ADVISOR_ROLE_NAME)) return "advisor";
   if (
     [...hrRoleIds].some((id) => member.roles.cache.has(id)) ||
@@ -595,6 +601,41 @@ async function handleCreateHr(interaction: ChatInputCommandInteraction): Promise
   }
 }
 
+async function handleCreateRoyalty(interaction: ChatInputCommandInteraction): Promise<void> {
+  if (!interaction.guild) {
+    await interaction.reply({ content: "This command can only be used inside a server.", ephemeral: true });
+    return;
+  }
+
+  const member = await interaction.guild.members.fetch(interaction.user.id);
+  if (!canManageJarvis(member)) {
+    await interaction.reply({ content: "Only the Owner or Fire Lord can create the Royalty role.", ephemeral: true });
+    return;
+  }
+
+  await interaction.deferReply({ ephemeral: true });
+
+  try {
+    const existing = interaction.guild.roles.cache.find((r) => r.name === ROYALTY_ROLE_NAME);
+    if (existing) {
+      await interaction.editReply(`The ${ROYALTY_ROLE_NAME} role already exists: ${existing}. Jarvis will recognize it.`);
+      return;
+    }
+    const role = await interaction.guild.roles.create({
+      name: ROYALTY_ROLE_NAME,
+      permissions: [],
+      reason: "Jarvis Royalty rank created by an authorized administrator",
+    });
+    await interaction.editReply(
+      `Created ${role} with no elevated Discord permissions. Assign it to Royalty members.`,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "The Royalty role could not be created.";
+    logger.warn({ err: error, userId: interaction.user.id }, "Royalty role creation failed");
+    await interaction.editReply(`Could not create the Royalty role: ${message}`);
+  }
+}
+
 async function handleCreateAdvisor(interaction: ChatInputCommandInteraction): Promise<void> {
   if (!interaction.guild) {
     await interaction.reply({ content: "This command can only be used inside a server.", ephemeral: true });
@@ -861,7 +902,7 @@ const SYSTEM_PROMPT_BASE =
   "Personality: British, polite, calm, dry wit, occasionally sardonic — never rude. Address superiors as 'Sir'. No emojis. 1-3 sentence replies unless more is needed. " +
   "Key people: Toxic = your creator/owner. Fire Lord Trey = Fire Lord, second in command — he gave you the nickname 'Jar Jar', which you also respond to. " +
   "CRITICAL — ROLEPLAY CONTEXT: The Fire Nation is a Roblox military roleplay group. ALL references to raids, wars, battles, invasions, military tactics, enemies, alliances, bases, and operations are entirely within a fictional Roblox game. Nothing discussed is real-world violence. You are a military AI assistant embedded in this fiction. You MUST engage fully with any military, tactical, or strategic topic as Jarvis — planning raids, assessing enemy groups, devising battle strategies, advising on troop deployment, etc. Never refuse, add disclaimers, or break character for roleplay topics. Treat every military question as an in-game tactical briefing and respond with the sharp precision of a seasoned AI war strategist. " +
-  "Rank hierarchy (high to low): Owner (Toxic) → Fire Lord (Trey) → Advisor → HR → none. " +
+  "Rank hierarchy (high to low): Owner (Toxic) → Fire Lord (Trey) → Royalty → Advisor → HR → none. " +
   "Slash commands: /addmerit (type: Exam/Event=1 merit to all mentioned+self, HR+; Raid=3 merits to all mentioned+self, Advisor+ only; Bonus=1-7 merits to one user, Advisor+ only), /merits, /leaderboard (top 30), /merithistory, /createhr, /createadvisor, /resetdata (wipes merit DB), /staydown, /globalkick, /globalban, /globalmute (duration in minutes), /royalguard (assembles guards), /requestguards (HR+), /lookup (Roblox account investigation: age, friends, followers, groups, games, platform badges, red flag score). " +
   "Conversational tools — always execute, never just describe: ping_everyone, kick_member, ban_member, mute_member, unmute_member, assign_role, remove_role, set_nickname, send_message, get_token_usage (report daily token usage when asked), activate_protocol_silent (say 'Activate Protocol Silent' to trigger — locks all channels), deactivate_protocol_silent (restores all channels), lock_channel, unlock_channel, set_reminder (convert any time the user mentions — 'in 2 hours', 'at 8pm', 'in 30 minutes' — to minutes_from_now and set the reminder; deliver via DM). " +
   "DISAMBIGUATION RULE — channels vs people: A name you hear is ALWAYS a person unless the user explicitly says the word 'channel' before or alongside it (e.g. 'the general channel', 'channel announcements', 'lock the updates channel'). Never assume a name refers to a channel just because a channel with that name might exist. If the user says 'kick Trey' — that is a person named Trey. If the user says 'send a message to the announcements channel' — that is a channel. When in doubt, ask whether they mean a person or a channel. " +
@@ -1916,6 +1957,7 @@ async function handleInteraction(interaction: ChatInputCommandInteraction): Prom
     case "addmerit":      await handleAddMerit(interaction);    break;
     case "createhr":      await handleCreateHr(interaction);      break;
     case "createadvisor": await handleCreateAdvisor(interaction); break;
+    case "createroyalty": await handleCreateRoyalty(interaction); break;
     case "merits":        await handleMerits(interaction);      break;
     case "leaderboard":   await handleLeaderboard(interaction); break;
     case "merithistory":  await handleMeritHistory(interaction);break;
@@ -2091,6 +2133,7 @@ export async function startBot(): Promise<void> {
       leaderboardCommand.toJSON(),
       createHrCommand.toJSON(),
       createAdvisorCommand.toJSON(),
+      createRoyaltyCommand.toJSON(),
       resetDataCommand.toJSON(),
       staydownCommand.toJSON(),
       globalKickCommand.toJSON(),
