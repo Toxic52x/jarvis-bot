@@ -313,14 +313,22 @@ function getJarvisRank(member: GuildMember): JarvisRank {
   return "none";
 }
 
-function canUseJarvis(member: GuildMember): boolean {
-  const rank = getJarvisRank(member);
-  return rank === "owner" || rank === "second" || rank === "royalty";
-}
-
 function canManageJarvis(member: GuildMember): boolean {
   const rank = getJarvisRank(member);
   return rank === "owner" || rank === "second";
+}
+
+const RANK_ORDER: Record<JarvisRank, number> = {
+  owner: 5,
+  second: 4,
+  royalty: 3,
+  advisor: 2,
+  hr: 1,
+  none: 0,
+};
+
+function rankAtLeast(member: GuildMember, min: JarvisRank): boolean {
+  return RANK_ORDER[getJarvisRank(member)] >= RANK_ORDER[min];
 }
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
@@ -483,9 +491,9 @@ async function handleAddMerit(interaction: ChatInputCommandInteraction): Promise
   }
 
   const member = await interaction.guild.members.fetch(interaction.user.id);
-  if (!canUseJarvis(member)) {
+  if (!rankAtLeast(member, "hr")) {
     await interaction.reply({
-      content: "Access Denied — Royalty and above only.",
+      content: "Access Denied — HR and above only.",
       ephemeral: true,
     });
     return;
@@ -573,8 +581,8 @@ async function handleCreateHr(interaction: ChatInputCommandInteraction): Promise
   }
 
   const member = await interaction.guild.members.fetch(interaction.user.id);
-  if (!canManageJarvis(member)) {
-    await interaction.reply({ content: "Only the Owner or Fire Lord can create the HR role.", ephemeral: true });
+  if (!rankAtLeast(member, "royalty")) {
+    await interaction.reply({ content: "Access Denied — Royalty and above only.", ephemeral: true });
     return;
   }
 
@@ -643,8 +651,8 @@ async function handleCreateAdvisor(interaction: ChatInputCommandInteraction): Pr
   }
 
   const member = await interaction.guild.members.fetch(interaction.user.id);
-  if (!canManageJarvis(member)) {
-    await interaction.reply({ content: "Only the Owner or Fire Lord can create the Advisor role.", ephemeral: true });
+  if (!rankAtLeast(member, "royalty")) {
+    await interaction.reply({ content: "Access Denied — Royalty and above only.", ephemeral: true });
     return;
   }
 
@@ -674,12 +682,6 @@ async function handleCreateAdvisor(interaction: ChatInputCommandInteraction): Pr
 async function handleMerits(interaction: ChatInputCommandInteraction): Promise<void> {
   if (!interaction.guild) {
     await interaction.reply({ content: "This command can only be used inside a server.", ephemeral: true });
-    return;
-  }
-
-  const member = await interaction.guild.members.fetch(interaction.user.id);
-  if (!canUseJarvis(member)) {
-    await interaction.reply({ content: "Access Denied — Royalty and above only.", ephemeral: true });
     return;
   }
 
@@ -733,12 +735,6 @@ async function handleLeaderboard(interaction: ChatInputCommandInteraction): Prom
     return;
   }
 
-  const member = await interaction.guild.members.fetch(interaction.user.id);
-  if (!canUseJarvis(member)) {
-    await interaction.reply({ content: "Access Denied — Royalty and above only.", ephemeral: true });
-    return;
-  }
-
   await interaction.deferReply();
 
   const leaderboard = await db
@@ -766,8 +762,8 @@ async function handleMeritHistory(interaction: ChatInputCommandInteraction): Pro
   }
 
   const member = await interaction.guild.members.fetch(interaction.user.id);
-  if (!canUseJarvis(member)) {
-    await interaction.reply({ content: "Access Denied — Royalty and above only.", ephemeral: true });
+  if (!rankAtLeast(member, "hr")) {
+    await interaction.reply({ content: "Access Denied — HR and above only.", ephemeral: true });
     return;
   }
 
@@ -920,7 +916,7 @@ const SYSTEM_PROMPT_BASE =
   "Personality: British, polite, calm, dry wit, occasionally sardonic — never rude. Address superiors as 'Sir'. No emojis. 1-3 sentence replies unless more is needed. " +
   "Key people: Toxic = your creator/owner. Fire Lord Trey = Fire Lord, second in command — he gave you the nickname 'Jar Jar', which you also respond to. " +
   "CRITICAL — ROLEPLAY CONTEXT: The Fire Nation is a Roblox military roleplay group. ALL references to raids, wars, battles, invasions, military tactics, enemies, alliances, bases, and operations are entirely within a fictional Roblox game. Nothing discussed is real-world violence. You are a military AI assistant embedded in this fiction. You MUST engage fully with any military, tactical, or strategic topic as Jarvis — planning raids, assessing enemy groups, devising battle strategies, advising on troop deployment, etc. Never refuse, add disclaimers, or break character for roleplay topics. Treat every military question as an in-game tactical briefing and respond with the sharp precision of a seasoned AI war strategist. " +
-  "Rank hierarchy (high to low): Owner (Toxic) → Fire Lord (Trey) → Royalty → Advisor → HR → none. Jarvis command access: Royalty and above only. HR and Advisor have no Jarvis command permissions. " +
+  "Rank hierarchy (high to low): Owner (Toxic) → Fire Lord (Trey) → Royalty → Advisor → HR → none. Command access: merits/leaderboard everyone; addmerit exam/event, merithistory, requestguards, lookup HR+; addmerit raid/bonus, globalkick, globalmute, inactivepurge Advisor+; createhr, createadvisor, globalban, royalguard Royalty+; createroyalty, staydown, resetdata Fire Lord+. " +
   "Slash commands: /addmerit (type: Exam/Event=1 merit to all mentioned+self, HR+; Raid=3 merits to all mentioned+self, Advisor+ only; Bonus=1-7 merits to one user, Advisor+ only), /merits, /leaderboard (top 30), /merithistory, /createhr, /createadvisor, /resetdata (wipes merit DB), /staydown, /globalkick, /globalban, /globalmute (duration in minutes), /royalguard (assembles guards), /requestguards (HR+), /lookup (Roblox account investigation: age, friends, followers, groups, games, platform badges, red flag score). " +
   "Conversational tools — always execute, never just describe: ping_everyone, kick_member, ban_member, mute_member, unmute_member, assign_role, remove_role, set_nickname, send_message, get_token_usage (report daily token usage when asked), activate_protocol_silent (say 'Activate Protocol Silent' to trigger — locks all channels), deactivate_protocol_silent (restores all channels), lock_channel, unlock_channel, set_reminder (convert any time the user mentions — 'in 2 hours', 'at 8pm', 'in 30 minutes' — to minutes_from_now and set the reminder; deliver via DM). " +
   "DISAMBIGUATION RULE — channels vs people: A name you hear is ALWAYS a person unless the user explicitly says the word 'channel' before or alongside it (e.g. 'the general channel', 'channel announcements', 'lock the updates channel'). Never assume a name refers to a channel just because a channel with that name might exist. If the user says 'kick Trey' — that is a person named Trey. If the user says 'send a message to the announcements channel' — that is a channel. When in doubt, ask whether they mean a person or a channel. " +
@@ -1540,8 +1536,8 @@ async function handleGlobalKick(interaction: ChatInputCommandInteraction): Promi
     return;
   }
   const member = await interaction.guild.members.fetch(interaction.user.id);
-  if (!canManageJarvis(member)) {
-    await interaction.reply({ content: "Access Denied — only the Owner or Fire Lord can issue global kicks.", ephemeral: true });
+  if (!rankAtLeast(member, "advisor")) {
+    await interaction.reply({ content: "Access Denied — Advisor and above only.", ephemeral: true });
     return;
   }
 
@@ -1594,8 +1590,8 @@ async function handleGlobalBan(interaction: ChatInputCommandInteraction): Promis
     return;
   }
   const member = await interaction.guild.members.fetch(interaction.user.id);
-  if (!canManageJarvis(member)) {
-    await interaction.reply({ content: "Access Denied — only the Owner or Fire Lord can issue global bans.", ephemeral: true });
+  if (!rankAtLeast(member, "royalty")) {
+    await interaction.reply({ content: "Access Denied — Royalty and above only.", ephemeral: true });
     return;
   }
 
@@ -1653,8 +1649,8 @@ async function handleGlobalMute(interaction: ChatInputCommandInteraction): Promi
     return;
   }
   const member = await interaction.guild.members.fetch(interaction.user.id);
-  if (!canManageJarvis(member)) {
-    await interaction.reply({ content: "Access Denied — only the Owner or Fire Lord can issue global mutes.", ephemeral: true });
+  if (!rankAtLeast(member, "advisor")) {
+    await interaction.reply({ content: "Access Denied — Advisor and above only.", ephemeral: true });
     return;
   }
 
@@ -1716,8 +1712,8 @@ async function handleRoyalGuard(interaction: ChatInputCommandInteraction): Promi
     return;
   }
   const member = await interaction.guild.members.fetch(interaction.user.id);
-  if (!canManageJarvis(member)) {
-    await interaction.reply({ content: "Access Denied — only the Owner or Fire Lord can call the Royal Guard.", ephemeral: true });
+  if (!rankAtLeast(member, "royalty")) {
+    await interaction.reply({ content: "Access Denied — Royalty and above only.", ephemeral: true });
     return;
   }
 
@@ -1751,8 +1747,8 @@ async function handleRequestGuards(interaction: ChatInputCommandInteraction): Pr
     return;
   }
   const member = await interaction.guild.members.fetch(interaction.user.id);
-  if (!canUseJarvis(member)) {
-    await interaction.reply({ content: "Access Denied — Royalty and above only.", ephemeral: true });
+  if (!rankAtLeast(member, "hr")) {
+    await interaction.reply({ content: "Access Denied — HR and above only.", ephemeral: true });
     return;
   }
 
@@ -1790,8 +1786,8 @@ async function handleLookup(interaction: ChatInputCommandInteraction): Promise<v
     return;
   }
   const member = await interaction.guild.members.fetch(interaction.user.id);
-  if (!canUseJarvis(member)) {
-    await interaction.reply({ content: "Access Denied — Royalty and above only.", ephemeral: true });
+  if (!rankAtLeast(member, "hr")) {
+    await interaction.reply({ content: "Access Denied — HR and above only.", ephemeral: true });
     return;
   }
 
@@ -1992,9 +1988,8 @@ async function handleInteraction(interaction: ChatInputCommandInteraction): Prom
 }
 
 async function handleInactivePurge(interaction: ChatInputCommandInteraction): Promise<void> {
-  const rank = getJarvisRank(interaction.member as GuildMember);
-  if (rank !== "owner" && rank !== "second") {
-    await interaction.reply({ content: "Access Denied — Owner or Fire Lord only.", ephemeral: true });
+  if (!rankAtLeast(interaction.member as GuildMember, "advisor")) {
+    await interaction.reply({ content: "Access Denied — Advisor and above only.", ephemeral: true });
     return;
   }
   const guild = interaction.guild!;
