@@ -1438,11 +1438,17 @@ async function handleMessageCreate(message: Message): Promise<void> {
       history.pop();
       const isRateLimit = typeof error === "object" && error !== null && "status" in error && (error as { status: number }).status === 429;
       if (isRateLimit) {
-        await message.reply("My daily token quota has been exhausted, Sir. I will notify you the moment it resets.");
+        const errMsg = (error as { message?: string }).message ?? "";
+        const retryMs = parseRetryAfterMs(errMsg);
+        const totalMins = Math.ceil(retryMs / 60_000);
+        const hours = Math.floor(totalMins / 60);
+        const mins = totalMins % 60;
+        const etaStr = hours > 0
+          ? `approximately ${hours} hour${hours === 1 ? "" : "s"}${mins > 0 ? ` ${mins} minute${mins === 1 ? "" : "s"}` : ""}`
+          : `approximately ${mins} minute${mins === 1 ? "" : "s"}`;
+        await message.reply(`My daily token quota has been exhausted, Sir. It will reset in ${etaStr}. I will notify you the moment it does.`);
         if (!tokenResetScheduled) {
           tokenResetScheduled = true;
-          const errMsg = (error as { message?: string }).message ?? "";
-          const retryMs = parseRetryAfterMs(errMsg);
           logger.info({ retryMs }, "Token quota exhausted — reset notification scheduled");
           setTimeout(() => void notifyTokenReset(), retryMs);
         }
