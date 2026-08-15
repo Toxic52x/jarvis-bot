@@ -193,8 +193,7 @@ let avatarIndex = 0;
 
 // Offline/online avatar paths
 const OFFLINE_AVATAR_PATH = resolve(process.cwd(), "src/assets/avatar-offline.png");
-// Set this to a URL or leave empty to skip restoring on startup
-const ONLINE_AVATAR_URL = "";
+const ONLINE_AVATAR_PATH  = resolve(process.cwd(), "src/assets/avatar-online.gif");
 
 // Module-level client reference for shutdown handler
 let botClient: Client | null = null;
@@ -1905,10 +1904,8 @@ export async function startBot(): Promise<void> {
       }, 4 * 60 * 60 * 1000);
     }
 
-    // Set online avatar on startup if configured
-    if (ONLINE_AVATAR_URL) {
-      try { await ready.user.setAvatar(ONLINE_AVATAR_URL); } catch { /* skip */ }
-    }
+    // Restore online avatar on startup
+    try { await ready.user.setAvatar(readFileSync(ONLINE_AVATAR_PATH)); } catch { /* skip */ }
 
     logger.info({ botUser: ready.user.tag }, "Jarvis online");
   });

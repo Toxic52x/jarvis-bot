@@ -1,0 +1,9 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "Yl405U5CM2IrfYIsdmlzj"
+uri = "file://artifacts/api-server/src/assets/avatar-online-animated.gif"
+type = "image"
+title = "Jarvis Online Avatar (Animated)"
+description = "Pulsing red glow — set as Jarvis's live Discord avatar"
