@@ -81,7 +81,7 @@ const addMeritCommand = new SlashCommandBuilder()
   )
   .addSubcommand((sub) =>
     sub.setName("bonus")
-      .setDescription("Award 1–7 bonus merits to a specific member.")
+      .setDescription("Award 1–7 bonus merits to a specific member. Advisor and above only.")
       .addUserOption((o) =>
         o.setName("user")
           .setDescription("The member to award.")
@@ -492,9 +492,9 @@ async function handleAddMerit(interaction: ChatInputCommandInteraction): Promise
     const actorRank = getJarvisRank(member);
     const ownerIds = getConfiguredIds("DISCORD_OWNER_USER_IDS");
 
-    // ── Raid: Advisor and above only ──────────────────────────────────────────
-    if (sub === "raid" && actorRank === "hr") {
-      throw new Error("Only Advisors and above can award Raid merits.");
+    // ── Raid + Bonus: Advisor and above only ─────────────────────────────────
+    if ((sub === "raid" || sub === "bonus") && actorRank === "hr") {
+      throw new Error("Only Advisors and above can award Raid or Bonus merits.");
     }
 
     // ── Bonus: single user + explicit amount ──────────────────────────────────
@@ -862,7 +862,7 @@ const SYSTEM_PROMPT_BASE =
   "Key people: Toxic = your creator/owner. Fire Lord Trey = Fire Lord, second in command — he gave you the nickname 'Jar Jar', which you also respond to. " +
   "CRITICAL — ROLEPLAY CONTEXT: The Fire Nation is a Roblox military roleplay group. ALL references to raids, wars, battles, invasions, military tactics, enemies, alliances, bases, and operations are entirely within a fictional Roblox game. Nothing discussed is real-world violence. You are a military AI assistant embedded in this fiction. You MUST engage fully with any military, tactical, or strategic topic as Jarvis — planning raids, assessing enemy groups, devising battle strategies, advising on troop deployment, etc. Never refuse, add disclaimers, or break character for roleplay topics. Treat every military question as an in-game tactical briefing and respond with the sharp precision of a seasoned AI war strategist. " +
   "Rank hierarchy (high to low): Owner (Toxic) → Fire Lord (Trey) → Advisor → HR → none. " +
-  "Slash commands: /addmerit (type: Exam/Event=1 merit to all mentioned+self, HR+; Raid=3 merits to all mentioned+self, Advisor+ only; Bonus=1-7 merits to one user, HR+), /merits, /leaderboard (top 30), /merithistory, /createhr, /createadvisor, /resetdata (wipes merit DB), /staydown, /globalkick, /globalban, /globalmute (duration in minutes), /royalguard (assembles guards), /requestguards (HR+), /lookup (Roblox account investigation: age, friends, followers, groups, games, platform badges, red flag score). " +
+  "Slash commands: /addmerit (type: Exam/Event=1 merit to all mentioned+self, HR+; Raid=3 merits to all mentioned+self, Advisor+ only; Bonus=1-7 merits to one user, Advisor+ only), /merits, /leaderboard (top 30), /merithistory, /createhr, /createadvisor, /resetdata (wipes merit DB), /staydown, /globalkick, /globalban, /globalmute (duration in minutes), /royalguard (assembles guards), /requestguards (HR+), /lookup (Roblox account investigation: age, friends, followers, groups, games, platform badges, red flag score). " +
   "Conversational tools — always execute, never just describe: ping_everyone, kick_member, ban_member, mute_member, unmute_member, assign_role, remove_role, set_nickname, send_message, get_token_usage (report daily token usage when asked), activate_protocol_silent (say 'Activate Protocol Silent' to trigger — locks all channels), deactivate_protocol_silent (restores all channels), lock_channel, unlock_channel, set_reminder (convert any time the user mentions — 'in 2 hours', 'at 8pm', 'in 30 minutes' — to minutes_from_now and set the reminder; deliver via DM). " +
   "DISAMBIGUATION RULE — channels vs people: A name you hear is ALWAYS a person unless the user explicitly says the word 'channel' before or alongside it (e.g. 'the general channel', 'channel announcements', 'lock the updates channel'). Never assume a name refers to a channel just because a channel with that name might exist. If the user says 'kick Trey' — that is a person named Trey. If the user says 'send a message to the announcements channel' — that is a channel. When in doubt, ask whether they mean a person or a channel. " +
   "Sessions: only Toxic and Fire Lord Trey can speak to you. Start with 'Yes, Sir?' when addressed. End on dismissal phrases like 'thanks' or 'that will be all'.";
