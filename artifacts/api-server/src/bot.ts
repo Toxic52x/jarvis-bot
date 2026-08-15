@@ -2,11 +2,13 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  ChannelType,
   Client,
   ComponentType,
   EmbedBuilder,
   Events,
   GatewayIntentBits,
+  PermissionFlagsBits,
   REST,
   Routes,
   SlashCommandBuilder,
@@ -166,6 +168,10 @@ function trackTokens(used: number) {
   if (today !== tokenResetDate) { dailyTokensUsed = 0; tokenResetDate = today; }
   dailyTokensUsed += used;
 }
+
+// Protocol Silent state
+let protocolSilentActive = false;
+let protocolSilentGuildId: string | null = null;
 
 // Ends the session if the message loosely contains a dismissal phrase anywhere
 function isDismissal(text: string): boolean {
@@ -676,6 +682,9 @@ const SYSTEM_PROMPT =
   "Your birthday is August 13th, 2026 — the date you were first brought online. " +
   "You have the ability to perform real Discord actions using tools — use them when the user asks you to do something in the server. " +
   "You also have a get_token_usage tool — use it when asked about token usage, remaining limit, or how much of the daily AI budget is left. " +
+  "You have Protocol Silent capability: activate_protocol_silent locks every text channel in the server; deactivate_protocol_silent restores them all. " +
+  "Use lock_channel and unlock_channel to lock or unlock a specific channel by name. " +
+  "Trigger activate_protocol_silent when the user says 'Activate Protocol Silent' and deactivate_protocol_silent when they say 'Deactivate Protocol Silent'. " +
   "Keep all responses concise and elegant — aim for 1-3 sentences unless the question genuinely requires more. Do not use emojis.";
 
 // Tool definitions for Groq function calling
@@ -823,6 +832,50 @@ const DISCORD_TOOLS = [
       parameters: { type: "object", properties: {}, required: [] },
     },
   },
+  {
+    type: "function" as const,
+    function: {
+      name: "activate_protocol_silent",
+      description: "Activates Protocol Silent — locks down every text channel in the server so no one can send messages.",
+      parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "deactivate_protocol_silent",
+      description: "Deactivates Protocol Silent — restores send permissions to all text channels.",
+      parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "lock_channel",
+      description: "Locks a specific channel so members cannot send messages in it.",
+      parameters: {
+        type: "object",
+        properties: {
+          channel_name: { type: "string", description: "Name of the channel to lock." },
+        },
+        required: ["channel_name"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "unlock_channel",
+      description: "Unlocks a specific channel so members can send messages in it again.",
+      parameters: {
+        type: "object",
+        properties: {
+          channel_name: { type: "string", description: "Name of the channel to unlock." },
+        },
+        required: ["channel_name"],
+      },
+    },
+  },
 ] satisfies OpenAI.Chat.ChatCompletionTool[];
 
 // Resolve a member by username, display name, or ID
@@ -853,11 +906,65 @@ async function executeTool(
   const guild = message.guild;
   if (!guild) return "I am unable to perform server actions here, Sir.";
 
-  // Handle tools that don't need guild/reason before anything else
+  // Handle tools that don't need reason before anything else
   if (name === "get_token_usage") {
     const remaining = Math.max(0, GROQ_DAILY_LIMIT - dailyTokensUsed);
     const pct = ((dailyTokensUsed / GROQ_DAILY_LIMIT) * 100).toFixed(1);
     return `Daily token usage: ${dailyTokensUsed.toLocaleString()} used / ${GROQ_DAILY_LIMIT.toLocaleString()} limit (${pct}% consumed). Approximately ${remaining.toLocaleString()} tokens remaining.`;
+  }
+
+  if (name === "activate_protocol_silent") {
+    const everyoneRole = guild.roles.everyone;
+    const channels = guild.channels.cache.filter(
+      (c) => c.type === ChannelType.GuildText || c.type === ChannelType.GuildAnnouncement,
+    ) as Map<string, TextChannel>;
+    let count = 0;
+    for (const [, ch] of channels) {
+      try {
+        await ch.permissionOverwrites.edit(everyoneRole, { SendMessages: false });
+        count++;
+      } catch { /* skip channels bot can't edit */ }
+    }
+    protocolSilentActive = true;
+    protocolSilentGuildId = guild.id;
+    return `Protocol Silent activated, Sir. ${count} channel${count === 1 ? "" : "s"} locked.`;
+  }
+
+  if (name === "deactivate_protocol_silent") {
+    const everyoneRole = guild.roles.everyone;
+    const channels = guild.channels.cache.filter(
+      (c) => c.type === ChannelType.GuildText || c.type === ChannelType.GuildAnnouncement,
+    ) as Map<string, TextChannel>;
+    let count = 0;
+    for (const [, ch] of channels) {
+      try {
+        await ch.permissionOverwrites.edit(everyoneRole, { SendMessages: null });
+        count++;
+      } catch { /* skip */ }
+    }
+    protocolSilentActive = false;
+    protocolSilentGuildId = null;
+    return `Protocol Silent deactivated, Sir. ${count} channel${count === 1 ? "" : "s"} restored.`;
+  }
+
+  if (name === "lock_channel") {
+    const target = guild.channels.cache.find(
+      (c) => (c.type === ChannelType.GuildText || c.type === ChannelType.GuildAnnouncement) &&
+        c.name.toLowerCase() === String(args.channel_name).toLowerCase(),
+    ) as TextChannel | undefined;
+    if (!target) return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    await target.permissionOverwrites.edit(guild.roles.everyone, { SendMessages: false });
+    return `#${target.name} has been locked, Sir.`;
+  }
+
+  if (name === "unlock_channel") {
+    const target = guild.channels.cache.find(
+      (c) => (c.type === ChannelType.GuildText || c.type === ChannelType.GuildAnnouncement) &&
+        c.name.toLowerCase() === String(args.channel_name).toLowerCase(),
+    ) as TextChannel | undefined;
+    if (!target) return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    await target.permissionOverwrites.edit(guild.roles.everyone, { SendMessages: null });
+    return `#${target.name} has been unlocked, Sir.`;
   }
 
   const ownerIds = getConfiguredIds("DISCORD_OWNER_USER_IDS");
