@@ -19,10 +19,11 @@ import {
   type TextChannel,
 } from "discord.js";
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
-import { desc, eq, sql } from "drizzle-orm";
+import { resolve, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { desc, eq, lte, sql } from "drizzle-orm";
 import OpenAI from "openai";
-import { db, meritAwardsTable, memberActivityTable } from "@workspace/db";
+import { db, meritAwardsTable, memberActivityTable, remindersTable, runMigrations } from "@workspace/db";
 import { sql as drizzleSql } from "drizzle-orm";
 import { logger } from "./lib/logger";
 
@@ -202,14 +203,6 @@ let botClient: Client | null = null;
 const recentlyProcessed = new Set<string>();
 
 // In-memory reminder store
-interface Reminder {
-  userId: string;
-  message: string;
-  dueAt: Date;
-}
-const reminders: Reminder[] = [];
-
-// Ends the session if the message loosely contains a dismissal phrase anywhere
 function isDismissal(text: string): boolean {
   const t = text.toLowerCase();
   return (
@@ -1022,7 +1015,7 @@ async function executeTool(
     const reminderMsg = String(args.message ?? "").trim();
     if (!reminderMsg) return "I need something to remind you about, Sir.";
     const dueAt = new Date(Date.now() + minutes * 60_000);
-    reminders.push({ userId: message.author.id, message: reminderMsg, dueAt });
+    await db.insert(remindersTable).values({ userId: message.author.id, message: reminderMsg, dueAt });
     const timeStr = dueAt.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZone: "America/New_York" });
     const label = minutes < 60
       ? `${Math.round(minutes)} minute${Math.round(minutes) === 1 ? "" : "s"}`
@@ -1970,16 +1963,22 @@ export async function startBot(): Promise<void> {
     // Restore online avatar on startup
     try { await ready.user.setAvatar(readFileSync(ONLINE_AVATAR_PATH)); } catch { /* skip */ }
 
-    // Reminder delivery checker — runs every 30 seconds
+    // Reminder delivery checker — runs every 30 seconds, queries the DB
     setInterval(async () => {
-      const now = new Date();
-      const due = reminders.filter((r) => r.dueAt <= now);
-      for (const r of due) {
-        reminders.splice(reminders.indexOf(r), 1);
-        try {
-          const user = await ready.users.fetch(r.userId);
-          await user.send(`⏰ Reminder, Sir: **${r.message}**`);
-        } catch { /* user has DMs disabled — silently skip */ }
+      try {
+        const now = new Date();
+        const due = await db
+          .delete(remindersTable)
+          .where(lte(remindersTable.dueAt, now))
+          .returning();
+        for (const r of due) {
+          try {
+            const user = await ready.users.fetch(r.userId);
+            await user.send(`⏰ Reminder, Sir: **${r.message}**`);
+          } catch { /* user has DMs disabled — silently skip */ }
+        }
+      } catch (e) {
+        logger.warn({ err: e }, "Reminder checker failed");
       }
     }, 30_000);
 
@@ -2037,6 +2036,15 @@ export async function startBot(): Promise<void> {
 
   process.once("SIGTERM", () => void shutdown("SIGTERM"));
   process.once("SIGINT",  () => void shutdown("SIGINT"));
+
+  // Apply any pending DB migrations before connecting to Discord.
+  // import.meta.url reliably points to the *bundle* file at runtime (dist/index.mjs)
+  // and to this source file in ts-node/tsc dev mode.
+  // The build script copies lib/db/migrations → dist/db-migrations so the
+  // migrator can find them when running the production build standalone.
+  const thisDirUrl = new URL(".", import.meta.url);
+  const migrationsDir = join(fileURLToPath(thisDirUrl), "db-migrations");
+  await runMigrations(migrationsDir);
 
   await client.login(token);
 

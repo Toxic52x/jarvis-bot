@@ -19,3 +19,4 @@
 
 export * from "./meritAwards";
 export * from "./memberActivity";
+export * from "./reminders";
