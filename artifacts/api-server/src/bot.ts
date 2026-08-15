@@ -157,6 +157,16 @@ const lookupCommand = new SlashCommandBuilder()
 type ChatMessage = OpenAI.Chat.ChatCompletionMessageParam;
 const activeSessions = new Map<string, ChatMessage[]>();
 
+// Daily token usage tracker (resets when date changes)
+const GROQ_DAILY_LIMIT = 100_000;
+let dailyTokensUsed = 0;
+let tokenResetDate = new Date().toDateString();
+function trackTokens(used: number) {
+  const today = new Date().toDateString();
+  if (today !== tokenResetDate) { dailyTokensUsed = 0; tokenResetDate = today; }
+  dailyTokensUsed += used;
+}
+
 // Ends the session if the message loosely contains a dismissal phrase anywhere
 function isDismissal(text: string): boolean {
   const t = text.toLowerCase();
@@ -665,6 +675,7 @@ const SYSTEM_PROMPT =
   "When asked who Aurie is, respond with something along the lines of: '\"Future Fire Princess.\"' " +
   "Your birthday is August 13th, 2026 — the date you were first brought online. " +
   "You have the ability to perform real Discord actions using tools — use them when the user asks you to do something in the server. " +
+  "You also have a get_token_usage tool — use it when asked about token usage, remaining limit, or how much of the daily AI budget is left. " +
   "Keep all responses concise and elegant — aim for 1-3 sentences unless the question genuinely requires more. Do not use emojis.";
 
 // Tool definitions for Groq function calling
@@ -804,6 +815,14 @@ const DISCORD_TOOLS = [
       },
     },
   },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_token_usage",
+      description: "Returns how many Groq API tokens have been used today and how many remain out of the daily limit.",
+      parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
 ] satisfies OpenAI.Chat.ChatCompletionTool[];
 
 // Resolve a member by username, display name, or ID
@@ -930,6 +949,12 @@ async function executeTool(
       return `Message sent to #${ch.name}, Sir.`;
     }
 
+    case "get_token_usage": {
+      const remaining = Math.max(0, GROQ_DAILY_LIMIT - dailyTokensUsed);
+      const pct = ((dailyTokensUsed / GROQ_DAILY_LIMIT) * 100).toFixed(1);
+      return `Daily token usage: ${dailyTokensUsed.toLocaleString()} used / ${GROQ_DAILY_LIMIT.toLocaleString()} limit (${pct}% consumed). Approximately ${remaining.toLocaleString()} tokens remaining.`;
+    }
+
     default:
       return "I do not recognise that directive, Sir.";
   }
@@ -964,6 +989,7 @@ async function handleMessageCreate(message: Message): Promise<void> {
         max_tokens: 300,
       });
 
+      if (completion.usage?.total_tokens) trackTokens(completion.usage.total_tokens);
       const choice = completion.choices[0];
 
       // ── Tool call — check tool_calls directly, not finish_reason (Groq may vary) ──
