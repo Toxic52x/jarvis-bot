@@ -384,6 +384,7 @@ async function writeOwnerAuditLog(
   members: GuildMember[],
   amount: number,
   proofUrl: string,
+  actorRank: string,
 ): Promise<void> {
   const logChannelId = process.env.DISCORD_OWNER_LOG_CHANNEL_ID?.trim();
   if (!logChannelId)
@@ -413,6 +414,14 @@ async function writeOwnerAuditLog(
     .setTimestamp();
 
   await channel.send({ embeds: [embed] });
+
+  // Ping @everyone when HR awards more than 3 merits — flags it for owner review
+  if (actorRank === "hr" && amount > 3) {
+    await channel.send({
+      content: `@everyone — HR member **${interaction.user.tag}** has awarded **+${amount}** merits. Owner review requested.`,
+      allowedMentions: { parse: ["everyone"] },
+    });
+  }
 }
 
 // ─── Command handlers ─────────────────────────────────────────────────────────
@@ -455,7 +464,7 @@ async function handleAddMerit(interaction: ChatInputCommandInteraction): Promise
     }
 
     await awardMerits(interaction, members, amount, proofUrl);
-    await writeOwnerAuditLog(interaction, members, amount, proofUrl);
+    await writeOwnerAuditLog(interaction, members, amount, proofUrl, actorRank);
 
     await interaction.editReply(
       `Recorded **+${amount}** merit${amount === 1 ? "" : "s"} for ${members.length} member${members.length === 1 ? "" : "s"} — proof logged for owners.`,
