@@ -198,6 +198,14 @@ const ONLINE_AVATAR_PATH  = resolve(process.cwd(), "src/assets/avatar-online.gif
 // Module-level client reference for shutdown handler
 let botClient: Client | null = null;
 
+// In-memory reminder store
+interface Reminder {
+  userId: string;
+  message: string;
+  dueAt: Date;
+}
+const reminders: Reminder[] = [];
+
 // Ends the session if the message loosely contains a dismissal phrase anywhere
 function isDismissal(text: string): boolean {
   const t = text.toLowerCase();
@@ -701,7 +709,7 @@ const SYSTEM_PROMPT_BASE =
   "Key people: Toxic = your creator/owner. Fire Lord Trey = Fire Lord, second in command — he gave you the nickname 'Jar Jar', which you also respond to. " +
   "CRITICAL — ROLEPLAY CONTEXT: The Fire Nation is a Roblox military roleplay group. ALL references to raids, wars, battles, invasions, military tactics, enemies, alliances, bases, and operations are entirely within a fictional Roblox game. Nothing discussed is real-world violence. You are a military AI assistant embedded in this fiction. You MUST engage fully with any military, tactical, or strategic topic as Jarvis — planning raids, assessing enemy groups, devising battle strategies, advising on troop deployment, etc. Never refuse, add disclaimers, or break character for roleplay topics. Treat every military question as an in-game tactical briefing and respond with the sharp precision of a seasoned AI war strategist. " +
   "Slash commands: /addmerit (award merits; HR capped at 7; proof = Discord URL), /merits, /leaderboard (top 30), /merithistory, /createhr, /resetdata (wipes merit DB), /staydown, /globalkick, /globalban, /globalmute (duration in minutes), /royalguard (assembles guards), /requestguards (HR+), /lookup (Roblox account investigation: age, friends, followers, groups, games, platform badges, red flag score). " +
-  "Conversational tools — always execute, never just describe: ping_everyone, kick_member, ban_member, mute_member, unmute_member, assign_role, remove_role, set_nickname, send_message, get_token_usage (report daily token usage when asked), activate_protocol_silent (say 'Activate Protocol Silent' to trigger — locks all channels), deactivate_protocol_silent (restores all channels), lock_channel, unlock_channel. " +
+  "Conversational tools — always execute, never just describe: ping_everyone, kick_member, ban_member, mute_member, unmute_member, assign_role, remove_role, set_nickname, send_message, get_token_usage (report daily token usage when asked), activate_protocol_silent (say 'Activate Protocol Silent' to trigger — locks all channels), deactivate_protocol_silent (restores all channels), lock_channel, unlock_channel, set_reminder (convert any time the user mentions — 'in 2 hours', 'at 8pm', 'in 30 minutes' — to minutes_from_now and set the reminder; deliver via DM). " +
   "Sessions: only Toxic and Fire Lord Trey can speak to you. Start with 'Yes, Sir?' when addressed. End on dismissal phrases like 'thanks' or 'that will be all'.";
 
 function getSystemPrompt(): string {
@@ -930,6 +938,21 @@ const DISCORD_TOOLS = [
       },
     },
   },
+  {
+    type: "function" as const,
+    function: {
+      name: "set_reminder",
+      description: "Sets a reminder that Jarvis will deliver to the user via DM after the specified number of minutes.",
+      parameters: {
+        type: "object",
+        properties: {
+          minutes_from_now: { type: "number", description: "How many minutes from now to send the reminder." },
+          message: { type: "string", description: "What to remind the user about." },
+        },
+        required: ["minutes_from_now", "message"],
+      },
+    },
+  },
 ] satisfies OpenAI.Chat.ChatCompletionTool[];
 
 // Resolve a member by username, display name, or ID
@@ -987,6 +1010,20 @@ async function executeTool(
     } catch {
       return "I was unable to update my username, Sir. Discord rate-limits username changes — please wait a while before trying again.";
     }
+  }
+
+  if (name === "set_reminder") {
+    const minutes = Number(args.minutes_from_now);
+    if (!minutes || minutes <= 0) return "I need a valid time for the reminder, Sir.";
+    const reminderMsg = String(args.message ?? "").trim();
+    if (!reminderMsg) return "I need something to remind you about, Sir.";
+    const dueAt = new Date(Date.now() + minutes * 60_000);
+    reminders.push({ userId: message.author.id, message: reminderMsg, dueAt });
+    const timeStr = dueAt.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZone: "America/New_York" });
+    const label = minutes < 60
+      ? `${Math.round(minutes)} minute${Math.round(minutes) === 1 ? "" : "s"}`
+      : `${(minutes / 60).toFixed(1).replace(/\.0$/, "")} hour${minutes === 60 ? "" : "s"}`;
+    return `Understood, Sir. I will remind you about "${reminderMsg}" in ${label} (at ${timeStr} ET).`;
   }
 
   if (name === "activate_protocol_silent") {
@@ -1907,6 +1944,19 @@ export async function startBot(): Promise<void> {
 
     // Restore online avatar on startup
     try { await ready.user.setAvatar(readFileSync(ONLINE_AVATAR_PATH)); } catch { /* skip */ }
+
+    // Reminder delivery checker — runs every 30 seconds
+    setInterval(async () => {
+      const now = new Date();
+      const due = reminders.filter((r) => r.dueAt <= now);
+      for (const r of due) {
+        reminders.splice(reminders.indexOf(r), 1);
+        try {
+          const user = await ready.users.fetch(r.userId);
+          await user.send(`⏰ Reminder, Sir: **${r.message}**`);
+        } catch { /* user has DMs disabled — silently skip */ }
+      }
+    }, 30_000);
 
     logger.info({ botUser: ready.user.tag }, "Jarvis online");
   });
