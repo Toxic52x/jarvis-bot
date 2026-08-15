@@ -853,6 +853,13 @@ async function executeTool(
   const guild = message.guild;
   if (!guild) return "I am unable to perform server actions here, Sir.";
 
+  // Handle tools that don't need guild/reason before anything else
+  if (name === "get_token_usage") {
+    const remaining = Math.max(0, GROQ_DAILY_LIMIT - dailyTokensUsed);
+    const pct = ((dailyTokensUsed / GROQ_DAILY_LIMIT) * 100).toFixed(1);
+    return `Daily token usage: ${dailyTokensUsed.toLocaleString()} used / ${GROQ_DAILY_LIMIT.toLocaleString()} limit (${pct}% consumed). Approximately ${remaining.toLocaleString()} tokens remaining.`;
+  }
+
   const ownerIds = getConfiguredIds("DISCORD_OWNER_USER_IDS");
   const reason = `[Jarvis — requested by ${message.author.tag}]${args.reason ? ` ${args.reason}` : ""}`;
 
@@ -949,12 +956,6 @@ async function executeTool(
       return `Message sent to #${ch.name}, Sir.`;
     }
 
-    case "get_token_usage": {
-      const remaining = Math.max(0, GROQ_DAILY_LIMIT - dailyTokensUsed);
-      const pct = ((dailyTokensUsed / GROQ_DAILY_LIMIT) * 100).toFixed(1);
-      return `Daily token usage: ${dailyTokensUsed.toLocaleString()} used / ${GROQ_DAILY_LIMIT.toLocaleString()} limit (${pct}% consumed). Approximately ${remaining.toLocaleString()} tokens remaining.`;
-    }
-
     default:
       return "I do not recognise that directive, Sir.";
   }
@@ -996,7 +997,10 @@ async function handleMessageCreate(message: Message): Promise<void> {
       const toolCall = choice?.message?.tool_calls?.find((tc) => tc.type === "function");
       if (toolCall && toolCall.type === "function") {
         let args: Record<string, unknown> = {};
-        try { args = JSON.parse(toolCall.function.arguments) as Record<string, unknown>; } catch { /* ignore */ }
+        try {
+          const parsed = JSON.parse(toolCall.function.arguments);
+          if (parsed && typeof parsed === "object") args = parsed as Record<string, unknown>;
+        } catch { /* ignore */ }
 
         let result: string;
         try {
