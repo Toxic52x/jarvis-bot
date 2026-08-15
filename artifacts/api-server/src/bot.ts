@@ -1278,7 +1278,12 @@ async function handleMessageCreate(message: Message): Promise<void> {
     } catch (error) {
       logger.error({ err: error }, "Groq API request failed");
       history.pop();
-      await message.reply("I encountered an error communicating with my neural core, Sir.");
+      const isRateLimit = typeof error === "object" && error !== null && "status" in error && (error as { status: number }).status === 429;
+      if (isRateLimit) {
+        await message.reply("My daily token quota has been exhausted, Sir. I will be back online within the hour. If this keeps occurring, upgrading at console.groq.com/settings/billing will resolve it.");
+      } else {
+        await message.reply("I encountered an error communicating with my neural core, Sir.");
+      }
     }
     return;
   }
