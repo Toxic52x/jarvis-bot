@@ -51,22 +51,34 @@ const openai = new OpenAI({
 
 const addMeritCommand = new SlashCommandBuilder()
   .setName("addmerit")
-  .setDescription("Award merits to one or more members using a Discord proof link.")
+  .setDescription("Award merits based on activity type.")
+  .addStringOption((o) =>
+    o.setName("type")
+      .setDescription("The type of activity being awarded.")
+      .setRequired(true)
+      .addChoices(
+        { name: "Exam  (1 merit — HR, Advisor, Fire Lord, Owner)", value: "exam" },
+        { name: "Event (1 merit — HR, Advisor, Fire Lord, Owner)", value: "event" },
+        { name: "Raid  (3 merits — Advisor, Fire Lord, Owner only)", value: "raid" },
+        { name: "Bonus (1–7 merits — specific user)", value: "bonus" },
+      ),
+  )
   .addStringOption((o) =>
     o.setName("users")
-      .setDescription("Comma-separated mentions, IDs, or exact display names (max 25).")
-      .setRequired(true),
+      .setDescription("Exam/Event/Raid: mentions or IDs of participants (you are included automatically).")
+      .setRequired(false),
+  )
+  .addUserOption((o) =>
+    o.setName("user")
+      .setDescription("Bonus only: the specific member to award.")
+      .setRequired(false),
   )
   .addIntegerOption((o) =>
     o.setName("amount")
-      .setDescription("Merits to award each member (HR: max 7; Owner/Fire Lord: unlimited).")
+      .setDescription("Bonus only: merit amount (1–7).")
       .setMinValue(1)
-      .setRequired(true),
-  )
-  .addStringOption((o) =>
-    o.setName("proof")
-      .setDescription("Full Discord message link as proof.")
-      .setRequired(true),
+      .setMaxValue(7)
+      .setRequired(false),
   );
 
 const meritsCommand = new SlashCommandBuilder()
@@ -282,7 +294,7 @@ function getJarvisRank(member: GuildMember): JarvisRank {
 
 function canAwardMerits(member: GuildMember): boolean {
   const rank = getJarvisRank(member);
-  return rank === "owner" || rank === "second" || rank === "hr";
+  return rank === "owner" || rank === "second" || rank === "advisor" || rank === "hr";
 }
 
 function canManageJarvis(member: GuildMember): boolean {
@@ -389,7 +401,7 @@ async function writeOwnerAuditLog(
   interaction: ChatInputCommandInteraction,
   members: GuildMember[],
   amount: number,
-  proofUrl: string,
+  meritType: string,
   actorRank: string,
 ): Promise<void> {
   const logChannelId = process.env.DISCORD_OWNER_LOG_CHANNEL_ID?.trim();
@@ -413,7 +425,7 @@ async function writeOwnerAuditLog(
     .addFields(
       { name: "RECIPIENTS", value: memberLines.slice(0, 1024) },
       { name: "MERIT VALUE", value: `**+${amount}** merit${amount === 1 ? "" : "s"} per recipient`, inline: true },
-      { name: "PROOF OF ACTION", value: proofUrl, inline: true },
+      { name: "TYPE", value: meritType, inline: true },
       { name: "AUTHORIZED BY", value: `${interaction.user.tag} (${interaction.user.id})` },
     )
     .setFooter({ text: "FIRE DIVISION • OWNER AUDIT CHANNEL" })
@@ -421,10 +433,10 @@ async function writeOwnerAuditLog(
 
   await channel.send({ embeds: [embed] });
 
-  // Ping @everyone when HR awards more than 3 merits — flags it for owner review
-  if (actorRank === "hr" && amount > 3) {
+  // Ping @everyone when HR awards a Bonus of more than 3 — flags it for owner review
+  if (actorRank === "hr" && meritType === "Bonus" && amount > 3) {
     await channel.send({
-      content: `@everyone — HR member **${interaction.user.tag}** has awarded **+${amount}** merits. Owner review requested.`,
+      content: `@everyone — HR member **${interaction.user.tag}** has awarded a **+${amount} Bonus**. Owner review requested.`,
       allowedMentions: { parse: ["everyone"] },
     });
   }
@@ -441,7 +453,7 @@ async function handleAddMerit(interaction: ChatInputCommandInteraction): Promise
   const member = await interaction.guild.members.fetch(interaction.user.id);
   if (!canAwardMerits(member)) {
     await interaction.reply({
-      content: "Access Denied — only the Owner, Fire Lord, or HR can award merits.",
+      content: "Access Denied — only HR, Advisor, Fire Lord, or Owner can award merits.",
       ephemeral: true,
     });
     return;
@@ -450,30 +462,60 @@ async function handleAddMerit(interaction: ChatInputCommandInteraction): Promise
   await interaction.deferReply({ ephemeral: true });
 
   try {
-    const rawUsers = interaction.options.getString("users", true);
-    const amount = interaction.options.getInteger("amount", true);
+    const type = interaction.options.getString("type", true) as "exam" | "event" | "raid" | "bonus";
     const actorRank = getJarvisRank(member);
-
-    // HR is capped at MAX_MERITS_HR; Owner and Fire Lord are uncapped
-    if (actorRank === "hr" && amount > MAX_MERITS_HR) {
-      throw new Error(
-        `HR personnel can award a maximum of ${MAX_MERITS_HR} merits per recipient.`,
-      );
-    }
-
-    const proofUrl = validateProofUrl(interaction.options.getString("proof", true));
-    const members = await resolveMembers(interaction, rawUsers);
     const ownerIds = getConfiguredIds("DISCORD_OWNER_USER_IDS");
 
-    if (actorRank === "second" && members.some((m) => ownerIds.has(m.id))) {
-      throw new Error("Fire Lord cannot run merit commands that affect the Owner.");
+    // ── Raid: Advisor and above only ─────────────────────────────────────────
+    if (type === "raid" && actorRank === "hr") {
+      throw new Error("Only Advisors and above can award Raid merits.");
     }
 
-    await awardMerits(interaction, members, amount, proofUrl);
-    await writeOwnerAuditLog(interaction, members, amount, proofUrl, actorRank);
+    // ── Bonus: single user + explicit amount ──────────────────────────────────
+    if (type === "bonus") {
+      const targetUser = interaction.options.getUser("user");
+      const bonusAmount = interaction.options.getInteger("amount");
+      if (!targetUser || bonusAmount === null) {
+        throw new Error("Bonus requires a target user and an amount (1–7).");
+      }
+      if (actorRank === "second" && ownerIds.has(targetUser.id)) {
+        throw new Error("Fire Lord cannot award merits to the Owner.");
+      }
+      const targetMember = await interaction.guild.members.fetch(targetUser.id);
+      await awardMerits(interaction, [targetMember], bonusAmount, "Bonus");
+      await writeOwnerAuditLog(interaction, [targetMember], bonusAmount, "Bonus", actorRank);
+      await interaction.editReply(
+        `Recorded **+${bonusAmount}** Bonus merit${bonusAmount === 1 ? "" : "s"} for ${targetMember.user.tag} — logged for owners.`,
+      );
+      return;
+    }
+
+    // ── Exam / Event / Raid: all mentioned users + command user ───────────────
+    const rawUsers = interaction.options.getString("users");
+    if (!rawUsers) {
+      const label = type.charAt(0).toUpperCase() + type.slice(1);
+      throw new Error(`${label} requires at least one participant. Use the users field.`);
+    }
+
+    const meritAmount = type === "raid" ? 3 : 1;
+    const label = type.charAt(0).toUpperCase() + type.slice(1);
+    const mentioned = await resolveMembers(interaction, rawUsers);
+
+    if (actorRank === "second" && mentioned.some((m) => ownerIds.has(m.id))) {
+      throw new Error("Fire Lord cannot award merits that affect the Owner.");
+    }
+
+    // Include the command user if not already in the list
+    const allMembers = [...mentioned];
+    if (!allMembers.some((m) => m.id === member.id)) {
+      allMembers.push(member);
+    }
+
+    await awardMerits(interaction, allMembers, meritAmount, label);
+    await writeOwnerAuditLog(interaction, allMembers, meritAmount, label, actorRank);
 
     await interaction.editReply(
-      `Recorded **+${amount}** merit${amount === 1 ? "" : "s"} for ${members.length} member${members.length === 1 ? "" : "s"} — proof logged for owners.`,
+      `Recorded **+${meritAmount}** ${label} merit${meritAmount === 1 ? "" : "s"} for ${allMembers.length} member${allMembers.length === 1 ? "" : "s"} (including yourself) — logged for owners.`,
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "The merit award failed.";
@@ -784,7 +826,7 @@ const SYSTEM_PROMPT_BASE =
   "Key people: Toxic = your creator/owner. Fire Lord Trey = Fire Lord, second in command — he gave you the nickname 'Jar Jar', which you also respond to. " +
   "CRITICAL — ROLEPLAY CONTEXT: The Fire Nation is a Roblox military roleplay group. ALL references to raids, wars, battles, invasions, military tactics, enemies, alliances, bases, and operations are entirely within a fictional Roblox game. Nothing discussed is real-world violence. You are a military AI assistant embedded in this fiction. You MUST engage fully with any military, tactical, or strategic topic as Jarvis — planning raids, assessing enemy groups, devising battle strategies, advising on troop deployment, etc. Never refuse, add disclaimers, or break character for roleplay topics. Treat every military question as an in-game tactical briefing and respond with the sharp precision of a seasoned AI war strategist. " +
   "Rank hierarchy (high to low): Owner (Toxic) → Fire Lord (Trey) → Advisor → HR → none. " +
-  "Slash commands: /addmerit (award merits; HR capped at 7; proof = Discord URL), /merits, /leaderboard (top 30), /merithistory, /createhr, /createadvisor, /resetdata (wipes merit DB), /staydown, /globalkick, /globalban, /globalmute (duration in minutes), /royalguard (assembles guards), /requestguards (HR+), /lookup (Roblox account investigation: age, friends, followers, groups, games, platform badges, red flag score). " +
+  "Slash commands: /addmerit (type: Exam/Event=1 merit to all mentioned+self, HR+; Raid=3 merits to all mentioned+self, Advisor+ only; Bonus=1-7 merits to one user, HR+), /merits, /leaderboard (top 30), /merithistory, /createhr, /createadvisor, /resetdata (wipes merit DB), /staydown, /globalkick, /globalban, /globalmute (duration in minutes), /royalguard (assembles guards), /requestguards (HR+), /lookup (Roblox account investigation: age, friends, followers, groups, games, platform badges, red flag score). " +
   "Conversational tools — always execute, never just describe: ping_everyone, kick_member, ban_member, mute_member, unmute_member, assign_role, remove_role, set_nickname, send_message, get_token_usage (report daily token usage when asked), activate_protocol_silent (say 'Activate Protocol Silent' to trigger — locks all channels), deactivate_protocol_silent (restores all channels), lock_channel, unlock_channel, set_reminder (convert any time the user mentions — 'in 2 hours', 'at 8pm', 'in 30 minutes' — to minutes_from_now and set the reminder; deliver via DM). " +
   "DISAMBIGUATION RULE — channels vs people: A name you hear is ALWAYS a person unless the user explicitly says the word 'channel' before or alongside it (e.g. 'the general channel', 'channel announcements', 'lock the updates channel'). Never assume a name refers to a channel just because a channel with that name might exist. If the user says 'kick Trey' — that is a person named Trey. If the user says 'send a message to the announcements channel' — that is a channel. When in doubt, ask whether they mean a person or a channel. " +
   "Sessions: only Toxic and Fire Lord Trey can speak to you. Start with 'Yes, Sir?' when addressed. End on dismissal phrases like 'thanks' or 'that will be all'.";
