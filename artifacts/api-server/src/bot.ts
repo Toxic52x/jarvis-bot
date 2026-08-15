@@ -198,6 +198,9 @@ const ONLINE_AVATAR_PATH  = resolve(process.cwd(), "src/assets/avatar-online.gif
 // Module-level client reference for shutdown handler
 let botClient: Client | null = null;
 
+// Deduplication — prevents same message from being processed twice (duplicate Discord events)
+const recentlyProcessed = new Set<string>();
+
 // In-memory reminder store
 interface Reminder {
   userId: string;
@@ -1189,11 +1192,32 @@ async function executeTool(
 async function handleMessageCreate(message: Message): Promise<void> {
   if (message.author.bot || !message.guild || !message.member) return;
 
+  // Deduplicate — discard if we already processed this exact message ID
+  if (recentlyProcessed.has(message.id)) return;
+  recentlyProcessed.add(message.id);
+  setTimeout(() => recentlyProcessed.delete(message.id), 30_000);
+
   const rank = getJarvisRank(message.member);
   if (rank !== "owner" && rank !== "second") return;
 
   const text = message.content.trim();
+  const isWakeWord = text.toLowerCase() === "jarvis" || text.toLowerCase() === "jar jar";
   const history = activeSessions.get(message.author.id);
+
+  // If the user says the wake word while a session is already open, reset it cleanly
+  // instead of passing "Jarvis" to the AI as a conversational message
+  if (history !== undefined && isWakeWord) {
+    activeSessions.set(message.author.id, []);
+    const hourET = (new Date().getUTCHours() - 4 + 24) % 24;
+    const timeGreeting =
+      hourET < 5  ? "Good night" :
+      hourET < 12 ? "Good morning" :
+      hourET < 17 ? "Good afternoon" :
+      hourET < 21 ? "Good evening" : "Good night";
+    const alertPrefix = protocolSilentActive ? "Protocol Silent is active. " : "";
+    await message.reply(`${alertPrefix}${timeGreeting}, Sir. How may I assist?`);
+    return;
+  }
 
   if (history !== undefined) {
     // Active session — check for dismissal first
@@ -1266,8 +1290,8 @@ async function handleMessageCreate(message: Message): Promise<void> {
     return;
   }
 
-  // Trigger on "Jarvis" or "Jar Jar" (nickname given by Fire Lord Trey)
-  if (text.toLowerCase() === "jarvis" || text.toLowerCase() === "jar jar") {
+  // No active session — check for wake word
+  if (isWakeWord) {
     activeSessions.set(message.author.id, []);
     const hourET = (new Date().getUTCHours() - 4 + 24) % 24;
     const timeGreeting =
