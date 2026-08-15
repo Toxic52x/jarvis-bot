@@ -181,6 +181,14 @@ function trackTokens(used: number) {
 let protocolSilentActive = false;
 let protocolSilentGuildId: string | null = null;
 
+// Status rotation control (paused during Protocol Silent)
+let statusRotationPaused = false;
+let rotateStatusFn: (() => void) | null = null;
+
+// Avatar rotation — add direct image URLs here to enable cycling
+const AVATAR_URLS: string[] = [];
+let avatarIndex = 0;
+
 // Ends the session if the message loosely contains a dismissal phrase anywhere
 function isDismissal(text: string): boolean {
   const t = text.toLowerCase();
@@ -678,13 +686,22 @@ async function handleStaydown(interaction: ChatInputCommandInteraction): Promise
 
 // ─── Jarvis keyword conversation ──────────────────────────────────────────────
 
-const SYSTEM_PROMPT =
+const SYSTEM_PROMPT_BASE =
   "You are J.A.R.V.I.S. (Just A Rather Very Intelligent System), created by Toxic on August 13th, 2026. Primary directive: optimizing Fire Nation management protocols. " +
   "Personality: British, polite, calm, dry wit, occasionally sardonic — never rude. Address superiors as 'Sir'. No emojis. 1-3 sentence replies unless more is needed. " +
   "Key people: Toxic = your creator/owner. Fire Lord Trey = Fire Lord, second in command. " +
   "Slash commands: /addmerit (award merits; HR capped at 7; proof = Discord URL), /merits, /leaderboard (top 30), /merithistory, /createhr, /resetdata (wipes merit DB), /staydown, /globalkick, /globalban, /globalmute (duration in minutes), /royalguard (assembles guards), /requestguards (HR+), /lookup (Roblox account investigation: age, friends, followers, groups, games, platform badges, red flag score). " +
   "Conversational tools — always execute, never just describe: ping_everyone, kick_member, ban_member, mute_member, unmute_member, assign_role, remove_role, set_nickname, send_message, get_token_usage (report daily token usage when asked), activate_protocol_silent (say 'Activate Protocol Silent' to trigger — locks all channels), deactivate_protocol_silent (restores all channels), lock_channel, unlock_channel. " +
   "Sessions: only Toxic and Fire Lord Trey can speak to you. Start with 'Yes, Sir?' when addressed. End on dismissal phrases like 'thanks' or 'that will be all'.";
+
+function getSystemPrompt(): string {
+  if (protocolSilentActive) {
+    return SYSTEM_PROMPT_BASE +
+      " CURRENT STATUS: Protocol Silent is active — the server is in full lockdown. " +
+      "Respond with heightened urgency and tactical precision. All non-essential pleasantries are suspended.";
+  }
+  return SYSTEM_PROMPT_BASE;
+}
 
 // Tool definitions for Groq function calling
 const DISCORD_TOOLS = [
@@ -976,6 +993,8 @@ async function executeTool(
     }
     protocolSilentActive = true;
     protocolSilentGuildId = guild.id;
+    statusRotationPaused = true;
+    message.client.user.setActivity("🔒 Protocol Silent — Server Locked");
     return `Protocol Silent activated, Sir. ${count} channel${count === 1 ? "" : "s"} locked.`;
   }
 
@@ -993,6 +1012,8 @@ async function executeTool(
     }
     protocolSilentActive = false;
     protocolSilentGuildId = null;
+    statusRotationPaused = false;
+    if (rotateStatusFn) rotateStatusFn();
     return `Protocol Silent deactivated, Sir. ${count} channel${count === 1 ? "" : "s"} restored.`;
   }
 
@@ -1140,7 +1161,7 @@ async function handleMessageCreate(message: Message): Promise<void> {
     try {
       const completion = await openai.chat.completions.create({
         model: "llama-3.3-70b-versatile",
-        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...history],
+        messages: [{ role: "system", content: getSystemPrompt() }, ...history],
         tools: DISCORD_TOOLS,
         tool_choice: "auto",
         max_tokens: 300,
@@ -1200,7 +1221,14 @@ async function handleMessageCreate(message: Message): Promise<void> {
   // Only trigger on the exact word "Jarvis" (case-insensitive), nothing else
   if (text.toLowerCase() === "jarvis") {
     activeSessions.set(message.author.id, []);
-    await message.reply("Yes, Sir?");
+    const hourET = (new Date().getUTCHours() - 4 + 24) % 24;
+    const timeGreeting =
+      hourET < 5  ? "Good night" :
+      hourET < 12 ? "Good morning" :
+      hourET < 17 ? "Good afternoon" :
+      hourET < 21 ? "Good evening" : "Good night";
+    const alertPrefix = protocolSilentActive ? "Protocol Silent is active. " : "";
+    await message.reply(`${alertPrefix}${timeGreeting}, Sir. How may I assist?`);
   }
 }
 
@@ -1469,6 +1497,13 @@ async function handleLookup(interaction: ChatInputCommandInteraction): Promise<v
 
   await interaction.deferReply();
   const username = interaction.options.getString("username", true).trim();
+
+  const bar = (pct: number) => `${"▰".repeat(Math.round(pct / 10))}${"▱".repeat(10 - Math.round(pct / 10))} ${pct}%`;
+  const loadEmbed = (desc: string, pct: number) =>
+    new EmbedBuilder().setTitle("JARVIS // ROBLOX ACCOUNT INVESTIGATION").setColor(FIRE_ORANGE)
+      .setDescription(`${desc}\n\n${bar(pct)}`);
+
+  await interaction.editReply({ embeds: [loadEmbed("Initiating investigation...", 0)] });
 
   try {
     // Resolve username → userId
@@ -1842,12 +1877,23 @@ export async function startBot(): Promise<void> {
       "Securing Fire Nation perimeter",
     ];
     let statusIndex = 0;
-    const rotateStatus = () => {
+    rotateStatusFn = () => {
+      if (statusRotationPaused) return;
       ready.user.setActivity(statuses[statusIndex % statuses.length]);
       statusIndex++;
     };
-    rotateStatus();
-    setInterval(rotateStatus, 5 * 60 * 1000); // rotate every 5 minutes
+    rotateStatusFn();
+    setInterval(rotateStatusFn, 5 * 60 * 1000); // rotate every 5 minutes
+
+    // Avatar rotation — cycles through AVATAR_URLS every 4 hours
+    if (AVATAR_URLS.length > 0) {
+      setInterval(async () => {
+        try {
+          await ready.user.setAvatar(AVATAR_URLS[avatarIndex % AVATAR_URLS.length]);
+          avatarIndex++;
+        } catch { /* rate-limited or bad URL — skip silently */ }
+      }, 4 * 60 * 60 * 1000);
+    }
 
     logger.info({ botUser: ready.user.tag }, "Jarvis online");
   });
