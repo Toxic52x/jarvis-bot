@@ -1735,17 +1735,11 @@ export async function startBot(): Promise<void> {
       lookupCommand.toJSON(),
     ];
     const rest = new REST({ version: "10" }).setToken(token);
-    const guildId = await resolveGuildId(ready);
 
-    if (guildId) {
-      await rest.put(Routes.applicationGuildCommands(ready.user.id, guildId), { body: commands });
-      // Wipe any leftover global commands
-      await rest.put(Routes.applicationCommands(ready.user.id), { body: [] });
-      logger.info({ guildId }, "Jarvis commands registered for guild");
-    } else {
-      await rest.put(Routes.applicationCommands(ready.user.id), { body: commands });
-      logger.info("Jarvis commands registered globally");
-    }
+    // Register globally so commands appear in every server Jarvis is in.
+    // Global commands propagate within ~1 hour of any change.
+    await rest.put(Routes.applicationCommands(ready.user.id), { body: commands });
+    logger.info("Jarvis commands registered globally");
 
     logger.info({ botUser: ready.user.tag }, "Jarvis online");
   });
