@@ -7,3 +7,10 @@ uri = "file://artifacts/api-server/src/assets/avatar-online-animated.gif"
 type = "image"
 title = "Jarvis Online Avatar (Animated)"
 description = "Pulsing red glow — set as Jarvis's live Discord avatar"
+
+[[outputs]]
+id = "cDPXGyRIxMKtBV95CxZl5"
+uri = "file://attached_assets/generated_videos/jarvis-online.mp4"
+type = "video"
+title = "Jarvis Online Animation"
+description = "Generated cinematic boot sequence — converting to animated avatar GIF next"
