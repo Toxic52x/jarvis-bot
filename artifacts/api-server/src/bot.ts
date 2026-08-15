@@ -867,6 +867,34 @@ const DISCORD_TOOLS = [
       },
     },
   },
+  {
+    type: "function" as const,
+    function: {
+      name: "set_avatar",
+      description: "Changes the bot's own profile picture to the image at the given URL.",
+      parameters: {
+        type: "object",
+        properties: {
+          url: { type: "string", description: "Direct URL to the image (png, jpg, gif)." },
+        },
+        required: ["url"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "set_username",
+      description: "Changes the bot's own username.",
+      parameters: {
+        type: "object",
+        properties: {
+          username: { type: "string", description: "The new username for the bot." },
+        },
+        required: ["username"],
+      },
+    },
+  },
 ] satisfies OpenAI.Chat.ChatCompletionTool[];
 
 // Resolve a member by username, display name, or ID
@@ -902,6 +930,28 @@ async function executeTool(
     const remaining = Math.max(0, GROQ_DAILY_LIMIT - dailyTokensUsed);
     const pct = ((dailyTokensUsed / GROQ_DAILY_LIMIT) * 100).toFixed(1);
     return `Daily token usage: ${dailyTokensUsed.toLocaleString()} used / ${GROQ_DAILY_LIMIT.toLocaleString()} limit (${pct}% consumed). Approximately ${remaining.toLocaleString()} tokens remaining.`;
+  }
+
+  if (name === "set_avatar") {
+    const url = String(args.url ?? "");
+    if (!url) return "No image URL provided, Sir.";
+    try {
+      await message.client.user.setAvatar(url);
+      return "Avatar updated, Sir.";
+    } catch {
+      return "I was unable to update my avatar, Sir. Discord may be rate-limiting avatar changes — try again in a few minutes.";
+    }
+  }
+
+  if (name === "set_username") {
+    const username = String(args.username ?? "").trim();
+    if (!username) return "No username provided, Sir.";
+    try {
+      await message.client.user.setUsername(username);
+      return `Username updated to "${username}", Sir.`;
+    } catch {
+      return "I was unable to update my username, Sir. Discord rate-limits username changes — please wait a while before trying again.";
+    }
   }
 
   if (name === "activate_protocol_silent") {
