@@ -20,7 +20,8 @@ import {
 } from "discord.js";
 import { desc, eq, sql } from "drizzle-orm";
 import OpenAI from "openai";
-import { db, meritAwardsTable } from "@workspace/db";
+import { db, meritAwardsTable, memberActivityTable } from "@workspace/db";
+import { sql as drizzleSql } from "drizzle-orm";
 import { logger } from "./lib/logger";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -153,6 +154,13 @@ const lookupCommand = new SlashCommandBuilder()
   .setDescription("Investigate a Roblox account for red flags and alt account indicators.")
   .addStringOption((o) =>
     o.setName("username").setDescription("Roblox username to investigate.").setRequired(true),
+  );
+
+const inactivePurgeCommand = new SlashCommandBuilder()
+  .setName("inactivepurge")
+  .setDescription("List members who haven't sent a message in X days, with option to kick them.")
+  .addIntegerOption((o) =>
+    o.setName("days").setDescription("Number of days of inactivity.").setRequired(true).setMinValue(1),
   );
 
 // Active sessions: userId → conversation history (proper OpenAI message params)
@@ -1642,6 +1650,82 @@ async function handleInteraction(interaction: ChatInputCommandInteraction): Prom
     case "royalguard":      await handleRoyalGuard(interaction);    break;
     case "requestguards":   await handleRequestGuards(interaction); break;
     case "lookup":          await handleLookup(interaction);        break;
+    case "inactivepurge":   await handleInactivePurge(interaction); break;
+  }
+}
+
+async function handleInactivePurge(interaction: ChatInputCommandInteraction): Promise<void> {
+  const rank = getJarvisRank(interaction.member as GuildMember);
+  if (rank !== "owner" && rank !== "second") {
+    await interaction.reply({ content: "Access Denied — Owner or Fire Lord only.", ephemeral: true });
+    return;
+  }
+  const guild = interaction.guild!;
+  const days = interaction.options.getInteger("days", true);
+  await interaction.deferReply();
+
+  const cutoff = new Date(Date.now() - days * 86_400_000);
+
+  // Fetch all current members
+  const allMembers = await guild.members.fetch();
+  const nonBotIds = [...allMembers.values()]
+    .filter((m) => !m.user.bot)
+    .map((m) => m.id);
+
+  // Get activity records for this guild
+  const activeRecords = await db
+    .select({ userId: memberActivityTable.userId })
+    .from(memberActivityTable)
+    .where(
+      drizzleSql`${memberActivityTable.guildId} = ${guild.id} AND ${memberActivityTable.lastSeenAt} >= ${cutoff}`,
+    );
+  const activeIds = new Set(activeRecords.map((r) => r.userId));
+
+  const inactiveMembers = nonBotIds
+    .filter((id) => !activeIds.has(id))
+    .map((id) => allMembers.get(id)!)
+    .filter(Boolean)
+    .slice(0, 30);
+
+  if (inactiveMembers.length === 0) {
+    await interaction.editReply(`No members found with ${days}+ days of inactivity, Sir.`);
+    return;
+  }
+
+  const list = inactiveMembers.map((m) => `• ${m.user.tag} (${m.id})`).join("\n");
+  const embed = new EmbedBuilder()
+    .setTitle("JARVIS // INACTIVITY REPORT")
+    .setDescription(`Members with no recorded activity in the last **${days} day${days === 1 ? "" : "s"}**:\n\n${list}`)
+    .setColor(FIRE_ORANGE)
+    .setFooter({ text: `${inactiveMembers.length} member${inactiveMembers.length === 1 ? "" : "s"} flagged — note: only tracks activity since Jarvis came online` })
+    .setTimestamp();
+
+  const kickBtn = new ButtonBuilder()
+    .setCustomId("purge_kick_confirm")
+    .setLabel(`Kick All ${inactiveMembers.length}`)
+    .setStyle(ButtonStyle.Danger);
+  const cancelBtn = new ButtonBuilder()
+    .setCustomId("purge_kick_cancel")
+    .setLabel("Cancel")
+    .setStyle(ButtonStyle.Secondary);
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(kickBtn, cancelBtn);
+
+  const reply = await interaction.editReply({ embeds: [embed], components: [row] });
+
+  try {
+    const btn = await reply.awaitMessageComponent({ componentType: ComponentType.Button, time: 30_000 });
+    if (btn.customId === "purge_kick_confirm") {
+      await btn.update({ components: [] });
+      let kicked = 0;
+      for (const m of inactiveMembers) {
+        try { await m.kick(`Inactivity purge — ${days}d — by ${interaction.user.tag}`); kicked++; } catch { /* skip */ }
+      }
+      await interaction.editReply({ embeds: [embed.setDescription(`✅ Kicked **${kicked}** inactive member${kicked === 1 ? "" : "s"}.`)], components: [] });
+    } else {
+      await btn.update({ embeds: [], components: [], content: "Purge cancelled, Sir." });
+    }
+  } catch {
+    await interaction.editReply({ components: [] });
   }
 }
 
@@ -1737,6 +1821,7 @@ export async function startBot(): Promise<void> {
       royalGuardCommand.toJSON(),
       requestGuardsCommand.toJSON(),
       lookupCommand.toJSON(),
+      inactivePurgeCommand.toJSON(),
     ];
     const rest = new REST({ version: "10" }).setToken(token);
 
@@ -1744,6 +1829,25 @@ export async function startBot(): Promise<void> {
     // Global commands propagate within ~1 hour of any change.
     await rest.put(Routes.applicationCommands(ready.user.id), { body: commands });
     logger.info("Jarvis commands registered globally");
+
+    // ── Status rotation ──────────────────────────────────────────────────────
+    const statuses = [
+      "Monitoring Fire Nation protocols",
+      "Standing by, Sir.",
+      "Analyzing threat intelligence",
+      "Surveillance systems active",
+      "Fire Nation command online",
+      "Awaiting orders, Sir.",
+      "All systems nominal.",
+      "Securing Fire Nation perimeter",
+    ];
+    let statusIndex = 0;
+    const rotateStatus = () => {
+      ready.user.setActivity(statuses[statusIndex % statuses.length]);
+      statusIndex++;
+    };
+    rotateStatus();
+    setInterval(rotateStatus, 5 * 60 * 1000); // rotate every 5 minutes
 
     logger.info({ botUser: ready.user.tag }, "Jarvis online");
   });
@@ -1755,6 +1859,21 @@ export async function startBot(): Promise<void> {
   });
 
   client.on(Events.MessageCreate, (message) => {
+    // Track member activity for inactivity purge (fire-and-forget)
+    if (!message.author.bot && message.guildId) {
+      void db.insert(memberActivityTable).values({
+        guildId: message.guildId,
+        userId: message.author.id,
+        userTag: message.author.tag ?? message.author.username,
+        lastSeenAt: new Date(),
+      }).onConflictDoUpdate({
+        target: [memberActivityTable.guildId, memberActivityTable.userId],
+        set: {
+          userTag: message.author.tag ?? message.author.username,
+          lastSeenAt: new Date(),
+        },
+      }).catch(() => { /* non-critical */ });
+    }
     void handleMessageCreate(message).catch((e) =>
       logger.error({ err: e }, "MessageCreate handler failed"),
     );
