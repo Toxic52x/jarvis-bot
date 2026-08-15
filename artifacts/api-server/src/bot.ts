@@ -18,6 +18,8 @@ import {
   type Message,
   type TextChannel,
 } from "discord.js";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { desc, eq, sql } from "drizzle-orm";
 import OpenAI from "openai";
 import { db, meritAwardsTable, memberActivityTable } from "@workspace/db";
@@ -188,6 +190,14 @@ let rotateStatusFn: (() => void) | null = null;
 // Avatar rotation — add direct image URLs here to enable cycling
 const AVATAR_URLS: string[] = [];
 let avatarIndex = 0;
+
+// Offline/online avatar paths
+const OFFLINE_AVATAR_PATH = resolve(process.cwd(), "src/assets/avatar-offline.png");
+// Set this to a URL or leave empty to skip restoring on startup
+const ONLINE_AVATAR_URL = "";
+
+// Module-level client reference for shutdown handler
+let botClient: Client | null = null;
 
 // Ends the session if the message loosely contains a dismissal phrase anywhere
 function isDismissal(text: string): boolean {
@@ -1895,6 +1905,11 @@ export async function startBot(): Promise<void> {
       }, 4 * 60 * 60 * 1000);
     }
 
+    // Set online avatar on startup if configured
+    if (ONLINE_AVATAR_URL) {
+      try { await ready.user.setAvatar(ONLINE_AVATAR_URL); } catch { /* skip */ }
+    }
+
     logger.info({ botUser: ready.user.tag }, "Jarvis online");
   });
 
@@ -1930,6 +1945,25 @@ export async function startBot(): Promise<void> {
       logger.error({ err: e }, "MessageDelete handler failed"),
     );
   });
+
+  botClient = client;
+
+  // Graceful shutdown — switch to offline avatar before exiting
+  const shutdown = async (signal: string) => {
+    logger.info({ signal }, "Jarvis shutting down — switching to offline avatar");
+    try {
+      const avatarBuffer = readFileSync(OFFLINE_AVATAR_PATH);
+      await client.user?.setAvatar(avatarBuffer);
+      await new Promise((r) => setTimeout(r, 2500)); // allow Discord API to process
+    } catch (e) {
+      logger.warn({ err: e }, "Could not set offline avatar on shutdown");
+    }
+    client.destroy();
+    process.exit(0);
+  };
+
+  process.once("SIGTERM", () => void shutdown("SIGTERM"));
+  process.once("SIGINT",  () => void shutdown("SIGINT"));
 
   await client.login(token);
 
