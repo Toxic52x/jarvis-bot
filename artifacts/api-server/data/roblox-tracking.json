@@ -1,0 +1,47 @@
+{
+  "experience": {
+    "placeId": 79669834155516,
+    "universeId": 9662757817,
+    "rootPlaceId": 79669834155516,
+    "name": "[RELEASE] The Shattered Balance",
+    "url": "https://www.roblox.com/games/79669834155516/The-Shattered-Balance"
+  },
+  "notifyChannelId": null,
+  "users": [
+    {
+      "robloxUserId": 1537703820,
+      "robloxUsername": "Litxro",
+      "wasInExperience": false,
+      "lastPresenceType": 0,
+      "lastPolledAt": 1788397270124
+    },
+    {
+      "robloxUserId": 28188216,
+      "robloxUsername": "rasmus1902",
+      "wasInExperience": false,
+      "lastPresenceType": 0,
+      "lastPolledAt": 1788397270124
+    },
+    {
+      "robloxUserId": 139280916,
+      "robloxUsername": "brecken200",
+      "wasInExperience": false,
+      "lastPresenceType": 2,
+      "lastPolledAt": 1788397270124
+    },
+    {
+      "robloxUserId": 2987696689,
+      "robloxUsername": "TxchnoFlashZ",
+      "wasInExperience": false,
+      "lastPresenceType": 0,
+      "lastPolledAt": 1788397270124
+    },
+    {
+      "robloxUserId": 413843886,
+      "robloxUsername": "Battylon",
+      "wasInExperience": false,
+      "lastPresenceType": 0,
+      "lastPolledAt": 1788397270124
+    }
+  ]
+}

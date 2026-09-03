@@ -19,6 +19,16 @@ async function buildAll() {
   const migrationsDest = path.resolve(distDir, "db-migrations");
   await cp(migrationsSource, migrationsDest, { recursive: true });
 
+  // Copy Fire Nation knowledge file into the bundle so Jarvis can find it at runtime
+  const knowledgeSource = path.resolve(artifactDir, "src/fire-nation-knowledge.txt");
+  const knowledgeDest = path.resolve(distDir, "fire-nation-knowledge.txt");
+  await cp(knowledgeSource, knowledgeDest);
+
+  // Copy Overwatch filter list into the bundle so Jarvis can find it at runtime
+  const overwatchSource = path.resolve(artifactDir, "src/overwatch-filters.txt");
+  const overwatchDest = path.resolve(distDir, "overwatch-filters.txt");
+  await cp(overwatchSource, overwatchDest);
+
   await esbuild({
     entryPoints: [path.resolve(artifactDir, "src/index.ts")],
     platform: "node",
