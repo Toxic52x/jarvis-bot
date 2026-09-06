@@ -1,14 +1,13 @@
 import { createInsertSchema } from "drizzle-zod";
 import {
   index,
-  integer,
+  numeric,
   pgTable,
   serial,
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
 import { z } from "zod/v4";
-
 export const meritAwardsTable = pgTable(
   "merit_awards",
   {
@@ -16,7 +15,7 @@ export const meritAwardsTable = pgTable(
     guildId: text("guild_id").notNull(),
     memberId: text("member_id").notNull(),
     memberTag: text("member_tag").notNull(),
-    amount: integer("amount").notNull(),
+    amount: numeric("amount", { precision: 4, scale: 1, mode: "number" }).notNull(),
     proofUrl: text("proof_url").notNull(),
     awardedById: text("awarded_by_id").notNull(),
     awardedByTag: text("awarded_by_tag").notNull(),
@@ -32,13 +31,11 @@ export const meritAwardsTable = pgTable(
     ),
   ],
 );
-
 export const insertMeritAwardSchema = createInsertSchema(meritAwardsTable).omit(
   {
     id: true,
     createdAt: true,
   },
 );
-
 export type InsertMeritAward = z.infer<typeof insertMeritAwardSchema>;
 export type MeritAward = typeof meritAwardsTable.$inferSelect;
