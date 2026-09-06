@@ -6,10 +6,13 @@ project into a plain Node.js project, so it can run on any generic host
 
 ## Deploying on bot-hosting.net
 
+The built bot (`dist/`) is committed to this repo, so the host never needs to
+run the bundler itself — that step (`esbuild`) is memory-hungry and will OOM
+on a small container. `npm install` here only installs runtime dependencies.
+
 1. Upload/unzip this whole folder as your bot's files.
 2. Set the **startup file** to `index.js` (default on most panels — it just
-   hands off to the real bundle in `dist/index.mjs`, which gets built
-   automatically during install).
+   hands off to the pre-built bundle in `dist/index.mjs`).
 3. In the panel's **Startup/Environment Variables** section, set every
    variable listed in `.env.example`:
    - `DISCORD_BOT_TOKEN` — your bot's token from the Discord Developer Portal
@@ -19,8 +22,18 @@ project into a plain Node.js project, so it can run on any generic host
    - `DISCORD_OWNER_USER_IDS`, `DISCORD_SECOND_IN_COMMAND_USER_IDS`,
      `DISCORD_OWNER_LOG_CHANNEL_ID` — role/permission IDs specific to your server
    - `PORT` — whatever port the panel assigns
-4. Start the bot. `npm install` will automatically run the build step
-   (bundles `src/` into `dist/index.mjs`) via `postinstall`.
+4. Start the bot.
+
+### If you edit the bot's code
+
+`dist/` is a snapshot, not generated on the fly. After changing anything in
+`src/`, rebuild locally and commit the result:
+
+```bash
+npm install    # first time only, installs esbuild etc.
+npm run build  # regenerates dist/
+git add dist && git commit -m "Rebuild dist"
+```
 
 ## The database
 

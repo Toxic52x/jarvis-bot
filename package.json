@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "postinstall": "node build.mjs",
     "build": "node build.mjs",
     "start": "node dist/index.mjs"
   },
