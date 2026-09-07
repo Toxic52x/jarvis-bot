@@ -31,10 +31,6 @@ export function setBotClient(client: Client): void {
   botClient = client;
 }
 
-export function getBotClient(): Client | null {
-  return botClient;
-}
-
 // ─── Guard request RSVP state ──────────────────────────────────────────────
 
 /** Active guard requests, keyed by a generated id. Cleared after 24h. */

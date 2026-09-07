@@ -42,10 +42,6 @@ export function getOnlineAvatarBuffer(): Buffer | null {
   return onlineAvatarBuffer;
 }
 
-export function getBannerBuffer(): Buffer | null {
-  return bannerBuffer;
-}
-
 // ─── Avatar rotation ──────────────────────────────────────────────────────────
 // Set JARVIS_AVATAR_URLS to a comma-separated list of direct image URLs to
 // enable cycling. Unset (the default) means no rotation at all.
@@ -63,10 +59,6 @@ let protocolSilentGuildId: string | null = null;
 
 export function isProtocolSilentActive(): boolean {
   return protocolSilentActive;
-}
-
-export function getProtocolSilentGuildId(): string | null {
-  return protocolSilentGuildId;
 }
 
 export function setProtocolSilent(active: boolean, guildId: string | null): void {

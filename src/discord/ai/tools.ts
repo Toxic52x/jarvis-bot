@@ -1638,13 +1638,3 @@ export function toolsForMessage(
   });
 }
 
-/** Returns only the tools this rank is actually allowed to call, so we stop
- * paying input tokens for ~70 tool schemas on every single message. */
-
-export function toolsForRank(rank: JarvisRank): OpenAI.Chat.ChatCompletionTool[] {
-  return DISCORD_TOOLS.filter((t) => {
-    const min =
-      TOOL_MIN_RANK[t.function.name] ?? LEGACY_TOOL_MIN_RANK[t.function.name];
-    return !min || RANK_ORDER[rank] >= RANK_ORDER[min];
-  });
-}
