@@ -213,13 +213,7 @@ export async function handleAddMerit(
         `Bonus award authorized by ${interaction.user.tag}`,
         "Bonus",
       );
-      await writeOwnerAuditLog(
-        interaction,
-        targetMembers,
-        bonusAmount,
-        "Bonus",
-        actorRank,
-      );
+      await writeOwnerAuditLog(interaction, targetMembers, bonusAmount, "Bonus");
 
       const skipped = mentionIds.length - targetMembers.length;
       const skippedNote =
@@ -284,13 +278,7 @@ export async function handleAddMerit(
       announcement,
       label,
     );
-    await writeOwnerAuditLog(
-      interaction,
-      allMembers,
-      meritAmount,
-      label,
-      actorRank,
-    );
+    await writeOwnerAuditLog(interaction, allMembers, meritAmount, label);
 
     const skipped = mentionIds.length - mentioned.length;
     const skippedNote =

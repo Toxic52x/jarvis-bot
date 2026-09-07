@@ -26,13 +26,11 @@ import {
   trackTokens,
 } from "./geminiClient";
 import {
-  MAX_SESSION_EXCHANGES,
   activeSessions,
   beginUserProcessing,
   endUserProcessing,
   isDismissal,
   isUserProcessing,
-  sessionExchangeCounts,
   trimHistory,
 } from "./session";
 import { getSystemPrompt } from "./systemPrompt";
@@ -75,7 +73,16 @@ export async function sendChunked(
 }
 
 function buildGreeting(): string {
-  const hourET = (new Date().getUTCHours() - 4 + 24) % 24;
+  // America/New_York handles EST/EDT correctly — a fixed UTC-4 offset used to
+  // be off by an hour for roughly four months of the year (EST is UTC-5).
+  const hourET =
+    Number(
+      new Date().toLocaleString("en-US", {
+        hour: "numeric",
+        hour12: false,
+        timeZone: "America/New_York",
+      }),
+    ) % 24; // ICU can format midnight as "24" rather than "0" — normalize it
   const timeGreeting =
     hourET < 5
       ? "Good night"
@@ -143,7 +150,6 @@ async function processAiChat(
   if (JARVIS_SLEEP_PATTERN.test(text)) {
     setJarvisAsleep(true);
     activeSessions.delete(message.author.id);
-    sessionExchangeCounts.delete(message.author.id);
     setStatusRotationPaused(true);
     try {
       message.client.user.setPresence({ status: "invisible" });
@@ -194,7 +200,6 @@ async function processAiChat(
   // instead of passing "Jarvis" to the AI as a conversational message
   if (history !== undefined && isWakeWord) {
     activeSessions.set(message.author.id, []);
-    sessionExchangeCounts.set(message.author.id, 0);
     await message.reply(buildGreeting());
     return;
   }
@@ -203,17 +208,11 @@ async function processAiChat(
     // Active session — check for dismissal first
     if (isDismissal(text)) {
       activeSessions.delete(message.author.id);
-      sessionExchangeCounts.delete(message.author.id);
       await message.reply(
         "Of course, Sir. I'll be standing by should you need me.",
       );
       return;
     }
-
-    const exchangeCount =
-      (sessionExchangeCounts.get(message.author.id) ?? 0) + 1;
-    sessionExchangeCounts.set(message.author.id, exchangeCount);
-    const isFinalExchange = exchangeCount >= MAX_SESSION_EXCHANGES;
 
     if ("sendTyping" in message.channel) await message.channel.sendTyping();
 
@@ -323,16 +322,8 @@ async function processAiChat(
         finalReply ??
         lastToolResult ??
         "I apologize, Sir — I was unable to generate a response.";
-      const outgoing = isFinalExchange
-        ? `${reply}\n\nThat concludes our exchange limit for this session, Sir — say "Jarvis" whenever you need me again.`
-        : reply;
 
-      await sendChunked(message, outgoing);
-
-      if (isFinalExchange) {
-        activeSessions.delete(message.author.id);
-        sessionExchangeCounts.delete(message.author.id);
-      }
+      await sendChunked(message, reply);
     } catch (error) {
       logger.error({ err: error }, "Gemini API request failed");
       // Roll the history back to exactly where this turn started, however many
@@ -341,7 +332,6 @@ async function processAiChat(
       if (history.length > historyLengthBeforeTurn) {
         history.length = historyLengthBeforeTurn;
       }
-      sessionExchangeCounts.set(message.author.id, exchangeCount - 1);
 
       const isRateLimit =
         typeof error === "object" &&
@@ -398,7 +388,6 @@ async function processAiChat(
   // No active session — check for wake word
   if (isWakeWord) {
     activeSessions.set(message.author.id, []);
-    sessionExchangeCounts.set(message.author.id, 0);
     await message.reply(buildGreeting());
   }
 }

@@ -41,7 +41,6 @@ export async function writeOwnerAuditLog(
   members: GuildMember[],
   amount: number,
   meritType: string,
-  actorRank: string,
 ): Promise<void> {
   const logChannelId = process.env.DISCORD_OWNER_LOG_CHANNEL_ID?.trim();
   if (!logChannelId)

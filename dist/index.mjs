@@ -133130,7 +133130,7 @@ async function writeGenericAuditLog(client, title, fields, actorTag) {
     (e) => logger.error({ err: e, title }, "Generic audit log send failed")
   );
 }
-async function writeOwnerAuditLog(interaction, members, amount, meritType, actorRank) {
+async function writeOwnerAuditLog(interaction, members, amount, meritType) {
   const logChannelId = process.env.DISCORD_OWNER_LOG_CHANNEL_ID?.trim();
   if (!logChannelId)
     throw new Error(
@@ -133384,13 +133384,7 @@ async function handleAddMerit(interaction) {
         `Bonus award authorized by ${interaction.user.tag}`,
         "Bonus"
       );
-      await writeOwnerAuditLog(
-        interaction,
-        targetMembers,
-        bonusAmount,
-        "Bonus",
-        actorRank
-      );
+      await writeOwnerAuditLog(interaction, targetMembers, bonusAmount, "Bonus");
       const skipped2 = mentionIds2.length - targetMembers.length;
       const skippedNote2 = skipped2 > 0 ? ` (${skipped2} mention${skipped2 === 1 ? "" : "s"} not found in server \u2014 skipped)` : "";
       await interaction.editReply(
@@ -133435,13 +133429,7 @@ async function handleAddMerit(interaction) {
       announcement,
       label
     );
-    await writeOwnerAuditLog(
-      interaction,
-      allMembers,
-      meritAmount,
-      label,
-      actorRank
-    );
+    await writeOwnerAuditLog(interaction, allMembers, meritAmount, label);
     const skipped = mentionIds.length - mentioned.length;
     const skippedNote = skipped > 0 ? ` (${skipped} mention${skipped === 1 ? "" : "s"} not found in server \u2014 skipped)` : "";
     await interaction.editReply(
@@ -152125,8 +152113,6 @@ async function notifyTokenReset(client) {
 
 // src/discord/ai/session.ts
 var activeSessions = /* @__PURE__ */ new Map();
-var sessionExchangeCounts = /* @__PURE__ */ new Map();
-var MAX_SESSION_EXCHANGES = Infinity;
 var usersCurrentlyProcessing = /* @__PURE__ */ new Set();
 function isUserProcessing(userId) {
   return usersCurrentlyProcessing.has(userId);
@@ -155503,7 +155489,13 @@ ${line2}` : line2;
   if (chunk) await message.reply(chunk);
 }
 function buildGreeting() {
-  const hourET = ((/* @__PURE__ */ new Date()).getUTCHours() - 4 + 24) % 24;
+  const hourET = Number(
+    (/* @__PURE__ */ new Date()).toLocaleString("en-US", {
+      hour: "numeric",
+      hour12: false,
+      timeZone: "America/New_York"
+    })
+  ) % 24;
   const timeGreeting = hourET < 5 ? "Good night" : hourET < 12 ? "Good morning" : hourET < 17 ? "Good afternoon" : hourET < 21 ? "Good evening" : "Good night";
   const alertPrefix = isProtocolSilentActive() ? "Protocol Silent is active. " : "";
   return `${alertPrefix}${timeGreeting}, Sir. How may I assist?`;
@@ -155535,7 +155527,6 @@ async function processAiChat(message, rank) {
   if (JARVIS_SLEEP_PATTERN.test(text2)) {
     setJarvisAsleep(true);
     activeSessions.delete(message.author.id);
-    sessionExchangeCounts.delete(message.author.id);
     setStatusRotationPaused(true);
     try {
       message.client.user.setPresence({ status: "invisible" });
@@ -155575,22 +155566,17 @@ async function processAiChat(message, rank) {
   const history = activeSessions.get(message.author.id);
   if (history !== void 0 && isWakeWord) {
     activeSessions.set(message.author.id, []);
-    sessionExchangeCounts.set(message.author.id, 0);
     await message.reply(buildGreeting());
     return;
   }
   if (history !== void 0) {
     if (isDismissal(text2)) {
       activeSessions.delete(message.author.id);
-      sessionExchangeCounts.delete(message.author.id);
       await message.reply(
         "Of course, Sir. I'll be standing by should you need me."
       );
       return;
     }
-    const exchangeCount = (sessionExchangeCounts.get(message.author.id) ?? 0) + 1;
-    sessionExchangeCounts.set(message.author.id, exchangeCount);
-    const isFinalExchange = exchangeCount >= MAX_SESSION_EXCHANGES;
     if ("sendTyping" in message.channel) await message.channel.sendTyping();
     const historyLengthBeforeTurn = history.length;
     history.push({ role: "user", content: text2 });
@@ -155672,20 +155658,12 @@ async function processAiChat(message, rank) {
         }
       }
       const reply = finalReply ?? lastToolResult ?? "I apologize, Sir \u2014 I was unable to generate a response.";
-      const outgoing = isFinalExchange ? `${reply}
-
-That concludes our exchange limit for this session, Sir \u2014 say "Jarvis" whenever you need me again.` : reply;
-      await sendChunked(message, outgoing);
-      if (isFinalExchange) {
-        activeSessions.delete(message.author.id);
-        sessionExchangeCounts.delete(message.author.id);
-      }
+      await sendChunked(message, reply);
     } catch (error40) {
       logger.error({ err: error40 }, "Gemini API request failed");
       if (history.length > historyLengthBeforeTurn) {
         history.length = historyLengthBeforeTurn;
       }
-      sessionExchangeCounts.set(message.author.id, exchangeCount - 1);
       const isRateLimit = typeof error40 === "object" && error40 !== null && "status" in error40 && error40.status === 429;
       if (isRateLimit) {
         const errMsg = error40.message ?? "";
@@ -155731,7 +155709,6 @@ That concludes our exchange limit for this session, Sir \u2014 say "Jarvis" when
   }
   if (isWakeWord) {
     activeSessions.set(message.author.id, []);
-    sessionExchangeCounts.set(message.author.id, 0);
     await message.reply(buildGreeting());
   }
 }

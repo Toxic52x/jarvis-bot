@@ -41,7 +41,6 @@ import {
 } from "../moderation/overwatch";
 import { TOOL_MIN_RANK, LEGACY_TOOL_MIN_RANK, isProtectedOwner } from "../permissions";
 import {
-  isProtocolSilentActive,
   setProtocolSilent,
   setStatusRotationPaused,
   triggerStatusRotation,
@@ -65,7 +64,6 @@ import {
   type CommandGuideTier,
 } from "./systemPrompt";
 import { findMember } from "./tools";
-import { logger } from "../../lib/logger";
 
 // ─── Additional resolution helpers ─────────────────────────────────────────
 

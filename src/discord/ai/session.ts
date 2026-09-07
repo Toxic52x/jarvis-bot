@@ -3,10 +3,6 @@ import type { ChatMessage } from "../types";
 // Active sessions: userId → conversation history (proper OpenAI message params)
 export const activeSessions = new Map<string, ChatMessage[]>();
 
-// Per-user exchange counter — caps how many back-and-forth turns a session allows
-export const sessionExchangeCounts = new Map<string, number>();
-export const MAX_SESSION_EXCHANGES = Infinity;
-
 // ─── Per-user in-flight guard ─────────────────────────────────────────────────
 // Two messages from the same user arriving while the first is still being
 // processed used to interleave pushes into the same history array, corrupting
