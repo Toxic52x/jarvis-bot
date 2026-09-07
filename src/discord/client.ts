@@ -18,6 +18,7 @@ import {
   handleMessageDelete,
   handleReactionAdd,
 } from "./events/messageEvents";
+import { loadTokenUsage } from "./ai/geminiClient";
 import { setBotClient } from "./guard";
 import { loadKnowledge } from "./knowledge";
 import { loadOverwatchFilters } from "./moderation/overwatch";
@@ -198,6 +199,7 @@ export async function startBot(): Promise<void> {
   loadOverwatchFilters();
   loadJarvisAccess();
   loadRobloxTracking();
+  loadTokenUsage();
 
   await client.login(token);
 }

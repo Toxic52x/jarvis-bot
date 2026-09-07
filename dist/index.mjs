@@ -18940,7 +18940,7 @@ var require_view = __commonJS({
     var dirname = path2.dirname;
     var basename2 = path2.basename;
     var extname = path2.extname;
-    var join7 = path2.join;
+    var join8 = path2.join;
     var resolve2 = path2.resolve;
     module2.exports = View2;
     function View2(name, options) {
@@ -19002,12 +19002,12 @@ var require_view = __commonJS({
     };
     View2.prototype.resolve = function resolve3(dir, file2) {
       var ext = this.ext;
-      var path3 = join7(dir, file2);
+      var path3 = join8(dir, file2);
       var stat = tryStat(path3);
       if (stat && stat.isFile()) {
         return path3;
       }
-      path3 = join7(dir, basename2(file2, ext), "index" + ext);
+      path3 = join8(dir, basename2(file2, ext), "index" + ext);
       stat = tryStat(path3);
       if (stat && stat.isFile()) {
         return path3;
@@ -22891,7 +22891,7 @@ var require_send = __commonJS({
     var Stream2 = __require("stream");
     var util2 = __require("util");
     var extname = path2.extname;
-    var join7 = path2.join;
+    var join8 = path2.join;
     var normalize = path2.normalize;
     var resolve2 = path2.resolve;
     var sep = path2.sep;
@@ -23063,7 +23063,7 @@ var require_send = __commonJS({
           return res;
         }
         parts = path3.split(sep);
-        path3 = normalize(join7(root, path3));
+        path3 = normalize(join8(root, path3));
       } else {
         if (UP_PATH_REGEXP.test(path3)) {
           debug('malicious path "%s"', path3);
@@ -23196,7 +23196,7 @@ var require_send = __commonJS({
           if (err) return self2.onStatError(err);
           return self2.error(404);
         }
-        var p = join7(path3, self2._index[i]);
+        var p = join8(path3, self2._index[i]);
         debug('stat "%s"', p);
         fs2.stat(p, function(err2, stat) {
           if (err2) return next(err2);
@@ -26320,7 +26320,7 @@ var require_thread_stream = __commonJS({
     var { version: version3 } = require_package();
     var { EventEmitter } = __require("events");
     var { Worker } = __require("worker_threads");
-    var { join: join7 } = __require("path");
+    var { join: join8 } = __require("path");
     var { pathToFileURL } = __require("url");
     var { wait } = require_wait();
     var {
@@ -26356,7 +26356,7 @@ var require_thread_stream = __commonJS({
     function createWorker(stream, opts) {
       const { filename, workerData } = opts;
       const bundlerOverrides = "__bundlerPathsOverrides" in globalThis ? globalThis.__bundlerPathsOverrides : {};
-      const toExecute = bundlerOverrides["thread-stream-worker"] || join7(__dirname, "lib", "worker.js");
+      const toExecute = bundlerOverrides["thread-stream-worker"] || join8(__dirname, "lib", "worker.js");
       const worker = new Worker(toExecute, {
         ...opts.workerOpts,
         trackUnmanagedFds: false,
@@ -26742,7 +26742,7 @@ var require_transport = __commonJS({
     "use strict";
     var { createRequire } = __require("module");
     var getCallers = require_caller();
-    var { join: join7, isAbsolute, sep } = __require("node:path");
+    var { join: join8, isAbsolute, sep } = __require("node:path");
     var sleep2 = require_atomic_sleep();
     var onExit = require_on_exit_leak_free();
     var ThreadStream = require_thread_stream();
@@ -26805,7 +26805,7 @@ var require_transport = __commonJS({
         throw new Error("only one of target or targets can be specified");
       }
       if (targets) {
-        target = bundlerOverrides["pino-worker"] || join7(__dirname, "worker.js");
+        target = bundlerOverrides["pino-worker"] || join8(__dirname, "worker.js");
         options.targets = targets.filter((dest) => dest.target).map((dest) => {
           return {
             ...dest,
@@ -26823,7 +26823,7 @@ var require_transport = __commonJS({
           });
         });
       } else if (pipeline) {
-        target = bundlerOverrides["pino-worker"] || join7(__dirname, "worker.js");
+        target = bundlerOverrides["pino-worker"] || join8(__dirname, "worker.js");
         options.pipelines = [pipeline.map((dest) => {
           return {
             ...dest,
@@ -26845,7 +26845,7 @@ var require_transport = __commonJS({
           return origin;
         }
         if (origin === "pino/file") {
-          return join7(__dirname, "..", "file.js");
+          return join8(__dirname, "..", "file.js");
         }
         let fixTarget2;
         for (const filePath of callers) {
@@ -27834,7 +27834,7 @@ var require_safe_stable_stringify = __commonJS({
               return circularValue;
             }
             let res = "";
-            let join7 = ",";
+            let join8 = ",";
             const originalIndentation = indentation;
             if (Array.isArray(value)) {
               if (value.length === 0) {
@@ -27848,7 +27848,7 @@ var require_safe_stable_stringify = __commonJS({
                 indentation += spacer;
                 res += `
 ${indentation}`;
-                join7 = `,
+                join8 = `,
 ${indentation}`;
               }
               const maximumValuesToStringify = Math.min(value.length, maximumBreadth);
@@ -27856,13 +27856,13 @@ ${indentation}`;
               for (; i < maximumValuesToStringify - 1; i++) {
                 const tmp2 = stringifyFnReplacer(String(i), value, stack, replacer, spacer, indentation);
                 res += tmp2 !== void 0 ? tmp2 : "null";
-                res += join7;
+                res += join8;
               }
               const tmp = stringifyFnReplacer(String(i), value, stack, replacer, spacer, indentation);
               res += tmp !== void 0 ? tmp : "null";
               if (value.length - 1 > maximumBreadth) {
                 const removedKeys = value.length - maximumBreadth - 1;
-                res += `${join7}"... ${getItemCount(removedKeys)} not stringified"`;
+                res += `${join8}"... ${getItemCount(removedKeys)} not stringified"`;
               }
               if (spacer !== "") {
                 res += `
@@ -27883,7 +27883,7 @@ ${originalIndentation}`;
             let separator = "";
             if (spacer !== "") {
               indentation += spacer;
-              join7 = `,
+              join8 = `,
 ${indentation}`;
               whitespace = " ";
             }
@@ -27897,13 +27897,13 @@ ${indentation}`;
               const tmp = stringifyFnReplacer(key2, value, stack, replacer, spacer, indentation);
               if (tmp !== void 0) {
                 res += `${separator}${strEscape(key2)}:${whitespace}${tmp}`;
-                separator = join7;
+                separator = join8;
               }
             }
             if (keyLength > maximumBreadth) {
               const removedKeys = keyLength - maximumBreadth;
               res += `${separator}"...":${whitespace}"${getItemCount(removedKeys)} not stringified"`;
-              separator = join7;
+              separator = join8;
             }
             if (spacer !== "" && separator.length > 1) {
               res = `
@@ -27944,7 +27944,7 @@ ${originalIndentation}`;
             }
             const originalIndentation = indentation;
             let res = "";
-            let join7 = ",";
+            let join8 = ",";
             if (Array.isArray(value)) {
               if (value.length === 0) {
                 return "[]";
@@ -27957,7 +27957,7 @@ ${originalIndentation}`;
                 indentation += spacer;
                 res += `
 ${indentation}`;
-                join7 = `,
+                join8 = `,
 ${indentation}`;
               }
               const maximumValuesToStringify = Math.min(value.length, maximumBreadth);
@@ -27965,13 +27965,13 @@ ${indentation}`;
               for (; i < maximumValuesToStringify - 1; i++) {
                 const tmp2 = stringifyArrayReplacer(String(i), value[i], stack, replacer, spacer, indentation);
                 res += tmp2 !== void 0 ? tmp2 : "null";
-                res += join7;
+                res += join8;
               }
               const tmp = stringifyArrayReplacer(String(i), value[i], stack, replacer, spacer, indentation);
               res += tmp !== void 0 ? tmp : "null";
               if (value.length - 1 > maximumBreadth) {
                 const removedKeys = value.length - maximumBreadth - 1;
-                res += `${join7}"... ${getItemCount(removedKeys)} not stringified"`;
+                res += `${join8}"... ${getItemCount(removedKeys)} not stringified"`;
               }
               if (spacer !== "") {
                 res += `
@@ -27984,7 +27984,7 @@ ${originalIndentation}`;
             let whitespace = "";
             if (spacer !== "") {
               indentation += spacer;
-              join7 = `,
+              join8 = `,
 ${indentation}`;
               whitespace = " ";
             }
@@ -27993,7 +27993,7 @@ ${indentation}`;
               const tmp = stringifyArrayReplacer(key2, value[key2], stack, replacer, spacer, indentation);
               if (tmp !== void 0) {
                 res += `${separator}${strEscape(key2)}:${whitespace}${tmp}`;
-                separator = join7;
+                separator = join8;
               }
             }
             if (spacer !== "" && separator.length > 1) {
@@ -28051,20 +28051,20 @@ ${originalIndentation}`;
               indentation += spacer;
               let res2 = `
 ${indentation}`;
-              const join8 = `,
+              const join9 = `,
 ${indentation}`;
               const maximumValuesToStringify = Math.min(value.length, maximumBreadth);
               let i = 0;
               for (; i < maximumValuesToStringify - 1; i++) {
                 const tmp2 = stringifyIndent(String(i), value[i], stack, spacer, indentation);
                 res2 += tmp2 !== void 0 ? tmp2 : "null";
-                res2 += join8;
+                res2 += join9;
               }
               const tmp = stringifyIndent(String(i), value[i], stack, spacer, indentation);
               res2 += tmp !== void 0 ? tmp : "null";
               if (value.length - 1 > maximumBreadth) {
                 const removedKeys = value.length - maximumBreadth - 1;
-                res2 += `${join8}"... ${getItemCount(removedKeys)} not stringified"`;
+                res2 += `${join9}"... ${getItemCount(removedKeys)} not stringified"`;
               }
               res2 += `
 ${originalIndentation}`;
@@ -28080,16 +28080,16 @@ ${originalIndentation}`;
               return '"[Object]"';
             }
             indentation += spacer;
-            const join7 = `,
+            const join8 = `,
 ${indentation}`;
             let res = "";
             let separator = "";
             let maximumPropertiesToStringify = Math.min(keyLength, maximumBreadth);
             if (isTypedArrayWithEntries(value)) {
-              res += stringifyTypedArray(value, join7, maximumBreadth);
+              res += stringifyTypedArray(value, join8, maximumBreadth);
               keys = keys.slice(value.length);
               maximumPropertiesToStringify -= value.length;
-              separator = join7;
+              separator = join8;
             }
             if (deterministic) {
               keys = sort(keys, comparator);
@@ -28100,13 +28100,13 @@ ${indentation}`;
               const tmp = stringifyIndent(key2, value[key2], stack, spacer, indentation);
               if (tmp !== void 0) {
                 res += `${separator}${strEscape(key2)}: ${tmp}`;
-                separator = join7;
+                separator = join8;
               }
             }
             if (keyLength > maximumBreadth) {
               const removedKeys = keyLength - maximumBreadth;
               res += `${separator}"...": "${getItemCount(removedKeys)} not stringified"`;
-              separator = join7;
+              separator = join8;
             }
             if (separator !== "") {
               res = `
@@ -93698,7 +93698,7 @@ var require_dist14 = __commonJS({
     var import_node_worker_threads2 = __require("worker_threads");
     var import_collection2 = require_dist13();
     var import_node_events = __require("events");
-    var import_node_path8 = __require("path");
+    var import_node_path9 = __require("path");
     var import_node_worker_threads = __require("worker_threads");
     var import_collection = require_dist13();
     var WorkerSendPayloadOp = /* @__PURE__ */ ((WorkerSendPayloadOp2) => {
@@ -93851,18 +93851,18 @@ var require_dist14 = __commonJS({
       resolveWorkerPath() {
         const path2 = this.options.workerPath;
         if (!path2) {
-          return (0, import_node_path8.join)(__dirname, "defaultWorker.js");
+          return (0, import_node_path9.join)(__dirname, "defaultWorker.js");
         }
-        if ((0, import_node_path8.isAbsolute)(path2)) {
+        if ((0, import_node_path9.isAbsolute)(path2)) {
           return path2;
         }
         if (/^\.\.?[/\\]/.test(path2)) {
-          return (0, import_node_path8.resolve)(path2);
+          return (0, import_node_path9.resolve)(path2);
         }
         try {
           return __require.resolve(path2);
         } catch {
-          return (0, import_node_path8.resolve)(path2);
+          return (0, import_node_path9.resolve)(path2);
         }
       }
       async waitForWorkerReady(worker) {
@@ -114271,7 +114271,7 @@ var app_default = app;
 
 // src/discord/client.ts
 var import_discord14 = __toESM(require_src2(), 1);
-import { join as join6 } from "node:path";
+import { join as join7 } from "node:path";
 import { fileURLToPath as fileURLToPath3 } from "node:url";
 
 // node_modules/drizzle-orm/entity.js
@@ -115311,7 +115311,7 @@ function sql(strings, ...params) {
     return new SQL([new StringChunk(str)]);
   }
   sql2.raw = raw;
-  function join7(chunks, separator) {
+  function join8(chunks, separator) {
     const result = [];
     for (const [i, chunk] of chunks.entries()) {
       if (i > 0 && separator !== void 0) {
@@ -115321,7 +115321,7 @@ function sql(strings, ...params) {
     }
     return new SQL(result);
   }
-  sql2.join = join7;
+  sql2.join = join8;
   function identifier(value) {
     return new Name(value);
   }
@@ -117588,7 +117588,7 @@ var OVERWATCH_PING_THRESHOLD = 5;
 var OVERWATCH_VIOLATIONS_BEFORE_MUTE = 3;
 var OVERWATCH_MUTE_DURATION_MIN = 15;
 var OVERWATCH_WARNING_LIFESPAN_MS = 15e3;
-var GEMINI_DAILY_LIMIT = 1e5;
+var GEMINI_DAILY_LIMIT = Number(process.env.GOOGLE_DAILY_TOKEN_LIMIT) || 1e5;
 var GOOGLE_TPM_LIMIT = Number(process.env.GOOGLE_TPM_LIMIT) || 12e3;
 var PRESENCE_POLL_INTERVAL_MS = 6e4;
 var GUARD_REQUEST_LIFESPAN_MS = 24 * 60 * 60 * 1e3;
@@ -119079,7 +119079,7 @@ var PgSelectQueryBuilderBase = class extends TypedQueryBuilder {
       const baseTableName = this.tableName;
       const tableName = getTableLikeName(table);
       for (const item of extractUsedTable(table)) this.usedTables.add(item);
-      if (typeof tableName === "string" && this.config.joins?.some((join7) => join7.alias === tableName)) {
+      if (typeof tableName === "string" && this.config.joins?.some((join8) => join8.alias === tableName)) {
         throw new Error(`Alias "${tableName}" is already used in this query`);
       }
       if (!this.isPartialSelect) {
@@ -120300,7 +120300,7 @@ var PgUpdateBase = class extends QueryPromise {
   createJoin(joinType) {
     return (table, on) => {
       const tableName = getTableLikeName(table);
-      if (typeof tableName === "string" && this.config.joins.some((join7) => join7.alias === tableName)) {
+      if (typeof tableName === "string" && this.config.joins.some((join8) => join8.alias === tableName)) {
         throw new Error(`Alias "${tableName}" is already used in this query`);
       }
       if (typeof on === "function") {
@@ -120396,10 +120396,10 @@ var PgUpdateBase = class extends QueryPromise {
           const fromFields = this.getTableLikeFields(this.config.from);
           fields[tableName] = fromFields;
         }
-        for (const join7 of this.config.joins) {
-          const tableName2 = getTableLikeName(join7.table);
-          if (typeof tableName2 === "string" && !is(join7.table, SQL)) {
-            const fromFields = this.getTableLikeFields(join7.table);
+        for (const join8 of this.config.joins) {
+          const tableName2 = getTableLikeName(join8.table);
+          if (typeof tableName2 === "string" && !is(join8.table, SQL)) {
+            const fromFields = this.getTableLikeFields(join8.table);
             fields[tableName2] = fromFields;
           }
         }
@@ -135648,6 +135648,10 @@ async function startPresenceLoops(ready) {
     );
   }
 }
+
+// src/discord/ai/geminiClient.ts
+import { readFileSync as readFileSync5, writeFileSync as writeFileSync3 } from "node:fs";
+import { join as join5 } from "node:path";
 
 // node_modules/openai/internal/tslib.mjs
 function __classPrivateFieldSet2(receiver, state2, value, kind, f) {
@@ -152039,8 +152043,37 @@ var openai = new OpenAI({
   apiKey: process.env.GOOGLE_API_KEY,
   baseURL: "https://generativelanguage.googleapis.com/v1beta/openai"
 });
+var TOKEN_USAGE_FILE_PATH = join5(DATA_DIR, "token-usage.json");
 var dailyTokensUsed = 0;
 var tokenResetDate = (/* @__PURE__ */ new Date()).toDateString();
+function loadTokenUsage() {
+  try {
+    const raw = readFileSync5(TOKEN_USAGE_FILE_PATH, "utf-8");
+    const parsed = JSON.parse(raw);
+    const today = (/* @__PURE__ */ new Date()).toDateString();
+    if (parsed.tokenResetDate === today && typeof parsed.dailyTokensUsed === "number") {
+      dailyTokensUsed = parsed.dailyTokensUsed;
+      tokenResetDate = today;
+      logger.info({ dailyTokensUsed }, "Daily token usage restored from disk");
+    } else {
+      dailyTokensUsed = 0;
+      tokenResetDate = today;
+    }
+  } catch {
+    logger.info("No token-usage.json found yet \u2014 starting today's count at 0");
+  }
+}
+function persistTokenUsage() {
+  try {
+    writeFileSync3(
+      TOKEN_USAGE_FILE_PATH,
+      JSON.stringify({ dailyTokensUsed, tokenResetDate }),
+      "utf-8"
+    );
+  } catch (err) {
+    logger.error({ err }, "Failed to persist token-usage.json");
+  }
+}
 var minuteTokensUsed = 0;
 var minuteWindowStart = Date.now();
 function trackTokens(used) {
@@ -152050,6 +152083,7 @@ function trackTokens(used) {
     tokenResetDate = today;
   }
   dailyTokensUsed += used;
+  persistTokenUsage();
   const now = Date.now();
   if (now - minuteWindowStart >= 6e4) {
     minuteTokensUsed = 0;
@@ -152409,11 +152443,11 @@ import { appendFileSync as appendFileSync2 } from "node:fs";
 
 // src/discord/moderation/overwatch.ts
 var import_discord11 = __toESM(require_src2(), 1);
-import { readFileSync as readFileSync5 } from "node:fs";
-import { join as join5 } from "node:path";
+import { readFileSync as readFileSync6 } from "node:fs";
+import { join as join6 } from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
 var INVITE_LINK_PATTERN = /(?:discord\.gg\/|discord(?:app)?\.com\/invite\/)[a-z0-9-]+/i;
-var OVERWATCH_FILTER_FILE_PATH = join5(
+var OVERWATCH_FILTER_FILE_PATH = join6(
   fileURLToPath2(new URL(".", import.meta.url)),
   "overwatch-filters.txt"
 );
@@ -152424,7 +152458,7 @@ var reactionWatches = /* @__PURE__ */ new Map();
 var cachedOverwatchFilters = [];
 function loadOverwatchFilters() {
   try {
-    const raw = readFileSync5(OVERWATCH_FILTER_FILE_PATH, "utf-8");
+    const raw = readFileSync6(OVERWATCH_FILTER_FILE_PATH, "utf-8");
     cachedOverwatchFilters = raw.split("\n").map((l) => l.trim().toLowerCase()).filter((l) => l.length > 0 && !l.startsWith("#"));
     logger.info(
       { count: cachedOverwatchFilters.length },
@@ -155942,12 +155976,13 @@ async function startBot() {
   process.once("SIGTERM", () => void shutdown("SIGTERM"));
   process.once("SIGINT", () => void shutdown("SIGINT"));
   const thisDirUrl = new URL(".", import.meta.url);
-  const migrationsDir = join6(fileURLToPath3(thisDirUrl), "db-migrations");
+  const migrationsDir = join7(fileURLToPath3(thisDirUrl), "db-migrations");
   await runMigrations(migrationsDir);
   loadKnowledge();
   loadOverwatchFilters();
   loadJarvisAccess();
   loadRobloxTracking();
+  loadTokenUsage();
   await client.login(token);
 }
 

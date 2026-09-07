@@ -1,6 +1,8 @@
+import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import type { Client } from "discord.js";
 import OpenAI from "openai";
-import { getConfiguredIds } from "../../config";
+import { DATA_DIR, getConfiguredIds } from "../../config";
 import { logger } from "../../lib/logger";
 
 // ─── OpenAI client ────────────────────────────────────────────────────────────
@@ -10,10 +12,51 @@ export const openai = new OpenAI({
   baseURL: "https://generativelanguage.googleapis.com/v1beta/openai",
 });
 
-// Daily token usage tracker (resets when date changes)
+// ─── Daily token usage tracker ─────────────────────────────────────────────────
+// Persisted to disk (unlike the per-minute counter below) — otherwise every
+// bot restart silently zeroes the "daily" total, which is exactly why
+// get_token_usage used to report a different, too-low number after every
+// redeploy/crash-restart instead of the actual usage so far that day.
+
+const TOKEN_USAGE_FILE_PATH = join(DATA_DIR, "token-usage.json");
 
 export let dailyTokensUsed = 0;
 export let tokenResetDate = new Date().toDateString();
+
+export function loadTokenUsage(): void {
+  try {
+    const raw = readFileSync(TOKEN_USAGE_FILE_PATH, "utf-8");
+    const parsed = JSON.parse(raw) as {
+      dailyTokensUsed?: number;
+      tokenResetDate?: string;
+    };
+    const today = new Date().toDateString();
+    if (parsed.tokenResetDate === today && typeof parsed.dailyTokensUsed === "number") {
+      dailyTokensUsed = parsed.dailyTokensUsed;
+      tokenResetDate = today;
+      logger.info({ dailyTokensUsed }, "Daily token usage restored from disk");
+    } else {
+      // Stored count is from a previous day (or file is malformed) — today
+      // starts fresh, same as if no file existed at all.
+      dailyTokensUsed = 0;
+      tokenResetDate = today;
+    }
+  } catch {
+    logger.info("No token-usage.json found yet — starting today's count at 0");
+  }
+}
+
+function persistTokenUsage(): void {
+  try {
+    writeFileSync(
+      TOKEN_USAGE_FILE_PATH,
+      JSON.stringify({ dailyTokensUsed, tokenResetDate }),
+      "utf-8",
+    );
+  } catch (err) {
+    logger.error({ err }, "Failed to persist token-usage.json");
+  }
+}
 
 export let minuteTokensUsed = 0;
 export let minuteWindowStart = Date.now();
@@ -25,6 +68,7 @@ export function trackTokens(used: number) {
     tokenResetDate = today;
   }
   dailyTokensUsed += used;
+  persistTokenUsage();
 
   const now = Date.now();
   if (now - minuteWindowStart >= 60_000) {

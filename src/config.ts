@@ -34,7 +34,12 @@ export const OVERWATCH_WARNING_LIFESPAN_MS = 15_000; // how long the public warn
 
 // ─── AI quota constants ───────────────────────────────────────────────────────
 
-export const GEMINI_DAILY_LIMIT = 100_000;
+// The 100,000 fallback is a guess, not a real Google quota figure — set
+// GOOGLE_DAILY_TOKEN_LIMIT to whatever your account's actual daily limit is
+// (visible on your Google AI Studio / Cloud console quota page) so the
+// get_token_usage tool reports a percentage that means something.
+export const GEMINI_DAILY_LIMIT =
+  Number(process.env.GOOGLE_DAILY_TOKEN_LIMIT) || 100_000;
 
 // Per-minute token usage tracker — Google AI Studio enforces a TPM (tokens-per-minute)
 // limit that varies by tier and model. Set GOOGLE_TPM_LIMIT in your environment to
