@@ -49002,26 +49002,26 @@ var require_channel = __commonJS({
       ForumLayoutType2[ForumLayoutType2["ListView"] = 1] = "ListView";
       ForumLayoutType2[ForumLayoutType2["GalleryView"] = 2] = "GalleryView";
     })(ForumLayoutType || (exports2.ForumLayoutType = ForumLayoutType = {}));
-    var ChannelType2;
-    (function(ChannelType3) {
-      ChannelType3[ChannelType3["GuildText"] = 0] = "GuildText";
-      ChannelType3[ChannelType3["DM"] = 1] = "DM";
-      ChannelType3[ChannelType3["GuildVoice"] = 2] = "GuildVoice";
-      ChannelType3[ChannelType3["GroupDM"] = 3] = "GroupDM";
-      ChannelType3[ChannelType3["GuildCategory"] = 4] = "GuildCategory";
-      ChannelType3[ChannelType3["GuildAnnouncement"] = 5] = "GuildAnnouncement";
-      ChannelType3[ChannelType3["AnnouncementThread"] = 10] = "AnnouncementThread";
-      ChannelType3[ChannelType3["PublicThread"] = 11] = "PublicThread";
-      ChannelType3[ChannelType3["PrivateThread"] = 12] = "PrivateThread";
-      ChannelType3[ChannelType3["GuildStageVoice"] = 13] = "GuildStageVoice";
-      ChannelType3[ChannelType3["GuildDirectory"] = 14] = "GuildDirectory";
-      ChannelType3[ChannelType3["GuildForum"] = 15] = "GuildForum";
-      ChannelType3[ChannelType3["GuildMedia"] = 16] = "GuildMedia";
-      ChannelType3[ChannelType3["GuildNews"] = 5] = "GuildNews";
-      ChannelType3[ChannelType3["GuildNewsThread"] = 10] = "GuildNewsThread";
-      ChannelType3[ChannelType3["GuildPublicThread"] = 11] = "GuildPublicThread";
-      ChannelType3[ChannelType3["GuildPrivateThread"] = 12] = "GuildPrivateThread";
-    })(ChannelType2 || (exports2.ChannelType = ChannelType2 = {}));
+    var ChannelType3;
+    (function(ChannelType4) {
+      ChannelType4[ChannelType4["GuildText"] = 0] = "GuildText";
+      ChannelType4[ChannelType4["DM"] = 1] = "DM";
+      ChannelType4[ChannelType4["GuildVoice"] = 2] = "GuildVoice";
+      ChannelType4[ChannelType4["GroupDM"] = 3] = "GroupDM";
+      ChannelType4[ChannelType4["GuildCategory"] = 4] = "GuildCategory";
+      ChannelType4[ChannelType4["GuildAnnouncement"] = 5] = "GuildAnnouncement";
+      ChannelType4[ChannelType4["AnnouncementThread"] = 10] = "AnnouncementThread";
+      ChannelType4[ChannelType4["PublicThread"] = 11] = "PublicThread";
+      ChannelType4[ChannelType4["PrivateThread"] = 12] = "PrivateThread";
+      ChannelType4[ChannelType4["GuildStageVoice"] = 13] = "GuildStageVoice";
+      ChannelType4[ChannelType4["GuildDirectory"] = 14] = "GuildDirectory";
+      ChannelType4[ChannelType4["GuildForum"] = 15] = "GuildForum";
+      ChannelType4[ChannelType4["GuildMedia"] = 16] = "GuildMedia";
+      ChannelType4[ChannelType4["GuildNews"] = 5] = "GuildNews";
+      ChannelType4[ChannelType4["GuildNewsThread"] = 10] = "GuildNewsThread";
+      ChannelType4[ChannelType4["GuildPublicThread"] = 11] = "GuildPublicThread";
+      ChannelType4[ChannelType4["GuildPrivateThread"] = 12] = "GuildPrivateThread";
+    })(ChannelType3 || (exports2.ChannelType = ChannelType3 = {}));
     var VideoQualityMode;
     (function(VideoQualityMode2) {
       VideoQualityMode2[VideoQualityMode2["Auto"] = 1] = "Auto";
@@ -60576,7 +60576,7 @@ var require_ChannelFlagsBitField = __commonJS({
 var require_Constants = __commonJS({
   "node_modules/discord.js/src/util/Constants.js"(exports2) {
     "use strict";
-    var { ChannelType: ChannelType2, MessageType, ComponentType: ComponentType5, ImageFormat, StickerFormatType } = require_v106();
+    var { ChannelType: ChannelType3, MessageType, ComponentType: ComponentType5, ImageFormat, StickerFormatType } = require_v106();
     exports2.MaxBulkDeletableMessageAge = 12096e5;
     exports2.SweeperKeys = [
       "autoModerationRules",
@@ -60603,18 +60603,18 @@ var require_Constants = __commonJS({
       MessageType.ContextMenuCommand
     ];
     exports2.GuildTextBasedChannelTypes = [
-      ChannelType2.GuildText,
-      ChannelType2.GuildAnnouncement,
-      ChannelType2.AnnouncementThread,
-      ChannelType2.PublicThread,
-      ChannelType2.PrivateThread,
-      ChannelType2.GuildVoice,
-      ChannelType2.GuildStageVoice
+      ChannelType3.GuildText,
+      ChannelType3.GuildAnnouncement,
+      ChannelType3.AnnouncementThread,
+      ChannelType3.PublicThread,
+      ChannelType3.PrivateThread,
+      ChannelType3.GuildVoice,
+      ChannelType3.GuildStageVoice
     ];
-    exports2.TextBasedChannelTypes = [...exports2.GuildTextBasedChannelTypes, ChannelType2.DM, ChannelType2.GroupDM];
-    exports2.SendableChannels = [...exports2.GuildTextBasedChannelTypes, ChannelType2.DM];
-    exports2.ThreadChannelTypes = [ChannelType2.AnnouncementThread, ChannelType2.PublicThread, ChannelType2.PrivateThread];
-    exports2.VoiceBasedChannelTypes = [ChannelType2.GuildVoice, ChannelType2.GuildStageVoice];
+    exports2.TextBasedChannelTypes = [...exports2.GuildTextBasedChannelTypes, ChannelType3.DM, ChannelType3.GroupDM];
+    exports2.SendableChannels = [...exports2.GuildTextBasedChannelTypes, ChannelType3.DM];
+    exports2.ThreadChannelTypes = [ChannelType3.AnnouncementThread, ChannelType3.PublicThread, ChannelType3.PrivateThread];
+    exports2.VoiceBasedChannelTypes = [ChannelType3.GuildVoice, ChannelType3.GuildStageVoice];
     exports2.SelectMenuTypes = [
       ComponentType5.StringSelect,
       ComponentType5.UserSelect,
@@ -60673,7 +60673,7 @@ var require_BaseChannel = __commonJS({
     "use strict";
     var { channelLink, channelMention } = require_dist11();
     var { DiscordSnowflake } = require_cjs();
-    var { ChannelType: ChannelType2, Routes: Routes3 } = require_v106();
+    var { ChannelType: ChannelType3, Routes: Routes3 } = require_v106();
     var Base = require_Base();
     var ChannelFlagsBitField = require_ChannelFlagsBitField();
     var { ThreadChannelTypes } = require_Constants();
@@ -60774,7 +60774,7 @@ var require_BaseChannel = __commonJS({
        * @returns {boolean}
        */
       isDMBased() {
-        return [ChannelType2.DM, ChannelType2.GroupDM].includes(this.type);
+        return [ChannelType3.DM, ChannelType3.GroupDM].includes(this.type);
       }
       /**
        * Indicates whether this channel is {@link BaseGuildVoiceChannel voice-based}.
@@ -61719,7 +61719,7 @@ var require_GuildChannel = __commonJS({
   "node_modules/discord.js/src/structures/GuildChannel.js"(exports2, module2) {
     "use strict";
     var { Snowflake } = require_cjs();
-    var { PermissionFlagsBits, ChannelType: ChannelType2 } = require_v106();
+    var { PermissionFlagsBits, ChannelType: ChannelType3 } = require_v106();
     var { BaseChannel } = require_BaseChannel();
     var { DiscordjsError: DiscordjsError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var PermissionOverwriteManager = require_PermissionOverwriteManager();
@@ -61797,7 +61797,7 @@ var require_GuildChannel = __commonJS({
        * @readonly
        */
       get position() {
-        const selfIsCategory = this.type === ChannelType2.GuildCategory;
+        const selfIsCategory = this.type === ChannelType3.GuildCategory;
         const types3 = getSortableGroupTypes(this.type);
         let count = 0;
         for (const channel of this.guild.channels.cache.values()) {
@@ -62117,7 +62117,7 @@ var require_Util = __commonJS({
     var { parse: parse3 } = __require("node:path");
     var process2 = __require("node:process");
     var { Collection: Collection2 } = require_dist10();
-    var { ChannelType: ChannelType2, RouteBases, Routes: Routes3 } = require_v106();
+    var { ChannelType: ChannelType3, RouteBases, Routes: Routes3 } = require_v106();
     var { fetch: fetch2 } = require_undici();
     var Colors = require_Colors();
     var { DiscordjsError: DiscordjsError2, DiscordjsRangeError: DiscordjsRangeError2, DiscordjsTypeError: DiscordjsTypeError2, ErrorCodes: ErrorCodes2 } = require_errors2();
@@ -62186,24 +62186,24 @@ var require_Util = __commonJS({
       };
     }
     var TextSortableGroupTypes = [
-      ChannelType2.GuildText,
-      ChannelType2.GuildAnnouncement,
-      ChannelType2.GuildForum,
-      ChannelType2.GuildMedia
+      ChannelType3.GuildText,
+      ChannelType3.GuildAnnouncement,
+      ChannelType3.GuildForum,
+      ChannelType3.GuildMedia
     ];
-    var VoiceSortableGroupTypes = [ChannelType2.GuildVoice, ChannelType2.GuildStageVoice];
-    var CategorySortableGroupTypes = [ChannelType2.GuildCategory];
+    var VoiceSortableGroupTypes = [ChannelType3.GuildVoice, ChannelType3.GuildStageVoice];
+    var CategorySortableGroupTypes = [ChannelType3.GuildCategory];
     function getSortableGroupTypes(type) {
       switch (type) {
-        case ChannelType2.GuildText:
-        case ChannelType2.GuildAnnouncement:
-        case ChannelType2.GuildForum:
-        case ChannelType2.GuildMedia:
+        case ChannelType3.GuildText:
+        case ChannelType3.GuildAnnouncement:
+        case ChannelType3.GuildForum:
+        case ChannelType3.GuildMedia:
           return TextSortableGroupTypes;
-        case ChannelType2.GuildVoice:
-        case ChannelType2.GuildStageVoice:
+        case ChannelType3.GuildVoice:
+        case ChannelType3.GuildStageVoice:
           return VoiceSortableGroupTypes;
-        case ChannelType2.GuildCategory:
+        case ChannelType3.GuildCategory:
           return CategorySortableGroupTypes;
         default:
           return [type];
@@ -62278,7 +62278,7 @@ var require_Util = __commonJS({
               return user ? `@${user.displayName}` : match;
             }
             case "@&": {
-              if (channel.type === ChannelType2.DM) return match;
+              if (channel.type === ChannelType3.DM) return match;
               const role = channel.guild.roles.cache.get(id);
               return role ? `@${role.name}` : match;
             }
@@ -78670,7 +78670,7 @@ var require_Message = __commonJS({
     var { DiscordSnowflake } = require_cjs();
     var {
       InteractionType,
-      ChannelType: ChannelType2,
+      ChannelType: ChannelType3,
       MessageType,
       MessageFlags,
       PermissionFlagsBits,
@@ -79199,7 +79199,7 @@ var require_Message = __commonJS({
         const bitfield = PermissionFlagsBits.SendMessages | (this.author.id === this.client.user.id ? PermissionsBitField2.DefaultBit : PermissionFlagsBits.ManageMessages);
         const { channel } = this;
         return Boolean(
-          channel?.type === ChannelType2.GuildAnnouncement && !this.flags.has(MessageFlags.Crossposted) && this.reference?.type !== MessageReferenceType.Forward && this.type === MessageType.Default && !this.poll && channel.viewable && channel.permissionsFor(this.client.user)?.has(bitfield, false)
+          channel?.type === ChannelType3.GuildAnnouncement && !this.flags.has(MessageFlags.Crossposted) && this.reference?.type !== MessageReferenceType.Forward && this.type === MessageType.Default && !this.poll && channel.viewable && channel.permissionsFor(this.client.user)?.has(bitfield, false)
         );
       }
       /**
@@ -79368,7 +79368,7 @@ var require_Message = __commonJS({
        */
       async startThread(options = {}) {
         if (!this.channel) throw new DiscordjsError2(ErrorCodes2.ChannelNotCached);
-        if (![ChannelType2.GuildText, ChannelType2.GuildAnnouncement].includes(this.channel.type)) {
+        if (![ChannelType3.GuildText, ChannelType3.GuildAnnouncement].includes(this.channel.type)) {
           throw new DiscordjsError2(ErrorCodes2.MessageThreadParent);
         }
         if (this.hasThread) throw new DiscordjsError2(ErrorCodes2.MessageExistingThread);
@@ -79956,7 +79956,7 @@ var require_WebhookClient = __commonJS({
 var require_VoiceState = __commonJS({
   "node_modules/discord.js/src/structures/VoiceState.js"(exports2, module2) {
     "use strict";
-    var { ChannelType: ChannelType2, Routes: Routes3 } = require_v106();
+    var { ChannelType: ChannelType3, Routes: Routes3 } = require_v106();
     var Base = require_Base();
     var { DiscordjsError: DiscordjsError2, DiscordjsTypeError: DiscordjsTypeError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var VoiceState = class extends Base {
@@ -80100,7 +80100,7 @@ var require_VoiceState = __commonJS({
        * @returns {Promise<VoiceState>}
        */
       async edit(options) {
-        if (this.channel?.type !== ChannelType2.GuildStageVoice) throw new DiscordjsError2(ErrorCodes2.VoiceNotStageChannel);
+        if (this.channel?.type !== ChannelType3.GuildStageVoice) throw new DiscordjsError2(ErrorCodes2.VoiceNotStageChannel);
         const target = this.client.user.id === this.id ? "@me" : this.id;
         if (target !== "@me" && options.requestToSpeak !== void 0) {
           throw new DiscordjsError2(ErrorCodes2.VoiceStateNotOwn);
@@ -82457,7 +82457,7 @@ var require_Partials = __commonJS({
 var require_Action = __commonJS({
   "node_modules/discord.js/src/client/actions/Action.js"(exports2, module2) {
     "use strict";
-    var { ChannelType: ChannelType2 } = require_v106();
+    var { ChannelType: ChannelType3 } = require_v106();
     var { Poll } = require_Poll();
     var { PollAnswer } = require_PollAnswer();
     var Partials = require_Partials();
@@ -82479,7 +82479,7 @@ var require_Action = __commonJS({
           if (!data.recipients.some((existingRecipient) => recipient.id === existingRecipient.id)) {
             payloadData.recipients = [...data.recipients, recipient];
           }
-        } else if (data.type === ChannelType2.DM || data.type === ChannelType2.GroupDM) {
+        } else if (data.type === ChannelType3.DM || data.type === ChannelType3.GroupDM) {
           const recipient = data.author ?? data.user ?? { id: data.user_id };
           payloadData.recipients = [recipient];
         }
@@ -82905,7 +82905,7 @@ var require_DMChannel = __commonJS({
   "node_modules/discord.js/src/structures/DMChannel.js"(exports2, module2) {
     "use strict";
     var { userMention } = require_dist11();
-    var { ChannelType: ChannelType2 } = require_v106();
+    var { ChannelType: ChannelType3 } = require_v106();
     var { BaseChannel } = require_BaseChannel();
     var TextBasedChannel = require_TextBasedChannel();
     var DMMessageManager = require_DMMessageManager();
@@ -82913,7 +82913,7 @@ var require_DMChannel = __commonJS({
     var DMChannel = class extends BaseChannel {
       constructor(client, data) {
         super(client, data);
-        this.type = ChannelType2.DM;
+        this.type = ChannelType3.DM;
         this.messages = new DMMessageManager(this);
       }
       _patch(data) {
@@ -83535,7 +83535,7 @@ var require_ThreadChannel = __commonJS({
     "use strict";
     var { DiscordAPIError } = require_dist9();
     var { lazy: lazy2 } = require_dist5();
-    var { RESTJSONErrorCodes, ChannelFlags, ChannelType: ChannelType2, PermissionFlagsBits, Routes: Routes3 } = require_v106();
+    var { RESTJSONErrorCodes, ChannelFlags, ChannelType: ChannelType3, PermissionFlagsBits, Routes: Routes3 } = require_v106();
     var { BaseChannel } = require_BaseChannel();
     var getThreadOnlyChannel = lazy2(() => require_ThreadOnlyChannel());
     var TextBasedChannel = require_TextBasedChannel();
@@ -83569,7 +83569,7 @@ var require_ThreadChannel = __commonJS({
         }
         if ("thread_metadata" in data) {
           this.locked = data.thread_metadata.locked ?? false;
-          this.invitable = this.type === ChannelType2.PrivateThread ? data.thread_metadata.invitable ?? false : null;
+          this.invitable = this.type === ChannelType3.PrivateThread ? data.thread_metadata.invitable ?? false : null;
           this.archived = data.thread_metadata.archived;
           this.autoArchiveDuration = data.thread_metadata.auto_archive_duration;
           this.archiveTimestamp = Date.parse(data.thread_metadata.archive_timestamp);
@@ -83583,7 +83583,7 @@ var require_ThreadChannel = __commonJS({
           this.archiveTimestamp ??= null;
           this.invitable ??= null;
         }
-        this._createdTimestamp ??= this.type === ChannelType2.PrivateThread ? super.createdTimestamp : null;
+        this._createdTimestamp ??= this.type === ChannelType3.PrivateThread ? super.createdTimestamp : null;
         if ("last_message_id" in data) {
           this.lastMessageId = data.last_message_id;
         } else {
@@ -83756,7 +83756,7 @@ var require_ThreadChannel = __commonJS({
             auto_archive_duration: options.autoArchiveDuration,
             rate_limit_per_user: options.rateLimitPerUser,
             locked: options.locked,
-            invitable: this.type === ChannelType2.PrivateThread ? options.invitable : void 0,
+            invitable: this.type === ChannelType3.PrivateThread ? options.invitable : void 0,
             applied_tags: options.appliedTags,
             flags: "flags" in options ? ChannelFlagsBitField.resolve(options.flags) : void 0
           },
@@ -83803,7 +83803,7 @@ var require_ThreadChannel = __commonJS({
        * @returns {Promise<ThreadChannel>}
        */
       async setInvitable(invitable = true, reason) {
-        if (this.type !== ChannelType2.PrivateThread) {
+        if (this.type !== ChannelType3.PrivateThread) {
           throw new DiscordjsRangeError2(ErrorCodes2.ThreadInvitableType, this.type);
         }
         return this.edit({ invitable, reason });
@@ -83886,7 +83886,7 @@ var require_ThreadChannel = __commonJS({
        * @readonly
        */
       get editable() {
-        return this.ownerId === this.client.user.id && (this.type !== ChannelType2.PrivateThread || this.joined) || this.manageable;
+        return this.ownerId === this.client.user.id && (this.type !== ChannelType3.PrivateThread || this.joined) || this.manageable;
       }
       /**
        * Whether the thread is joinable by the client user
@@ -83895,7 +83895,7 @@ var require_ThreadChannel = __commonJS({
        */
       get joinable() {
         return !this.archived && !this.joined && this.permissionsFor(this.client.user)?.has(
-          this.type === ChannelType2.PrivateThread ? PermissionFlagsBits.ManageThreads : PermissionFlagsBits.ViewChannel,
+          this.type === ChannelType3.PrivateThread ? PermissionFlagsBits.ManageThreads : PermissionFlagsBits.ViewChannel,
           false
         );
       }
@@ -83930,7 +83930,7 @@ var require_ThreadChannel = __commonJS({
         const permissions = this.permissionsFor(this.client.user);
         if (!permissions) return false;
         if (permissions.has(PermissionFlagsBits.Administrator, false)) return true;
-        return !(this.archived && this.locked && !this.manageable) && (this.type !== ChannelType2.PrivateThread || this.joined || this.manageable) && permissions.has(PermissionFlagsBits.SendMessagesInThreads, false) && this.guild.members.me.communicationDisabledUntilTimestamp < Date.now();
+        return !(this.archived && this.locked && !this.manageable) && (this.type !== ChannelType3.PrivateThread || this.joined || this.manageable) && permissions.has(PermissionFlagsBits.SendMessagesInThreads, false) && this.guild.members.me.communicationDisabledUntilTimestamp < Date.now();
       }
       /**
        * Whether the thread is unarchivable by the client user
@@ -84153,7 +84153,7 @@ var require_ThreadManager = __commonJS({
 var require_GuildTextThreadManager = __commonJS({
   "node_modules/discord.js/src/managers/GuildTextThreadManager.js"(exports2, module2) {
     "use strict";
-    var { ChannelType: ChannelType2, Routes: Routes3 } = require_v106();
+    var { ChannelType: ChannelType3, Routes: Routes3 } = require_v106();
     var ThreadManager = require_ThreadManager();
     var { DiscordjsTypeError: DiscordjsTypeError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var GuildTextThreadManager = class extends ThreadManager {
@@ -84209,12 +84209,12 @@ var require_GuildTextThreadManager = __commonJS({
         reason,
         rateLimitPerUser
       } = {}) {
-        let resolvedType = this.channel.type === ChannelType2.GuildAnnouncement ? ChannelType2.AnnouncementThread : ChannelType2.PublicThread;
+        let resolvedType = this.channel.type === ChannelType3.GuildAnnouncement ? ChannelType3.AnnouncementThread : ChannelType3.PublicThread;
         let startMessageId;
         if (startMessage) {
           startMessageId = this.channel.messages.resolveId(startMessage);
           if (!startMessageId) throw new DiscordjsTypeError2(ErrorCodes2.InvalidType, "startMessage", "MessageResolvable");
-        } else if (this.channel.type !== ChannelType2.GuildAnnouncement) {
+        } else if (this.channel.type !== ChannelType3.GuildAnnouncement) {
           resolvedType = type ?? resolvedType;
         }
         const data = await this.client.rest.post(Routes3.threads(this.channel.id, startMessageId), {
@@ -84222,7 +84222,7 @@ var require_GuildTextThreadManager = __commonJS({
             name,
             auto_archive_duration: autoArchiveDuration,
             type: resolvedType,
-            invitable: resolvedType === ChannelType2.PrivateThread ? invitable : void 0,
+            invitable: resolvedType === ChannelType3.PrivateThread ? invitable : void 0,
             rate_limit_per_user: rateLimitPerUser
           },
           reason
@@ -84886,7 +84886,7 @@ var require_Channels = __commonJS({
   "node_modules/discord.js/src/util/Channels.js"(exports2, module2) {
     "use strict";
     var { lazy: lazy2 } = require_dist5();
-    var { ChannelType: ChannelType2 } = require_v106();
+    var { ChannelType: ChannelType3 } = require_v106();
     var getCategoryChannel = lazy2(() => require_CategoryChannel());
     var getDMChannel = lazy2(() => require_DMChannel());
     var getNewsChannel = lazy2(() => require_NewsChannel());
@@ -84901,49 +84901,49 @@ var require_Channels = __commonJS({
     function createChannel(client, data, guild, { allowUnknownGuild } = {}) {
       let channel;
       if (!data.guild_id && !guild) {
-        if (data.recipients && data.type !== ChannelType2.GroupDM || data.type === ChannelType2.DM) {
+        if (data.recipients && data.type !== ChannelType3.GroupDM || data.type === ChannelType3.DM) {
           channel = new (getDMChannel())(client, data);
-        } else if (data.type === ChannelType2.GroupDM) {
+        } else if (data.type === ChannelType3.GroupDM) {
           channel = new (getPartialGroupDMChannel())(client, data);
         }
       } else {
         guild ??= client.guilds.cache.get(data.guild_id);
         if (guild || allowUnknownGuild) {
           switch (data.type) {
-            case ChannelType2.GuildText: {
+            case ChannelType3.GuildText: {
               channel = new (getTextChannel())(guild, data, client);
               break;
             }
-            case ChannelType2.GuildVoice: {
+            case ChannelType3.GuildVoice: {
               channel = new (getVoiceChannel())(guild, data, client);
               break;
             }
-            case ChannelType2.GuildCategory: {
+            case ChannelType3.GuildCategory: {
               channel = new (getCategoryChannel())(guild, data, client);
               break;
             }
-            case ChannelType2.GuildAnnouncement: {
+            case ChannelType3.GuildAnnouncement: {
               channel = new (getNewsChannel())(guild, data, client);
               break;
             }
-            case ChannelType2.GuildStageVoice: {
+            case ChannelType3.GuildStageVoice: {
               channel = new (getStageChannel())(guild, data, client);
               break;
             }
-            case ChannelType2.AnnouncementThread:
-            case ChannelType2.PublicThread:
-            case ChannelType2.PrivateThread: {
+            case ChannelType3.AnnouncementThread:
+            case ChannelType3.PublicThread:
+            case ChannelType3.PrivateThread: {
               channel = new (getThreadChannel())(guild, data, client);
               if (!allowUnknownGuild) channel.parent?.threads.cache.set(channel.id, channel);
               break;
             }
-            case ChannelType2.GuildDirectory:
+            case ChannelType3.GuildDirectory:
               channel = new (getDirectoryChannel())(guild, data, client);
               break;
-            case ChannelType2.GuildForum:
+            case ChannelType3.GuildForum:
               channel = new (getForumChannel())(guild, data, client);
               break;
-            case ChannelType2.GuildMedia:
+            case ChannelType3.GuildMedia:
               channel = new (getMediaChannel())(guild, data, client);
               break;
           }
@@ -97871,7 +97871,7 @@ var require_GuildChannelManager = __commonJS({
     "use strict";
     var process2 = __require("node:process");
     var { Collection: Collection2 } = require_dist10();
-    var { ChannelType: ChannelType2, Routes: Routes3 } = require_v106();
+    var { ChannelType: ChannelType3, Routes: Routes3 } = require_v106();
     var CachedManager = require_CachedManager();
     var GuildTextThreadManager = require_GuildTextThreadManager();
     var { DiscordjsError: DiscordjsError2, DiscordjsTypeError: DiscordjsTypeError2, ErrorCodes: ErrorCodes2 } = require_errors2();
@@ -98134,7 +98134,7 @@ var require_GuildChannelManager = __commonJS({
         if (options.lockPermissions) {
           if (parentId) {
             const newParent = this.cache.get(parentId);
-            if (newParent?.type === ChannelType2.GuildCategory) {
+            if (newParent?.type === ChannelType3.GuildCategory) {
               permission_overwrites = newParent.permissionOverwrites.cache.map(
                 (overwrite) => PermissionOverwrites.resolve(overwrite, this.guild)
               );
@@ -100834,7 +100834,7 @@ var require_Guild = __commonJS({
     var { Collection: Collection2 } = require_dist10();
     var { makeURLSearchParams: makeURLSearchParams2 } = require_dist9();
     var { DiscordSnowflake } = require_cjs();
-    var { ChannelType: ChannelType2, GuildPremiumTier, Routes: Routes3, GuildFeature } = require_v106();
+    var { ChannelType: ChannelType3, GuildPremiumTier, Routes: Routes3, GuildFeature } = require_v106();
     var AnonymousGuild = require_AnonymousGuild();
     var GuildAuditLogs = require_GuildAuditLogs();
     var { GuildOnboarding } = require_GuildOnboarding();
@@ -101970,7 +101970,7 @@ var require_Guild = __commonJS({
        * @private
        */
       _sortedChannels(channel) {
-        const channelIsCategory = channel.type === ChannelType2.GuildCategory;
+        const channelIsCategory = channel.type === ChannelType3.GuildCategory;
         const types3 = getSortableGroupTypes(channel.type);
         return discordSort(
           this.channels.cache.filter(
@@ -102352,7 +102352,7 @@ var require_GuildManager = __commonJS({
 var require_UserManager = __commonJS({
   "node_modules/discord.js/src/managers/UserManager.js"(exports2, module2) {
     "use strict";
-    var { ChannelType: ChannelType2, Routes: Routes3 } = require_v106();
+    var { ChannelType: ChannelType3, Routes: Routes3 } = require_v106();
     var CachedManager = require_CachedManager();
     var { DiscordjsError: DiscordjsError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var { GuildMember } = require_GuildMember();
@@ -102387,7 +102387,7 @@ var require_UserManager = __commonJS({
       dmChannel(userId) {
         const expectedRecipientIds = [userId, this.client.user.id];
         return this.client.channels.cache.find(
-          (channel) => channel.type === ChannelType2.DM && channel.recipientId === userId && channel.recipientIds.every((id) => expectedRecipientIds.includes(id))
+          (channel) => channel.type === ChannelType3.DM && channel.recipientId === userId && channel.recipientIds.every((id) => expectedRecipientIds.includes(id))
         ) ?? null;
       }
       /**
@@ -114270,7 +114270,7 @@ app.use((err, _req, res, _next) => {
 var app_default = app;
 
 // src/discord/client.ts
-var import_discord14 = __toESM(require_src2(), 1);
+var import_discord16 = __toESM(require_src2(), 1);
 import { join as join7 } from "node:path";
 import { fileURLToPath as fileURLToPath3 } from "node:url";
 
@@ -135539,7 +135539,7 @@ async function handleInteraction(interaction) {
 }
 
 // src/discord/events/messageEvents.ts
-var import_discord13 = __toESM(require_src2(), 1);
+var import_discord15 = __toESM(require_src2(), 1);
 
 // src/discord/presence.ts
 import { readFileSync as readFileSync4 } from "node:fs";
@@ -152437,9 +152437,306 @@ VERIFIED SPEAKER IDENTITY: You are currently speaking with ${speakerName}, verif
   return SYSTEM_PROMPT_BASE + identityBlock + knowledgeBlock;
 }
 
-// src/discord/ai/toolExecutor.ts
-var import_discord12 = __toESM(require_src2(), 1);
-import { appendFileSync as appendFileSync2 } from "node:fs";
+// src/discord/ai/tools/shared.ts
+async function findMember(guild, query) {
+  const mention = query.match(/^<@!?(\d+)>$/);
+  if (mention) return guild.members.fetch(mention[1]).catch(() => null);
+  if (/^\d+$/.test(query)) return guild.members.fetch(query).catch(() => null);
+  const results = await guild.members.fetch({ query, limit: 10 }).catch(() => null);
+  if (!results?.size) return null;
+  const norm = query.toLowerCase();
+  return results.find(
+    (m) => m.user.username.toLowerCase() === norm || m.user.globalName?.toLowerCase() === norm || m.displayName.toLowerCase() === norm
+  ) ?? results.first() ?? null;
+}
+function findAnyChannel(guild, name) {
+  const norm = name.toLowerCase().replace(/^#/, "");
+  return guild.channels.cache.find((c) => c.name.toLowerCase() === norm);
+}
+function findRole(guild, name) {
+  const norm = name.toLowerCase();
+  return guild.roles.cache.find(
+    (r) => r.name.toLowerCase() === norm && r.name !== "@everyone"
+  );
+}
+
+// src/discord/ai/tools/meritTools.ts
+var meritToolDefs = [
+  {
+    type: "function",
+    function: {
+      name: "award_merit",
+      description: "Awards merits to one or more members. Use type 'bonus' for one or more named members, each receiving the same 0.1-7 amount (Advisor+ only); use 'exam'/'event' (HR+) or 'raid' (Advisor+ only) with a required host \u2014 the person who receives the merit for running it \u2014 plus any participant usernames.",
+      parameters: {
+        type: "object",
+        properties: {
+          merit_type: {
+            type: "string",
+            enum: ["exam", "event", "raid", "bonus"]
+          },
+          usernames: {
+            type: "array",
+            items: { type: "string" },
+            description: "Usernames/display names/IDs of participants to award. For 'bonus', all listed members receive the same amount. For 'exam'/'event'/'raid', these are additional participants beyond the host; can be empty if only the host is being credited."
+          },
+          host: {
+            type: "string",
+            description: "Required for 'exam'/'event'/'raid' \u2014 the username/display name/ID of whoever hosted/ran it. They are the one credited with the merit; Jarvis no longer auto-credits whoever is chatting."
+          },
+          amount: {
+            type: "number",
+            description: "Required only for 'bonus' \u2014 amount between 0.1 and 7."
+          }
+        },
+        required: ["merit_type", "usernames"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "remove_merit",
+      description: "Deducts merits from a member. Advisor and above only. Requires a reason.",
+      parameters: {
+        type: "object",
+        properties: {
+          username: { type: "string" },
+          amount: { type: "number", description: "0.1-7" },
+          reason: { type: "string" }
+        },
+        required: ["username", "amount", "reason"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_merits",
+      description: "Reports a specific member's total merit count, or the top-30 leaderboard if no username is given.",
+      parameters: {
+        type: "object",
+        properties: { username: { type: "string" } },
+        required: []
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_merit_history",
+      description: "Returns a member's 10 most recent merit awards with proof links. HR and above only.",
+      parameters: {
+        type: "object",
+        properties: { username: { type: "string" } },
+        required: []
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "reset_merit_data",
+      description: "Permanently wipes all merit data after exporting a backup to the owner log channel. DESTRUCTIVE. Owner/Fire Lord only. Only call this with confirmed:true after the user has explicitly confirmed in the conversation that they want to proceed \u2014 if they haven't confirmed yet, ask them to confirm first instead of calling this tool.",
+      parameters: {
+        type: "object",
+        properties: {
+          confirmed: {
+            type: "boolean",
+            description: "Must be true \u2014 only set after explicit user confirmation."
+          }
+        },
+        required: ["confirmed"]
+      }
+    }
+  }
+];
+var meritToolHandlers = {
+  award_merit: async ({ args, message, guild, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.hr)
+      return "Access Denied \u2014 HR and above only, Sir.";
+    const meritType = String(args.merit_type ?? "");
+    const usernames = Array.isArray(args.usernames) ? args.usernames : [];
+    if ((meritType === "raid" || meritType === "bonus") && RANK_ORDER[actorRank] < RANK_ORDER.advisor)
+      return "Only Advisors and above can award Raid or Bonus merits, Sir.";
+    const ownerIdsForAward = getConfiguredIds("DISCORD_OWNER_USER_IDS");
+    if (meritType === "bonus") {
+      if (!usernames.length) return "I need at least one member to award, Sir.";
+      const amount2 = Number(args.amount);
+      if (!amount2 || amount2 < 0.1 || amount2 > 7)
+        return "Bonus amount must be between 0.1 and 7, Sir.";
+      const resolvedBonus = [];
+      const notFoundBonus = [];
+      for (const u of usernames) {
+        const m = await findMember(guild, u);
+        if (m) resolvedBonus.push(m);
+        else notFoundBonus.push(u);
+      }
+      if (resolvedBonus.length === 0)
+        return "I could not locate any of the members you named, Sir.";
+      if (resolvedBonus.some(
+        (m) => isProtectedOwner(actorRank, m.id, ownerIdsForAward)
+      ))
+        return "Fire Lord cannot award merits that affect the Owner, Sir.";
+      await db.insert(meritAwardsTable).values(
+        resolvedBonus.map((m) => ({
+          guildId: guild.id,
+          memberId: m.id,
+          memberTag: m.user.tag,
+          amount: amount2,
+          proofUrl: "Bonus (conversational)",
+          awardedById: message.author.id,
+          awardedByTag: message.author.tag
+        }))
+      );
+      await writeGenericAuditLog(
+        message.client,
+        "JARVIS // MERIT AWARD AUDIT",
+        [
+          {
+            name: "RECIPIENTS",
+            value: resolvedBonus.map((m) => `\u2022 ${m.user.tag} (+${amount2})`).join("\n").slice(0, 1024)
+          },
+          { name: "TYPE", value: "Bonus (conversational)" }
+        ],
+        message.author.tag
+      );
+      const notFoundNote = notFoundBonus.length > 0 ? ` (${notFoundBonus.length} not found: ${notFoundBonus.join(", ")} \u2014 skipped)` : "";
+      return `Recorded **+${amount2}** Bonus merit${amount2 === 1 ? "" : "s"} for **${resolvedBonus.length}** member${resolvedBonus.length === 1 ? "" : "s"}${notFoundNote}, Sir \u2014 logged for owners.`;
+    }
+    const hostQuery = String(args.host ?? "").trim();
+    if (!hostQuery)
+      return "I need a host for that award, Sir \u2014 that's who receives the merit.";
+    const hostMember = await findMember(guild, hostQuery);
+    if (!hostMember)
+      return `I could not locate a host matching "${hostQuery}", Sir.`;
+    if (isProtectedOwner(actorRank, hostMember.id, ownerIdsForAward))
+      return "Fire Lord cannot award merits that affect the Owner, Sir.";
+    const resolvedMembers = [];
+    for (const u of usernames) {
+      const m = await findMember(guild, u);
+      if (m) resolvedMembers.push(m);
+    }
+    if (resolvedMembers.some(
+      (m) => isProtectedOwner(actorRank, m.id, ownerIdsForAward)
+    ))
+      return "Fire Lord cannot award merits that affect the Owner, Sir.";
+    const amount = meritType === "raid" ? 3 : 1;
+    if (!resolvedMembers.some((m) => m.id === hostMember.id))
+      resolvedMembers.push(hostMember);
+    await db.transaction(async (tx) => {
+      await tx.insert(meritAwardsTable).values(
+        resolvedMembers.map((m) => ({
+          guildId: guild.id,
+          memberId: m.id,
+          memberTag: m.user.tag,
+          amount,
+          proofUrl: `${meritType[0].toUpperCase()}${meritType.slice(1)} (conversational)`,
+          awardedById: message.author.id,
+          awardedByTag: message.author.tag
+        }))
+      );
+    });
+    await writeGenericAuditLog(
+      message.client,
+      "JARVIS // MERIT AWARD AUDIT",
+      [
+        {
+          name: "RECIPIENTS",
+          value: resolvedMembers.map((m) => `\u2022 ${m.user.tag} (+${amount})`).join("\n").slice(0, 1024)
+        },
+        { name: "TYPE", value: meritType },
+        { name: "HOST", value: hostMember.user.tag }
+      ],
+      message.author.tag
+    );
+    return `Recorded **+${amount}** ${meritType} merit${amount === 1 ? "" : "s"} for **${resolvedMembers.length}** member${resolvedMembers.length === 1 ? "" : "s"} (Host: ${hostMember.user.tag}), Sir \u2014 logged for owners.`;
+  },
+  remove_merit: async ({ args, message, guild, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.advisor)
+      return "Access Denied \u2014 Advisor and above only, Sir.";
+    const target = await findMember(guild, String(args.username ?? ""));
+    if (!target)
+      return `I could not locate a member matching "${args.username}", Sir.`;
+    const amount = Number(args.amount);
+    if (!amount || amount < 0.1 || amount > 7)
+      return "Amount must be between 0.1 and 7, Sir.";
+    const reasonText = String(args.reason ?? "").trim();
+    if (!reasonText) return "I need a reason for the removal, Sir.";
+    const ownerIdsForRemove = getConfiguredIds("DISCORD_OWNER_USER_IDS");
+    if (isProtectedOwner(actorRank, target.id, ownerIdsForRemove))
+      return "Fire Lord cannot remove merits from the Owner, Sir.";
+    await db.insert(meritAwardsTable).values({
+      guildId: guild.id,
+      memberId: target.id,
+      memberTag: target.user.tag,
+      amount: -amount,
+      proofUrl: reasonText,
+      awardedById: message.author.id,
+      awardedByTag: message.author.tag
+    });
+    await writeGenericAuditLog(
+      message.client,
+      "JARVIS // MERIT REMOVAL AUDIT",
+      [
+        { name: "MEMBER", value: `${target.user.tag} (${target.id})` },
+        { name: "AMOUNT REMOVED", value: `-${amount}` },
+        { name: "REASON", value: reasonText }
+      ],
+      message.author.tag
+    );
+    return `Recorded **-${amount}** merit${amount === 1 ? "" : "s"} for ${target.user.tag}, Sir \u2014 logged for owners.`;
+  },
+  get_merits: async ({ args, guild }) => {
+    const usernameArg = args.username ? String(args.username).trim() : "";
+    if (usernameArg) {
+      const target = await findMember(guild, usernameArg);
+      if (!target)
+        return `I could not locate a member matching "${usernameArg}", Sir.`;
+      const [result] = await db.select({
+        total: sql`coalesce(sum(${meritAwardsTable.amount}), 0)`
+      }).from(meritAwardsTable).where(eq(meritAwardsTable.memberId, target.id));
+      return `${target.user.tag} currently has **${Number(result?.total ?? 0)}** merits, Sir.`;
+    }
+    const leaderboard = await db.select({
+      memberTag: meritAwardsTable.memberTag,
+      total: sql`sum(${meritAwardsTable.amount})`
+    }).from(meritAwardsTable).groupBy(meritAwardsTable.memberId, meritAwardsTable.memberTag).orderBy(desc(sql`sum(${meritAwardsTable.amount})`)).limit(10);
+    if (leaderboard.length === 0)
+      return "No merits have been recorded yet, Sir.";
+    return `Top personnel by merit, Sir:
+${leaderboard.map((e, i) => `${i + 1}. ${e.memberTag} \u2014 ${Number(e.total)}`).join("\n")}`;
+  },
+  get_merit_history: async ({ args, message, guild, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.hr)
+      return "Access Denied \u2014 HR and above only, Sir.";
+    const usernameArg = args.username ? String(args.username).trim() : "";
+    const target = usernameArg ? await findMember(guild, usernameArg) : message.member;
+    if (!target)
+      return `I could not locate a member matching "${usernameArg}", Sir.`;
+    const history = await db.select().from(meritAwardsTable).where(eq(meritAwardsTable.memberId, target.id)).orderBy(desc(meritAwardsTable.createdAt));
+    if (history.length === 0)
+      return `No merit history found for ${target.user.tag}, Sir.`;
+    return `Full merit history for ${target.user.tag} (${history.length} total), Sir:
+${history.map((a) => `\u2022 ${a.amount > 0 ? "+" : ""}${a.amount} \u2014 ${a.proofUrl}`).join("\n")}`;
+  },
+  reset_merit_data: async ({ args, message, guild, actorRank }) => {
+    if (actorRank !== "owner" && actorRank !== "second")
+      return "Access Denied \u2014 only the Owner or Fire Lord can reset system data, Sir.";
+    if (args.confirmed !== true)
+      return "This permanently wipes all merit data, Sir. Please confirm explicitly before I proceed.";
+    const { backupLines } = await exportAndResetMeritData(
+      guild.id,
+      message.author.tag
+    );
+    await writeGenericAuditLog(
+      message.client,
+      "JARVIS // SYSTEM DATA BACKUP & RESET EXPORT",
+      [{ name: "DATA BACKUP AT RESET", value: backupLines.slice(0, 1024) }],
+      message.author.tag
+    );
+    return "\u2705 All merit data has been reset, Sir. A full backup was logged to the owner channel first.";
+  }
+};
 
 // src/discord/moderation/overwatch.ts
 var import_discord11 = __toESM(require_src2(), 1);
@@ -152669,8 +152966,8 @@ function buildOverwatchDetailReport(guild, usernameFilter) {
   return report;
 }
 
-// src/discord/ai/tools.ts
-var DISCORD_TOOLS = [
+// src/discord/ai/tools/messageTools.ts
+var messageToolDefs = [
   {
     type: "function",
     function: {
@@ -152695,6 +152992,797 @@ var DISCORD_TOOLS = [
       }
     }
   },
+  {
+    type: "function",
+    function: {
+      name: "send_message",
+      description: "Send a message to a specific channel in the server. Only use this when the user explicitly refers to a channel (e.g. 'send to the announcements channel'). Do not use it just because a name matches a channel.",
+      parameters: {
+        type: "object",
+        properties: {
+          channel_name: {
+            type: "string",
+            description: "Name of the channel to send the message to."
+          },
+          content: { type: "string", description: "The message to send." }
+        },
+        required: ["channel_name", "content"]
+      }
+    }
+  },
+  // ── Messages ─────────────────────────────────────────────────────────────
+  {
+    type: "function",
+    function: {
+      name: "pin_last_message",
+      description: "Pins the most recent message in a channel, optionally filtered to one author.",
+      parameters: {
+        type: "object",
+        properties: {
+          channel_name: {
+            type: "string",
+            description: "Leave empty for the current channel."
+          },
+          username: {
+            type: "string",
+            description: "Optional \u2014 only pin the latest message from this member."
+          }
+        },
+        required: []
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "unpin_last_message",
+      description: "Unpins the most recently pinned message in a channel.",
+      parameters: {
+        type: "object",
+        properties: { channel_name: { type: "string" } },
+        required: []
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "react_to_last_message",
+      description: "Adds an emoji reaction to the most recent message in a channel.",
+      parameters: {
+        type: "object",
+        properties: {
+          emoji: {
+            type: "string",
+            description: "A unicode emoji, e.g. '\u2705' or '\u{1F525}'."
+          },
+          channel_name: { type: "string" }
+        },
+        required: ["emoji"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "dm_user",
+      description: "Sends a direct message to a member on the user's behalf.",
+      parameters: {
+        type: "object",
+        properties: {
+          username: { type: "string" },
+          message: { type: "string" }
+        },
+        required: ["username", "message"]
+      }
+    }
+  },
+  // ── Audit log ────────────────────────────────────────────────────────────
+  {
+    type: "function",
+    function: {
+      name: "query_audit_log",
+      description: "Retrieves the most recent Discord server audit log entries.",
+      parameters: {
+        type: "object",
+        properties: {
+          limit: { type: "number", description: "1-25, default 10." }
+        },
+        required: []
+      }
+    }
+  },
+  // ── Reaction watching ────────────────────────────────────────────────────
+  {
+    type: "function",
+    function: {
+      name: "watch_message_reactions",
+      description: "Watches a message and DMs the requester once it accumulates a target number of a specific emoji reaction. Defaults to the most recent message in the given (or current) channel if no message ID is given.",
+      parameters: {
+        type: "object",
+        properties: {
+          emoji: {
+            type: "string",
+            description: "Emoji to watch for, e.g. '\u2705' or '\u{1F525}'."
+          },
+          threshold: {
+            type: "number",
+            description: "Reaction count needed to trigger the notification."
+          },
+          channel_name: {
+            type: "string",
+            description: "Leave empty for the current channel."
+          },
+          message_id: {
+            type: "string",
+            description: "Optional message ID/link. Defaults to the latest message."
+          }
+        },
+        required: ["emoji", "threshold"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "list_reaction_watches",
+      description: "Lists all active reaction watches in this server.",
+      parameters: { type: "object", properties: {}, required: [] }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "cancel_reaction_watch",
+      description: "Cancels a reaction watch by message ID, or the most recently created one if omitted.",
+      parameters: {
+        type: "object",
+        properties: { message_id: { type: "string" } },
+        required: []
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "delete_message",
+      description: "Deletes a single specific message. Defaults to the most recent message in the channel (optionally filtered to one author) if no message ID/link is given. Advisor and above only.",
+      parameters: {
+        type: "object",
+        properties: {
+          channel_name: {
+            type: "string",
+            description: "Leave empty for the current channel."
+          },
+          message_id: {
+            type: "string",
+            description: "Optional message ID or link. Defaults to the latest message."
+          },
+          username: {
+            type: "string",
+            description: "Optional \u2014 only match the latest message if it's from this member. Ignored if message_id is given."
+          }
+        },
+        required: []
+      }
+    }
+  }
+];
+var messageToolHandlers = {
+  create_poll: async ({ args, message, guild }) => {
+    const target = args.channel_name ? findAnyChannel(guild, String(args.channel_name)) : message.channel;
+    if (!target || !("send" in target))
+      return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    const options = Array.isArray(args.options) ? args.options.slice(0, 10) : [];
+    if (options.length < 2)
+      return "A poll needs at least 2 answer options, Sir.";
+    const durationHours = Math.min(
+      768,
+      Math.max(1, Number(args.duration_hours) || 24)
+    );
+    await target.send({
+      poll: {
+        question: { text: String(args.question ?? "Poll") },
+        answers: options.map((text2) => ({ text: text2 })),
+        duration: durationHours,
+        allowMultiselect: false
+      }
+    });
+    return `Poll posted in #${target.name}, Sir.`;
+  },
+  send_message: async ({ args, guild }) => {
+    const ch = guild.channels.cache.find(
+      (c) => c.isTextBased() && c.name.toLowerCase() === String(args.channel_name).toLowerCase()
+    );
+    if (!ch)
+      return `I could not find a channel named "${args.channel_name}", Sir.`;
+    await ch.send(String(args.content));
+    return `Message sent to #${ch.name}, Sir.`;
+  },
+  pin_last_message: async ({ args, message, guild }) => {
+    const target = args.channel_name ? findAnyChannel(guild, String(args.channel_name)) : message.channel;
+    if (!target || !("messages" in target))
+      return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    const recent = await target.messages.fetch({ limit: 20 });
+    const usernameFilter = args.username ? String(args.username).toLowerCase() : null;
+    const toPin = usernameFilter ? recent.find(
+      (m) => m.author.username.toLowerCase().includes(usernameFilter) || m.author.tag.toLowerCase().includes(usernameFilter)
+    ) : recent.first();
+    if (!toPin) return "I could not find a matching message to pin, Sir.";
+    const pinnedOk = await toPin.pin().catch(() => null);
+    return pinnedOk ? `Pinned a message from ${toPin.author.tag} in #${target.name}, Sir.` : `\u274C I was unable to pin that message in #${target.name}, Sir \u2014 check my Manage Messages permission (or whether the pin limit has been reached).`;
+  },
+  unpin_last_message: async ({ args, message, guild }) => {
+    const target = args.channel_name ? findAnyChannel(guild, String(args.channel_name)) : message.channel;
+    if (!target || !("messages" in target))
+      return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    const pinned = await target.messages.fetchPinned();
+    const latest = pinned.first();
+    if (!latest) return `There are no pinned messages in #${target.name}, Sir.`;
+    const unpinnedOk = await latest.unpin().catch(() => null);
+    return unpinnedOk ? `Unpinned the most recent pin in #${target.name}, Sir.` : `\u274C I was unable to unpin that message in #${target.name}, Sir \u2014 check my Manage Messages permission.`;
+  },
+  react_to_last_message: async ({ args, message, guild }) => {
+    const target = args.channel_name ? findAnyChannel(guild, String(args.channel_name)) : message.channel;
+    if (!target || !("messages" in target))
+      return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    const recent = await target.messages.fetch({ limit: 1 });
+    const last = recent.first();
+    if (!last) return `There are no messages in #${target.name}, Sir.`;
+    const reacted = await last.react(String(args.emoji ?? "\u{1F44D}")).catch(() => null);
+    return reacted ? `Reacted to the latest message in #${target.name}, Sir.` : `\u274C I was unable to react to that message in #${target.name}, Sir \u2014 the emoji may be unavailable to me, or I lack the Add Reactions permission.`;
+  },
+  dm_user: async ({ args, guild }) => {
+    const target = await findMember(guild, String(args.username ?? ""));
+    if (!target)
+      return `I could not locate a member matching "${args.username}", Sir.`;
+    try {
+      await target.send(String(args.message ?? ""));
+      return `Message sent to ${target.user.tag} via DM, Sir.`;
+    } catch {
+      return `I was unable to DM ${target.user.tag}, Sir \u2014 they likely have DMs disabled.`;
+    }
+  },
+  query_audit_log: async ({ args, guild }) => {
+    const limit2 = Math.min(25, Math.max(1, Number(args.limit) || 10));
+    const logs = await guild.fetchAuditLogs({ limit: limit2 }).catch(() => null);
+    if (!logs || logs.entries.size === 0)
+      return "No audit log entries found, Sir.";
+    return `Recent audit log entries, Sir:
+${[...logs.entries.values()].map(
+      (e) => `\u2022 ${e.actionType} by ${e.executor?.tag ?? "unknown"} \u2014 target: ${e.targetId ?? "n/a"}${e.reason ? ` \u2014 "${e.reason}"` : ""}`
+    ).join("\n").slice(0, 1800)}`;
+  },
+  watch_message_reactions: async ({ args, message, guild }) => {
+    const target = args.channel_name ? findAnyChannel(guild, String(args.channel_name)) : message.channel;
+    if (!target || !("messages" in target))
+      return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    const emoji3 = String(args.emoji ?? "").trim();
+    if (!emoji3) return "I need an emoji to watch for, Sir.";
+    const rawThreshold = Number(args.threshold);
+    if (!Number.isFinite(rawThreshold) || rawThreshold < 1)
+      return "I need a valid target reaction count, Sir.";
+    const threshold = Math.floor(rawThreshold);
+    let targetMessage;
+    const msgIdArg = args.message_id ? String(args.message_id).match(/\d+/)?.[0] : void 0;
+    if (msgIdArg) {
+      targetMessage = await target.messages.fetch(msgIdArg).catch(() => void 0);
+      if (!targetMessage)
+        return `I could not find a message with ID "${msgIdArg}" in #${target.name}, Sir.`;
+    } else {
+      targetMessage = (await target.messages.fetch({ limit: 1 })).first();
+      if (!targetMessage)
+        return `There are no messages in #${target.name} to watch, Sir.`;
+    }
+    const key = `${targetMessage.id}:${emoji3}`;
+    reactionWatches.set(key, {
+      guildId: guild.id,
+      channelId: target.id,
+      messageId: targetMessage.id,
+      emoji: emoji3,
+      threshold,
+      requesterId: message.author.id,
+      createdAt: Date.now()
+    });
+    const currentCount = targetMessage.reactions.cache.get(emoji3)?.count ?? 0;
+    return `Watching that message in #${target.name} for **${threshold}** ${emoji3} reactions, Sir. (Currently at ${currentCount}.) I'll DM you the moment it hits the target.`;
+  },
+  list_reaction_watches: async ({ guild }) => {
+    const entries = [...reactionWatches.entries()].filter(
+      ([, w]) => w.guildId === guild.id
+    );
+    if (entries.length === 0)
+      return "No active reaction watches in this server, Sir.";
+    return `Active reaction watches, Sir:
+${entries.map(
+      ([, w]) => `\u2022 [${w.messageId}] ${w.emoji} \u2192 ${w.threshold} in <#${w.channelId}> (requested by <@${w.requesterId}>)`
+    ).join("\n")}`;
+  },
+  cancel_reaction_watch: async ({ args, guild }) => {
+    const msgIdArg = args.message_id ? String(args.message_id).match(/\d+/)?.[0] : void 0;
+    const guildEntries = [...reactionWatches.entries()].filter(
+      ([, w]) => w.guildId === guild.id
+    );
+    const toCancel = msgIdArg ? guildEntries.filter(([, w]) => w.messageId === msgIdArg) : guildEntries.sort((a, b) => b[1].createdAt - a[1].createdAt).slice(0, 1);
+    if (toCancel.length === 0)
+      return "I could not find a matching reaction watch to cancel, Sir.";
+    for (const [key] of toCancel) reactionWatches.delete(key);
+    return `Cancelled ${toCancel.length} reaction watch${toCancel.length === 1 ? "" : "es"}, Sir.`;
+  },
+  delete_message: async ({ args, message, guild }) => {
+    const target = args.channel_name ? findAnyChannel(guild, String(args.channel_name)) : message.channel;
+    if (!target || !("messages" in target))
+      return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    let toDelete;
+    const msgIdArg = args.message_id ? String(args.message_id).match(/\d+/)?.[0] : void 0;
+    if (msgIdArg) {
+      toDelete = await target.messages.fetch(msgIdArg).catch(() => void 0);
+      if (!toDelete)
+        return `I could not find a message with ID "${msgIdArg}" in #${target.name}, Sir.`;
+    } else {
+      const recent = await target.messages.fetch({ limit: 20 });
+      const usernameFilter = args.username ? String(args.username).toLowerCase() : null;
+      toDelete = usernameFilter ? recent.find(
+        (m) => m.author.username.toLowerCase().includes(usernameFilter) || m.author.tag.toLowerCase().includes(usernameFilter)
+      ) : recent.first();
+      if (!toDelete)
+        return "I could not find a matching message to delete, Sir.";
+    }
+    const authorTag = toDelete.author.tag;
+    const snippet = toDelete.content ? toDelete.content.slice(0, 80) : "_(no text \u2014 embed/attachment)_";
+    await toDelete.delete().catch(() => null);
+    await writeGenericAuditLog(
+      message.client,
+      "JARVIS // MESSAGE DELETED (conversational)",
+      [
+        { name: "AUTHOR", value: authorTag },
+        { name: "CHANNEL", value: `#${target.name}` },
+        { name: "CONTENT", value: snippet }
+      ],
+      message.author.tag
+    );
+    return `Deleted a message from ${authorTag} in #${target.name}, Sir.`;
+  }
+};
+
+// src/discord/ai/tools/miscTools.ts
+var import_discord12 = __toESM(require_src2(), 1);
+import { appendFileSync as appendFileSync2 } from "node:fs";
+var miscToolDefs = [
+  {
+    type: "function",
+    function: {
+      name: "get_token_usage",
+      description: "Returns how many Gemini API tokens have been used today and how many remain out of the daily limit.",
+      parameters: { type: "object", properties: {}, required: [] }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_server_status",
+      description: "Returns current member counts: total members, online members, and optionally how many members hold a specific role.",
+      parameters: {
+        type: "object",
+        properties: {
+          role_name: {
+            type: "string",
+            description: "Optional. If provided, also counts how many members hold this specific role (e.g. 'HR', 'Advisor')."
+          }
+        },
+        required: []
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "set_reminder",
+      description: "Sets a reminder that Jarvis will deliver to the user via DM after the specified number of minutes.",
+      parameters: {
+        type: "object",
+        properties: {
+          minutes_from_now: {
+            type: "number",
+            description: "How many minutes from now to send the reminder."
+          },
+          message: {
+            type: "string",
+            description: "What to remind the user about."
+          }
+        },
+        required: ["minutes_from_now", "message"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "grant_jarvis_access",
+      description: "Grants a user standing, persistent access to converse with Jarvis (same as Owner/Fire Lord access). Persists across restarts until revoked. Owner/Fire Lord only.",
+      parameters: {
+        type: "object",
+        properties: {
+          username: {
+            type: "string",
+            description: "Username, display name, or user ID to grant standing Jarvis access to."
+          }
+        },
+        required: ["username"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "revoke_jarvis_access",
+      description: "Revokes a previously granted user's standing access to converse with Jarvis. Owner/Fire Lord only.",
+      parameters: {
+        type: "object",
+        properties: {
+          username: {
+            type: "string",
+            description: "Username, display name, or user ID to revoke standing Jarvis access from."
+          }
+        },
+        required: ["username"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_jarvis_access_status",
+      description: "Reports how many users currently hold granted standing access to converse with Jarvis, and lists who they are.",
+      parameters: { type: "object", properties: {}, required: [] }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_command_guide",
+      description: "Returns a full guide listing every slash command available at a given access tier (Member, HR, or Advisor) and what each command does. Use this when asked things like 'what commands do members have access to', 'what can HR do', or 'give me the Advisor command list'.",
+      parameters: {
+        type: "object",
+        properties: {
+          tier: {
+            type: "string",
+            enum: ["member", "hr", "advisor"],
+            description: "Which access tier to report on. 'member' = base commands everyone has, 'hr' = HR-and-above commands (includes member), 'advisor' = Advisor-and-above commands (includes member + hr)."
+          }
+        },
+        required: ["tier"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_full_capabilities",
+      description: "Returns a complete list of everything Jarvis can do \u2014 every slash command AND every conversational tool \u2014 for a given access tier. Use for broad questions like 'what can you do'.",
+      parameters: {
+        type: "object",
+        properties: {
+          tier: {
+            type: "string",
+            enum: ["member", "hr", "advisor", "royalty", "owner"],
+            description: "Tier to report on, cumulative down through member."
+          }
+        },
+        required: ["tier"]
+      }
+    }
+  },
+  // ── Members ──────────────────────────────────────────────────────────────
+  {
+    type: "function",
+    function: {
+      name: "get_member_info",
+      description: "Reports a Discord member's join date, account creation date, and roles.",
+      parameters: {
+        type: "object",
+        properties: { username: { type: "string" } },
+        required: ["username"]
+      }
+    }
+  },
+  // ── Fire Nation admin tools brought over from slash-only commands ──────────
+  {
+    type: "function",
+    function: {
+      name: "royal_guard_alert",
+      description: "Notifies the Royal Guard channel that a royal is currently in-game and needs escort. Royalty and above only.",
+      parameters: {
+        type: "object",
+        properties: { location: { type: "string" } },
+        required: []
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "request_guards",
+      description: "Posts a guard request with a live RSVP list for an HR exam. HR and above only.",
+      parameters: {
+        type: "object",
+        properties: { when: { type: "string" }, location: { type: "string" } },
+        required: ["when", "location"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "reload_knowledge_base",
+      description: "Reloads the Fire Nation knowledge file from disk without restarting Jarvis. HR and above only.",
+      parameters: { type: "object", properties: {}, required: [] }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "add_knowledge_entry",
+      description: "Appends a new entry to the Fire Nation knowledge base. HR and above only.",
+      parameters: {
+        type: "object",
+        properties: { entry: { type: "string" } },
+        required: ["entry"]
+      }
+    }
+  },
+  // ── Nicknames & bot server list ─────────────────────────────────────────
+  {
+    type: "function",
+    function: {
+      name: "search_nicknames",
+      description: "Searches this server's members by nickname/display name. Provide a query to filter, or omit it to list everyone who currently has a nickname set.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: {
+            type: "string",
+            description: "Optional. Partial nickname to search for. Leave empty to list all members with a nickname set."
+          }
+        },
+        required: []
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "list_servers",
+      description: "Reports how many Discord servers Jarvis is currently active in, and lists each one by name. Use this for questions like 'how many servers are you in' or 'what servers are you in'.",
+      parameters: { type: "object", properties: {}, required: [] }
+    }
+  }
+];
+var usageStatusHandler = async ({ name, args, guild }) => {
+  if (name === "get_server_status") {
+    const allMembers = await guild.members.fetch();
+    const totalMembers = allMembers.filter((m) => !m.user.bot).size;
+    const onlineMembers = allMembers.filter(
+      (m) => !m.user.bot && m.presence?.status && m.presence.status !== "offline"
+    ).size;
+    let roleLine = "";
+    const roleName = args.role_name ? String(args.role_name).trim() : "";
+    if (roleName) {
+      const role = guild.roles.cache.find(
+        (r) => r.name.toLowerCase() === roleName.toLowerCase()
+      );
+      if (role) {
+        const roleMembers = allMembers.filter(
+          (m) => m.roles.cache.has(role.id)
+        );
+        const roleOnline = roleMembers.filter(
+          (m) => m.presence?.status && m.presence.status !== "offline"
+        ).size;
+        roleLine = ` Of those holding the "${role.name}" role: ${roleMembers.size} total, ${roleOnline} currently online.`;
+      } else {
+        roleLine = ` No role named "${roleName}" was found.`;
+      }
+    }
+    return `${onlineMembers} of ${totalMembers} personnel currently online.${roleLine}`;
+  }
+  const dailyRemaining = Math.max(0, GEMINI_DAILY_LIMIT - dailyTokensUsed);
+  const dailyPct = Math.min(
+    100,
+    dailyTokensUsed / GEMINI_DAILY_LIMIT * 100
+  ).toFixed(1);
+  const now = /* @__PURE__ */ new Date();
+  const midnight = new Date(now);
+  midnight.setHours(24, 0, 0, 0);
+  const msUntilDailyReset = midnight.getTime() - now.getTime();
+  const hoursUntilReset = Math.floor(msUntilDailyReset / 36e5);
+  const minsUntilReset = Math.floor(msUntilDailyReset % 36e5 / 6e4);
+  const nowMs = Date.now();
+  const currentMinuteUsed = nowMs - minuteWindowStart >= 6e4 ? 0 : minuteTokensUsed;
+  const minuteRemaining = Math.max(0, GOOGLE_TPM_LIMIT - currentMinuteUsed);
+  const minutePct = Math.min(
+    100,
+    currentMinuteUsed / GOOGLE_TPM_LIMIT * 100
+  ).toFixed(1);
+  const secsUntilMinuteReset = Math.max(
+    0,
+    Math.ceil((6e4 - (nowMs - minuteWindowStart)) / 1e3)
+  );
+  return `Daily: ${dailyTokensUsed.toLocaleString()} / ${GEMINI_DAILY_LIMIT.toLocaleString()} tokens used (${dailyPct}%), ${dailyRemaining.toLocaleString()} remaining \u2014 resets in ${hoursUntilReset}h ${minsUntilReset}m.
+Per-minute: ${currentMinuteUsed.toLocaleString()} / ${GOOGLE_TPM_LIMIT.toLocaleString()} tokens used this minute (${minutePct}%), ${minuteRemaining.toLocaleString()} remaining \u2014 resets in ${secsUntilMinuteReset}s.`;
+};
+var jarvisAccessHandler = async ({
+  name,
+  args,
+  message,
+  guild,
+  actorRank
+}) => {
+  if (actorRank !== "owner" && actorRank !== "second") {
+    return "Only the Owner or Fire Lord may modify Jarvis access, Sir.";
+  }
+  const usernameArg = String(args.username ?? "").trim();
+  if (!usernameArg) return "I need a user to target, Sir.";
+  const targetMember = await findMember(guild, usernameArg);
+  if (!targetMember)
+    return `I could not locate a member matching "${usernameArg}", Sir.`;
+  if (name === "grant_jarvis_access") {
+    jarvisAccessIds.add(targetMember.id);
+    saveJarvisAccess();
+    await writeGenericAuditLog(
+      message.client,
+      "JARVIS // STANDING ACCESS GRANTED",
+      [
+        { name: "TARGET", value: `${targetMember.user.tag} (${targetMember.id})` },
+        { name: "TOTAL WITH ACCESS", value: String(jarvisAccessIds.size), inline: true }
+      ],
+      message.author.tag
+    );
+    return `${targetMember.user.tag} now has standing access to speak with me, Sir \u2014 this persists until revoked. (${jarvisAccessIds.size} total with granted access.)`;
+  }
+  const had = jarvisAccessIds.delete(targetMember.id);
+  saveJarvisAccess();
+  if (had) {
+    await writeGenericAuditLog(
+      message.client,
+      "JARVIS // STANDING ACCESS REVOKED",
+      [
+        { name: "TARGET", value: `${targetMember.user.tag} (${targetMember.id})` },
+        { name: "REMAINING WITH ACCESS", value: String(jarvisAccessIds.size), inline: true }
+      ],
+      message.author.tag
+    );
+  }
+  return had ? `${targetMember.user.tag}'s access has been revoked, Sir. (${jarvisAccessIds.size} remaining with granted access.)` : `${targetMember.user.tag} did not have standing access to begin with, Sir.`;
+};
+var miscToolHandlers = {
+  get_token_usage: usageStatusHandler,
+  get_server_status: usageStatusHandler,
+  set_reminder: async ({ args, message }) => {
+    const minutes = Number(args.minutes_from_now);
+    if (!minutes || minutes <= 0)
+      return "I need a valid time for the reminder, Sir.";
+    const reminderMsg = String(args.message ?? "").trim();
+    if (!reminderMsg) return "I need something to remind you about, Sir.";
+    const dueAt = new Date(Date.now() + minutes * 6e4);
+    await db.insert(remindersTable).values({ userId: message.author.id, message: reminderMsg, dueAt });
+    const timeStr = dueAt.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "America/New_York"
+    });
+    const label = minutes < 60 ? `${Math.round(minutes)} minute${Math.round(minutes) === 1 ? "" : "s"}` : `${(minutes / 60).toFixed(1).replace(/\.0$/, "")} hour${minutes === 60 ? "" : "s"}`;
+    return `Understood, Sir. I will remind you about "${reminderMsg}" in ${label} (at ${timeStr} ET).`;
+  },
+  grant_jarvis_access: jarvisAccessHandler,
+  revoke_jarvis_access: jarvisAccessHandler,
+  get_jarvis_access_status: async ({ guild }) => {
+    if (jarvisAccessIds.size === 0)
+      return "No one currently holds granted access, Sir \u2014 only the Owner and Fire Lord may speak with me by default.";
+    const names = [...jarvisAccessIds].map((id) => {
+      const m = guild.members.cache.get(id);
+      return m ? m.user.tag : `Unknown User (${id})`;
+    });
+    return `${jarvisAccessIds.size} member${jarvisAccessIds.size === 1 ? "" : "s"} currently hold${jarvisAccessIds.size === 1 ? "s" : ""} granted access, Sir: ${names.join(", ")}`;
+  },
+  get_command_guide: async ({ args }) => {
+    const tierArg = String(args.tier ?? "member").toLowerCase();
+    if (tierArg !== "member" && tierArg !== "hr" && tierArg !== "advisor") {
+      return "I need a valid tier \u2014 Member, HR, or Advisor, Sir.";
+    }
+    return buildCommandGuide(tierArg);
+  },
+  get_full_capabilities: async ({ args }) => {
+    const tierArg = String(
+      args.tier ?? "member"
+    ).toLowerCase();
+    if (!GUIDE_TIER_ORDER.includes(tierArg)) return "I need a valid tier, Sir.";
+    return buildFullCapabilityGuide(tierArg);
+  },
+  get_member_info: async ({ args, guild }) => {
+    const target = await findMember(guild, String(args.username ?? ""));
+    if (!target)
+      return `I could not locate a member matching "${args.username}", Sir.`;
+    const roles = target.roles.cache.filter((r) => r.name !== "@everyone").map((r) => r.name);
+    return `**${target.user.tag}**, Sir:
+\u2022 Joined server: <t:${Math.floor((target.joinedTimestamp ?? 0) / 1e3)}:D>
+\u2022 Account created: <t:${Math.floor(target.user.createdTimestamp / 1e3)}:D>
+\u2022 Roles: ${roles.length > 0 ? roles.join(", ") : "None"}`;
+  },
+  royal_guard_alert: async ({ args, message, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
+      return "Access Denied \u2014 Royalty and above only, Sir.";
+    const ch = await message.client.channels.fetch(ROYAL_GUARD_CHANNEL_ID).catch(() => null);
+    if (!ch || !ch.isTextBased() || !("send" in ch))
+      return "Could not reach the Royal Guard channel, Sir.";
+    const embed = new import_discord12.EmbedBuilder().setTitle("\u{1F6E1}\uFE0F ROYAL GUARD ALERT").setDescription("A Royal is currently in game and requires escort.").setColor(FIRE_RED).addFields(
+      { name: "ROYAL", value: message.author.tag },
+      ...args.location ? [{ name: "LOCATION", value: String(args.location) }] : []
+    ).setTimestamp();
+    await ch.send({ content: "@everyone", embeds: [embed] });
+    return "Royal Guard has been notified, Sir.";
+  },
+  request_guards: async ({ args, message, guild, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.hr)
+      return "Access Denied \u2014 HR and above only, Sir.";
+    const result = await postGuardRequest(
+      message.client,
+      guild,
+      { id: message.author.id, tag: message.author.tag },
+      String(args.when ?? "TBD"),
+      String(args.location ?? "TBD")
+    );
+    return result.ok ? "Guard request posted, Sir. I'll DM you privately as people confirm \u2014 no one else can see who's RSVP'd." : `Could not post the guard request: ${result.error}`;
+  },
+  reload_knowledge_base: async ({ actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.hr)
+      return "Access Denied \u2014 HR and above only, Sir.";
+    const before = cachedKnowledge.length;
+    loadKnowledge();
+    return cachedKnowledge.length > 0 ? `Knowledge base reloaded, Sir. (${before} \u2192 ${cachedKnowledge.length} characters)` : "Knowledge base reload failed, Sir \u2014 the file could not be read.";
+  },
+  add_knowledge_entry: async ({ args, message, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.hr)
+      return "Access Denied \u2014 HR and above only, Sir.";
+    const entry = String(args.entry ?? "").trim();
+    if (!entry) return "I need something to add, Sir.";
+    const timestamp2 = (/* @__PURE__ */ new Date()).toISOString();
+    appendFileSync2(
+      KNOWLEDGE_FILE_PATH,
+      `
+[Added ${timestamp2} by ${message.author.tag}] ${entry}
+`,
+      "utf-8"
+    );
+    loadKnowledge();
+    return `Knowledge base updated, Sir. (${cachedKnowledge.length} characters total)`;
+  },
+  search_nicknames: async ({ args, guild }) => {
+    const allMembers = await guild.members.fetch();
+    const query = args.query ? String(args.query).trim().toLowerCase() : "";
+    const withNicknames = allMembers.filter(
+      (m) => !!m.nickname && (!query || m.nickname.toLowerCase().includes(query))
+    );
+    if (withNicknames.size === 0) {
+      return query ? `No members found with a nickname matching "${query}", Sir.` : "No members currently have a nickname set, Sir.";
+    }
+    const lines = [...withNicknames.values()].slice(0, 50).map((m) => `\u2022 ${m.user.tag} \u2014 "${m.nickname}"`);
+    const extra = withNicknames.size > 50 ? `
+\u2026and ${withNicknames.size - 50} more not shown` : "";
+    const label = query ? `matching "${query}"` : "with a nickname set";
+    return `Members ${label} (${withNicknames.size}), Sir:
+${lines.join("\n")}${extra}`;
+  },
+  list_servers: async ({ message }) => {
+    const guilds = [...message.client.guilds.cache.values()];
+    const lines = guilds.map((g) => `\u2022 ${g.name} (${g.memberCount ?? "?"} members)`).join("\n");
+    return `I am currently active in **${guilds.length}** server${guilds.length === 1 ? "" : "s"}, Sir:
+${lines}`;
+  }
+};
+
+// src/discord/ai/tools/moderationTools.ts
+var import_discord13 = __toESM(require_src2(), 1);
+var moderationToolDefs = [
   {
     type: "function",
     function: {
@@ -152857,49 +153945,6 @@ var DISCORD_TOOLS = [
   {
     type: "function",
     function: {
-      name: "send_message",
-      description: "Send a message to a specific channel in the server. Only use this when the user explicitly refers to a channel (e.g. 'send to the announcements channel'). Do not use it just because a name matches a channel.",
-      parameters: {
-        type: "object",
-        properties: {
-          channel_name: {
-            type: "string",
-            description: "Name of the channel to send the message to."
-          },
-          content: { type: "string", description: "The message to send." }
-        },
-        required: ["channel_name", "content"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "get_token_usage",
-      description: "Returns how many Gemini API tokens have been used today and how many remain out of the daily limit.",
-      parameters: { type: "object", properties: {}, required: [] }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "get_server_status",
-      description: "Returns current member counts: total members, online members, and optionally how many members hold a specific role.",
-      parameters: {
-        type: "object",
-        properties: {
-          role_name: {
-            type: "string",
-            description: "Optional. If provided, also counts how many members hold this specific role (e.g. 'HR', 'Advisor')."
-          }
-        },
-        required: []
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
       name: "activate_protocol_silent",
       description: "Activates Protocol Silent \u2014 locks down every text channel in the server so no one can send messages.",
       parameters: { type: "object", properties: {}, required: [] }
@@ -152950,61 +153995,6 @@ var DISCORD_TOOLS = [
   {
     type: "function",
     function: {
-      name: "set_avatar",
-      description: "Changes the bot's own profile picture to the image at the given URL.",
-      parameters: {
-        type: "object",
-        properties: {
-          url: {
-            type: "string",
-            description: "Direct URL to the image (png, jpg, gif)."
-          }
-        },
-        required: ["url"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "set_username",
-      description: "Changes the bot's own username.",
-      parameters: {
-        type: "object",
-        properties: {
-          username: {
-            type: "string",
-            description: "The new username for the bot."
-          }
-        },
-        required: ["username"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "set_reminder",
-      description: "Sets a reminder that Jarvis will deliver to the user via DM after the specified number of minutes.",
-      parameters: {
-        type: "object",
-        properties: {
-          minutes_from_now: {
-            type: "number",
-            description: "How many minutes from now to send the reminder."
-          },
-          message: {
-            type: "string",
-            description: "What to remind the user about."
-          }
-        },
-        required: ["minutes_from_now", "message"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
       name: "activate_overwatch_mode",
       description: "Activates Overwatch Mode \u2014 silent automod monitoring for filtered language, invite links, and ping abuse in this server. Violating messages are deleted and the sender warned automatically, with full detail logged silently to the owner channel.",
       parameters: { type: "object", properties: {}, required: [] }
@@ -153046,166 +154036,705 @@ var DISCORD_TOOLS = [
   {
     type: "function",
     function: {
-      name: "grant_jarvis_access",
-      description: "Grants a user standing, persistent access to converse with Jarvis (same as Owner/Fire Lord access). Persists across restarts until revoked. Owner/Fire Lord only.",
+      name: "purge_messages",
+      description: "Bulk-deletes the most recent N messages (max 100, Discord only allows deleting messages under 14 days old) from a channel. Advisor and above only.",
       parameters: {
         type: "object",
         properties: {
-          username: {
+          count: {
+            type: "number",
+            description: "Number of messages to delete, 1-100."
+          },
+          channel_name: {
             type: "string",
-            description: "Username, display name, or user ID to grant standing Jarvis access to."
+            description: "Leave empty for the current channel."
           }
         },
-        required: ["username"]
+        required: ["count"]
       }
     }
   },
   {
     type: "function",
     function: {
-      name: "revoke_jarvis_access",
-      description: "Revokes a previously granted user's standing access to converse with Jarvis. Owner/Fire Lord only.",
+      name: "move_voice_member",
+      description: "Moves a member currently in a voice channel to a different voice channel.",
       parameters: {
         type: "object",
         properties: {
-          username: {
-            type: "string",
-            description: "Username, display name, or user ID to revoke standing Jarvis access from."
-          }
+          username: { type: "string" },
+          channel_name: { type: "string" }
         },
-        required: ["username"]
+        required: ["username", "channel_name"]
       }
     }
   },
   {
     type: "function",
     function: {
-      name: "get_jarvis_access_status",
-      description: "Reports how many users currently hold granted standing access to converse with Jarvis, and lists who they are.",
+      name: "server_mute_member",
+      description: "Server voice-mutes or unmutes a member (distinct from a timeout).",
+      parameters: {
+        type: "object",
+        properties: { username: { type: "string" }, mute: { type: "boolean" } },
+        required: ["username", "mute"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "server_deafen_member",
+      description: "Server voice-deafens or undeafens a member.",
+      parameters: {
+        type: "object",
+        properties: {
+          username: { type: "string" },
+          deafen: { type: "boolean" }
+        },
+        required: ["username", "deafen"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "unban_member",
+      description: "Removes a ban for a user by username or ID. Royalty and above only.",
+      parameters: {
+        type: "object",
+        properties: { username_or_id: { type: "string" } },
+        required: ["username_or_id"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "list_bans",
+      description: "Lists currently banned users in this server.",
       parameters: { type: "object", properties: {}, required: [] }
     }
   },
   {
     type: "function",
     function: {
-      name: "get_command_guide",
-      description: "Returns a full guide listing every slash command available at a given access tier (Member, HR, or Advisor) and what each command does. Use this when asked things like 'what commands do members have access to', 'what can HR do', or 'give me the Advisor command list'.",
-      parameters: {
-        type: "object",
-        properties: {
-          tier: {
-            type: "string",
-            enum: ["member", "hr", "advisor"],
-            description: "Which access tier to report on. 'member' = base commands everyone has, 'hr' = HR-and-above commands (includes member), 'advisor' = Advisor-and-above commands (includes member + hr)."
-          }
-        },
-        required: ["tier"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "get_full_capabilities",
-      description: "Returns a complete list of everything Jarvis can do \u2014 every slash command AND every conversational tool \u2014 for a given access tier. Use for broad questions like 'what can you do'.",
-      parameters: {
-        type: "object",
-        properties: {
-          tier: {
-            type: "string",
-            enum: ["member", "hr", "advisor", "royalty", "owner"],
-            description: "Tier to report on, cumulative down through member."
-          }
-        },
-        required: ["tier"]
-      }
-    }
-  },
-  // ── Merit system ──────────────────────────────────────────────────────────
-  {
-    type: "function",
-    function: {
-      name: "award_merit",
-      description: "Awards merits to one or more members. Use type 'bonus' for one or more named members, each receiving the same 0.1-7 amount (Advisor+ only); use 'exam'/'event' (HR+) or 'raid' (Advisor+ only) with a required host \u2014 the person who receives the merit for running it \u2014 plus any participant usernames.",
-      parameters: {
-        type: "object",
-        properties: {
-          merit_type: {
-            type: "string",
-            enum: ["exam", "event", "raid", "bonus"]
-          },
-          usernames: {
-            type: "array",
-            items: { type: "string" },
-            description: "Usernames/display names/IDs of participants to award. For 'bonus', all listed members receive the same amount. For 'exam'/'event'/'raid', these are additional participants beyond the host; can be empty if only the host is being credited."
-          },
-          host: {
-            type: "string",
-            description: "Required for 'exam'/'event'/'raid' \u2014 the username/display name/ID of whoever hosted/ran it. They are the one credited with the merit; Jarvis no longer auto-credits whoever is chatting."
-          },
-          amount: {
-            type: "number",
-            description: "Required only for 'bonus' \u2014 amount between 0.1 and 7."
-          }
-        },
-        required: ["merit_type", "usernames"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "remove_merit",
-      description: "Deducts merits from a member. Advisor and above only. Requires a reason.",
+      name: "softban_member",
+      description: "Bans then immediately unbans a member, purging their recent messages without a permanent ban. Advisor and above only.",
       parameters: {
         type: "object",
         properties: {
           username: { type: "string" },
-          amount: { type: "number", description: "0.1-7" },
           reason: { type: "string" }
         },
-        required: ["username", "amount", "reason"]
+        required: ["username"]
       }
     }
   },
   {
     type: "function",
     function: {
-      name: "get_merits",
-      description: "Reports a specific member's total merit count, or the top-30 leaderboard if no username is given.",
-      parameters: {
-        type: "object",
-        properties: { username: { type: "string" } },
-        required: []
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "get_merit_history",
-      description: "Returns a member's 10 most recent merit awards with proof links. HR and above only.",
-      parameters: {
-        type: "object",
-        properties: { username: { type: "string" } },
-        required: []
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "reset_merit_data",
-      description: "Permanently wipes all merit data after exporting a backup to the owner log channel. DESTRUCTIVE. Owner/Fire Lord only. Only call this with confirmed:true after the user has explicitly confirmed in the conversation that they want to proceed \u2014 if they haven't confirmed yet, ask them to confirm first instead of calling this tool.",
+      name: "global_ban",
+      description: "Bans a user from every server Jarvis is currently in. Royalty and above only.",
       parameters: {
         type: "object",
         properties: {
+          username: { type: "string" },
+          reason: { type: "string" }
+        },
+        required: ["username"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "acknowledge_breach",
+      description: "Acknowledges a detected security breach, clears the alarm state, and restores the audit log channel's permissions. Owner/Fire Lord only.",
+      parameters: { type: "object", properties: {}, required: [] }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "inactive_purge",
+      description: "Lists members inactive for X+ days. Advisor and above only. Only pass confirmed:true and actually kick if the user has explicitly asked you to kick them after seeing the list \u2014 otherwise just report the list.",
+      parameters: {
+        type: "object",
+        properties: {
+          days: { type: "number" },
           confirmed: {
             type: "boolean",
-            description: "Must be true \u2014 only set after explicit user confirmation."
+            description: "Set true only after the user explicitly confirms kicking."
           }
         },
-        required: ["confirmed"]
+        required: ["days"]
+      }
+    }
+  }
+];
+var serverVoiceStateHandler = async ({
+  name,
+  args,
+  guild
+}) => {
+  const target = await findMember(guild, String(args.username ?? ""));
+  if (!target)
+    return `I could not locate a member matching "${args.username}", Sir.`;
+  if (name === "server_mute_member") {
+    const muted = await target.voice.setMute(Boolean(args.mute)).catch(() => null);
+    return muted ? `${target.user.tag} has been ${args.mute ? "server-muted" : "unmuted"}, Sir.` : `\u274C I was unable to ${args.mute ? "server-mute" : "unmute"} ${target.user.tag}, Sir \u2014 they may not be in a voice channel, or I lack the Mute Members permission.`;
+  }
+  const deafened = await target.voice.setDeaf(Boolean(args.deafen)).catch(() => null);
+  return deafened ? `${target.user.tag} has been ${args.deafen ? "server-deafened" : "undeafened"}, Sir.` : `\u274C I was unable to ${args.deafen ? "server-deafen" : "undeafen"} ${target.user.tag}, Sir \u2014 they may not be in a voice channel, or I lack the Deafen Members permission.`;
+};
+var moderationToolHandlers = {
+  ping_everyone: async ({ args, message, guild }) => {
+    const content = `@everyone${args.message ? ` ${args.message}` : ""}`;
+    if (args.channel_name) {
+      const ch2 = guild.channels.cache.find(
+        (c) => c.isTextBased() && c.name.toLowerCase() === String(args.channel_name).toLowerCase()
+      );
+      if (!ch2)
+        return `I could not find a channel named "${args.channel_name}", Sir.`;
+      await ch2.send({ content, allowedMentions: { parse: ["everyone"] } });
+      return `@everyone ping sent to #${ch2.name}, Sir.`;
+    }
+    const ch = message.channel;
+    await ch.send({ content, allowedMentions: { parse: ["everyone"] } });
+    return "@everyone ping sent, Sir.";
+  },
+  kick_member: async ({ args, message, guild, actorRank, ownerIds, reason }) => {
+    const target = await findMember(guild, String(args.username));
+    if (!target)
+      return `I could not locate a member matching "${args.username}", Sir.`;
+    if (isProtectedOwner(actorRank, target.id, ownerIds))
+      return "I cannot perform that action on the Owner, Sir.";
+    await target.kick(reason);
+    await writeGenericAuditLog(
+      message.client,
+      "JARVIS // MEMBER KICKED (conversational)",
+      [
+        { name: "TARGET", value: `${target.user.tag} (${target.id})` },
+        {
+          name: "REASON",
+          value: String(args.reason ?? "No reason provided.")
+        }
+      ],
+      message.author.tag
+    );
+    return `${target.user.tag} has been removed from the server, Sir.`;
+  },
+  ban_member: async ({ args, message, guild, actorRank, ownerIds, reason }) => {
+    const target = await findMember(guild, String(args.username));
+    if (!target)
+      return `I could not locate a member matching "${args.username}", Sir.`;
+    if (isProtectedOwner(actorRank, target.id, ownerIds))
+      return "I cannot perform that action on the Owner, Sir.";
+    await target.ban({ reason, deleteMessageSeconds: 0 });
+    await writeGenericAuditLog(
+      message.client,
+      "JARVIS // MEMBER BANNED (conversational)",
+      [
+        { name: "TARGET", value: `${target.user.tag} (${target.id})` },
+        {
+          name: "REASON",
+          value: String(args.reason ?? "No reason provided.")
+        }
+      ],
+      message.author.tag
+    );
+    return `${target.user.tag} has been permanently banned, Sir.`;
+  },
+  mute_member: async ({ args, message, guild, actorRank, ownerIds, reason }) => {
+    const target = await findMember(guild, String(args.username));
+    if (!target)
+      return `I could not locate a member matching "${args.username}", Sir.`;
+    if (isProtectedOwner(actorRank, target.id, ownerIds))
+      return "I cannot perform that action on the Owner, Sir.";
+    const durationMs = Number(args.duration_minutes) * 60 * 1e3;
+    const until = new Date(Date.now() + durationMs);
+    await target.disableCommunicationUntil(until, reason);
+    await writeGenericAuditLog(
+      message.client,
+      "JARVIS // MEMBER MUTED (conversational)",
+      [
+        { name: "TARGET", value: `${target.user.tag} (${target.id})` },
+        { name: "DURATION", value: `${args.duration_minutes} minute(s)` },
+        {
+          name: "REASON",
+          value: String(args.reason ?? "No reason provided.")
+        }
+      ],
+      message.author.tag
+    );
+    return `${target.user.tag} has been muted for ${args.duration_minutes} minute${Number(args.duration_minutes) === 1 ? "" : "s"}, Sir.`;
+  },
+  unmute_member: async ({ args, guild, reason }) => {
+    const target = await findMember(guild, String(args.username));
+    if (!target)
+      return `I could not locate a member matching "${args.username}", Sir.`;
+    await target.disableCommunicationUntil(null, reason);
+    return `${target.user.tag}'s timeout has been lifted, Sir.`;
+  },
+  assign_role: async ({ args, message, guild, actorRank, ownerIds, reason }) => {
+    const target = await findMember(guild, String(args.username));
+    if (!target)
+      return `I could not locate a member matching "${args.username}", Sir.`;
+    if (isProtectedOwner(actorRank, target.id, ownerIds))
+      return "I cannot perform that action on the Owner, Sir.";
+    const role = guild.roles.cache.find(
+      (r) => r.name.toLowerCase() === String(args.role_name).toLowerCase()
+    );
+    if (!role)
+      return `I could not find a role named "${args.role_name}", Sir.`;
+    await target.roles.add(role, reason);
+    await writeGenericAuditLog(
+      message.client,
+      "JARVIS // ROLE ASSIGNED (conversational)",
+      [
+        { name: "TARGET", value: `${target.user.tag} (${target.id})` },
+        { name: "ROLE", value: role.name }
+      ],
+      message.author.tag
+    );
+    return `The "${role.name}" role has been assigned to ${target.user.tag}, Sir.`;
+  },
+  remove_role: async ({ args, message, guild, actorRank, ownerIds, reason }) => {
+    const target = await findMember(guild, String(args.username));
+    if (!target)
+      return `I could not locate a member matching "${args.username}", Sir.`;
+    if (isProtectedOwner(actorRank, target.id, ownerIds))
+      return "I cannot perform that action on the Owner, Sir.";
+    const role = guild.roles.cache.find(
+      (r) => r.name.toLowerCase() === String(args.role_name).toLowerCase()
+    );
+    if (!role)
+      return `I could not find a role named "${args.role_name}", Sir.`;
+    await target.roles.remove(role, reason);
+    await writeGenericAuditLog(
+      message.client,
+      "JARVIS // ROLE REMOVED (conversational)",
+      [
+        { name: "TARGET", value: `${target.user.tag} (${target.id})` },
+        { name: "ROLE", value: role.name }
+      ],
+      message.author.tag
+    );
+    return `The "${role.name}" role has been removed from ${target.user.tag}, Sir.`;
+  },
+  set_nickname: async ({ args, guild, reason }) => {
+    const target = await findMember(guild, String(args.username));
+    if (!target)
+      return `I could not locate a member matching "${args.username}", Sir.`;
+    const nick = args.nickname ? String(args.nickname) : null;
+    await target.setNickname(nick, reason);
+    return nick ? `${target.user.tag}'s nickname has been set to "${nick}", Sir.` : `${target.user.tag}'s nickname has been reset, Sir.`;
+  },
+  activate_protocol_silent: async ({ message, guild }) => {
+    const everyoneRole = guild.roles.everyone;
+    const channels = guild.channels.cache.filter(
+      (c) => c.type === import_discord13.ChannelType.GuildText || c.type === import_discord13.ChannelType.GuildAnnouncement
+    );
+    let count = 0;
+    for (const [, ch] of channels) {
+      try {
+        await ch.permissionOverwrites.edit(everyoneRole, {
+          SendMessages: false
+        });
+        count++;
+      } catch {
+      }
+    }
+    setProtocolSilent(true, guild.id);
+    setStatusRotationPaused(true);
+    message.client.user.setActivity("\u{1F512} Protocol Silent \u2014 Server Locked");
+    return `Protocol Silent activated, Sir. ${count} channel${count === 1 ? "" : "s"} locked.`;
+  },
+  deactivate_protocol_silent: async ({ guild }) => {
+    const everyoneRole = guild.roles.everyone;
+    const channels = guild.channels.cache.filter(
+      (c) => c.type === import_discord13.ChannelType.GuildText || c.type === import_discord13.ChannelType.GuildAnnouncement
+    );
+    let count = 0;
+    for (const [, ch] of channels) {
+      try {
+        await ch.permissionOverwrites.edit(everyoneRole, {
+          SendMessages: null
+        });
+        count++;
+      } catch {
+      }
+    }
+    setProtocolSilent(false, null);
+    setStatusRotationPaused(false);
+    triggerStatusRotation();
+    return `Protocol Silent deactivated, Sir. ${count} channel${count === 1 ? "" : "s"} restored.`;
+  },
+  lock_channel: async ({ args, guild }) => {
+    const target = guild.channels.cache.find(
+      (c) => (c.type === import_discord13.ChannelType.GuildText || c.type === import_discord13.ChannelType.GuildAnnouncement) && c.name.toLowerCase() === String(args.channel_name).toLowerCase()
+    );
+    if (!target)
+      return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    await target.permissionOverwrites.edit(guild.roles.everyone, {
+      SendMessages: false
+    });
+    return `#${target.name} has been locked, Sir.`;
+  },
+  unlock_channel: async ({ args, guild }) => {
+    const target = guild.channels.cache.find(
+      (c) => (c.type === import_discord13.ChannelType.GuildText || c.type === import_discord13.ChannelType.GuildAnnouncement) && c.name.toLowerCase() === String(args.channel_name).toLowerCase()
+    );
+    if (!target)
+      return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    await target.permissionOverwrites.edit(guild.roles.everyone, {
+      SendMessages: null
+    });
+    return `#${target.name} has been unlocked, Sir.`;
+  },
+  activate_overwatch_mode: async ({ guild }) => {
+    overwatchActiveGuilds.add(guild.id);
+    return "Overwatch Mode engaged, Sir. I will monitor silently and act on filtered language, invite links, and ping abuse without further prompting.";
+  },
+  deactivate_overwatch_mode: async ({ guild }) => {
+    overwatchActiveGuilds.delete(guild.id);
+    return "Overwatch Mode disengaged, Sir. Automated monitoring is off.";
+  },
+  get_overwatch_status: async ({ guild }) => {
+    const active = overwatchActiveGuilds.has(guild.id);
+    const totalViolations = [...overwatchViolations.entries()].filter(([k]) => k.startsWith(`${guild.id}:`)).reduce((sum, [, v]) => sum + v, 0);
+    return active ? `Overwatch Mode is currently **ON**, Sir. ${totalViolations} tracked violation${totalViolations === 1 ? "" : "s"} across monitored members since activation.` : "Overwatch Mode is currently **OFF**, Sir.";
+  },
+  get_overwatch_detail: async ({ args, guild }) => {
+    const usernameFilter = args.username ? String(args.username).trim() : void 0;
+    return buildOverwatchDetailReport(guild, usernameFilter);
+  },
+  purge_messages: async ({ args, message, guild, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.advisor)
+      return "Access Denied \u2014 Advisor and above only, Sir.";
+    const rawCount = Number(args.count);
+    if (!Number.isFinite(rawCount) || rawCount < 1)
+      return "I need a valid number of messages to delete, Sir.";
+    const count = Math.min(100, Math.floor(rawCount));
+    const target = args.channel_name ? findAnyChannel(guild, String(args.channel_name)) : message.channel;
+    if (!target || !("bulkDelete" in target))
+      return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    const deleted = await target.bulkDelete(count, true).catch(() => null);
+    return deleted ? `Deleted ${deleted.size} message${deleted.size === 1 ? "" : "s"} from #${target.name}, Sir. (Messages older than 14 days can't be bulk-deleted by Discord's API.)` : "\u274C Failed to purge messages, Sir \u2014 check my Manage Messages permission.";
+  },
+  move_voice_member: async ({ args, guild }) => {
+    const target = await findMember(guild, String(args.username ?? ""));
+    if (!target)
+      return `I could not locate a member matching "${args.username}", Sir.`;
+    if (!target.voice.channel)
+      return `${target.user.tag} is not currently in a voice channel, Sir.`;
+    const destination = findAnyChannel(guild, String(args.channel_name ?? ""));
+    if (!destination || destination.type !== import_discord13.ChannelType.GuildVoice)
+      return `I could not find a voice channel named "${args.channel_name}", Sir.`;
+    await target.voice.setChannel(destination.id);
+    return `Moved ${target.user.tag} to #${destination.name}, Sir.`;
+  },
+  server_mute_member: serverVoiceStateHandler,
+  server_deafen_member: serverVoiceStateHandler,
+  unban_member: async ({ args, message, guild, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
+      return "Access Denied \u2014 Royalty and above only, Sir.";
+    const idOrName = String(args.username_or_id ?? "");
+    const bans = await guild.bans.fetch().catch(() => null);
+    const ban = bans?.find(
+      (b) => b.user.id === idOrName || b.user.username.toLowerCase() === idOrName.toLowerCase() || b.user.tag.toLowerCase() === idOrName.toLowerCase()
+    );
+    if (!ban) return `I could not find a ban matching "${idOrName}", Sir.`;
+    await guild.bans.remove(
+      ban.user.id,
+      `Unbanned conversationally by ${message.author.tag}`
+    );
+    return `${ban.user.tag} has been unbanned, Sir.`;
+  },
+  list_bans: async ({ guild }) => {
+    const bans = await guild.bans.fetch().catch(() => null);
+    if (!bans || bans.size === 0)
+      return "There are no active bans in this server, Sir.";
+    return `Currently banned, Sir:
+${[...bans.values()].slice(0, 30).map((b) => `\u2022 ${b.user.tag} (${b.user.id})`).join("\n")}`;
+  },
+  softban_member: async ({ args, message, guild, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.advisor)
+      return "Access Denied \u2014 Advisor and above only, Sir.";
+    const target = await findMember(guild, String(args.username ?? ""));
+    if (!target)
+      return `I could not locate a member matching "${args.username}", Sir.`;
+    const reasonText = `[Jarvis Softban \u2014 requested by ${message.author.tag}]${args.reason ? ` ${args.reason}` : ""}`;
+    await guild.bans.create(target.id, {
+      reason: reasonText,
+      deleteMessageSeconds: 7 * 86400
+    });
+    await guild.bans.remove(target.id, "Softban cleanup").catch(() => null);
+    return `${target.user.tag} has been softbanned \u2014 recent messages purged, Sir.`;
+  },
+  global_ban: async ({ args, message, guild, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
+      return "Access Denied \u2014 Royalty and above only, Sir.";
+    const target = await findMember(guild, String(args.username ?? ""));
+    if (!target)
+      return `I could not locate a member matching "${args.username}", Sir.`;
+    const ownerIdsForGlobal = getConfiguredIds("DISCORD_OWNER_USER_IDS");
+    if (isProtectedOwner(actorRank, target.id, ownerIdsForGlobal))
+      return "Fire Lord cannot run global actions that affect the Owner, Sir.";
+    const reasonText = `[Jarvis Global Ban] ${args.reason ?? "No reason provided."} \u2014 by ${message.author.tag}`;
+    let success2 = 0, skipped = 0, failed = 0;
+    for (const g of message.client.guilds.cache.values()) {
+      try {
+        await g.bans.create(target.id, {
+          reason: reasonText,
+          deleteMessageSeconds: 0
+        });
+        success2++;
+      } catch (e) {
+        const code = e.code;
+        if (code === 10007 || code === 10013) skipped++;
+        else failed++;
+      }
+    }
+    await writeGenericAuditLog(
+      message.client,
+      "JARVIS // GLOBAL BAN EXECUTED",
+      [
+        { name: "TARGET", value: `${target.user.tag} (${target.id})` },
+        {
+          name: "RESULTS",
+          value: `\u2705 Banned: ${success2} | \u23ED\uFE0F Not found: ${skipped} | \u274C Failed: ${failed}`
+        }
+      ],
+      message.author.tag
+    );
+    return `Global ban complete, Sir \u2014 ${success2} banned, ${skipped} not found, ${failed} failed.`;
+  },
+  acknowledge_breach: async ({ message, guild, actorRank }) => {
+    if (actorRank !== "owner" && actorRank !== "second")
+      return "Access Denied \u2014 only the Owner or Fire Lord can silence alarms, Sir.";
+    const logChannelId = process.env.DISCORD_OWNER_LOG_CHANNEL_ID?.trim();
+    if (!logChannelId)
+      return "\u274C I cannot lift the lockdown, Sir \u2014 no owner log channel is configured (DISCORD_OWNER_LOG_CHANNEL_ID).";
+    const ch = await message.client.channels.fetch(logChannelId).catch(() => null);
+    if (!ch || !("permissionOverwrites" in ch))
+      return "\u274C I cannot lift the lockdown, Sir \u2014 the configured owner log channel could not be reached.";
+    const restored = await ch.permissionOverwrites.edit(guild.roles.everyone, { ViewChannel: null, SendMessages: null }).catch(() => null);
+    if (restored === null)
+      return "\u274C I could not restore the channel permissions, Sir \u2014 check my Manage Roles/Manage Channels permission there.";
+    return `\u{1F7E2} Lockdown lifted, Sir \u2014 breach acknowledged and the channel has been restored.`;
+  },
+  inactive_purge: async ({ args, message, guild, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.advisor)
+      return "Access Denied \u2014 Advisor and above only, Sir.";
+    const days = Math.max(1, Number(args.days) || 30);
+    const cutoff = new Date(Date.now() - days * 864e5);
+    const allMembers = await guild.members.fetch();
+    const nonBotIds = [...allMembers.values()].filter((m) => !m.user.bot).map((m) => m.id);
+    const activeRecords = await db.select({ userId: memberActivityTable.userId }).from(memberActivityTable).where(
+      sql`${memberActivityTable.guildId} = ${guild.id} AND ${memberActivityTable.lastSeenAt} >= ${cutoff}`
+    );
+    const activeIds = new Set(activeRecords.map((r) => r.userId));
+    const inactiveMembers = nonBotIds.filter((id) => !activeIds.has(id)).map((id) => allMembers.get(id)).filter(Boolean);
+    if (inactiveMembers.length === 0)
+      return `No members found with ${days}+ days of inactivity, Sir.`;
+    if (args.confirmed !== true) {
+      return `Found **${inactiveMembers.length}** member${inactiveMembers.length === 1 ? "" : "s"} inactive for ${days}+ days, Sir:
+${inactiveMembers.slice(0, 30).map((m) => `\u2022 ${m.user.tag}`).join("\n")}
+
+Say the word if you'd like me to kick them.`;
+    }
+    let kicked = 0;
+    for (const m of inactiveMembers) {
+      try {
+        await m.kick(`Inactivity purge \u2014 ${days}d \u2014 by ${message.author.tag}`);
+        kicked++;
+      } catch {
+      }
+    }
+    return `\u2705 Kicked **${kicked}** inactive member${kicked === 1 ? "" : "s"}, Sir.`;
+  }
+};
+
+// src/discord/ai/tools/robloxTools.ts
+var robloxToolDefs = [
+  {
+    type: "function",
+    function: {
+      name: "lookup_roblox_account",
+      description: "Investigates a Roblox username for account-age, social-presence, and alt-account red flags. HR and above only.",
+      parameters: {
+        type: "object",
+        properties: { username: { type: "string" } },
+        required: ["username"]
+      }
+    }
+  },
+  // ── Roblox presence tracking (Fire Lord/Owner only) ─────────────────────────
+  {
+    type: "function",
+    function: {
+      name: "track_roblox_user",
+      description: "Adds a Roblox username to be tracked for joins into the currently-watched experience. Fire Lord/Owner only.",
+      parameters: {
+        type: "object",
+        properties: {
+          username: {
+            type: "string",
+            description: "Roblox username to track."
+          }
+        },
+        required: ["username"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "untrack_roblox_user",
+      description: "Stops tracking a Roblox username. Fire Lord/Owner only.",
+      parameters: {
+        type: "object",
+        properties: { username: { type: "string" } },
+        required: ["username"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "set_roblox_experience",
+      description: "Sets which Roblox experience Jarvis watches for tracked-user joins, given a roblox.com/games/ link. Fire Lord/Owner only.",
+      parameters: {
+        type: "object",
+        properties: {
+          url: {
+            type: "string",
+            description: "A roblox.com/games/<placeId>/... link."
+          }
+        },
+        required: ["url"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_roblox_tracking_status",
+      description: "Reports the currently-watched Roblox experience and every tracked user's current in-game status. Fire Lord/Owner only.",
+      parameters: { type: "object", properties: {}, required: [] }
+    }
+  }
+];
+var robloxTrackingHandler = async ({
+  name,
+  args,
+  actorRank
+}) => {
+  if (actorRank !== "owner" && actorRank !== "second") {
+    return "Only the Owner or Fire Lord may manage Roblox tracking, Sir.";
+  }
+  if (name === "set_roblox_experience") {
+    const url2 = String(args.url ?? "").trim();
+    const resolved = await resolveExperience(url2);
+    if ("error" in resolved) return resolved.error;
+    robloxTracking.experience = resolved;
+    robloxTracking.users.forEach((u) => u.wasInExperience = false);
+    saveRobloxTracking();
+    return `Now watching **${resolved.name}**, Sir.`;
+  }
+  if (name === "track_roblox_user") {
+    if (!robloxTracking.experience)
+      return "Set an experience first with set_roblox_experience, Sir.";
+    const username = String(args.username ?? "").trim();
+    const resolvedUser = await resolveRobloxUser(username);
+    if (!resolvedUser)
+      return `No Roblox account found for "${username}", Sir.`;
+    const { id: robloxUserId, name: robloxUsername } = resolvedUser;
+    robloxTracking.users.push({
+      robloxUserId,
+      robloxUsername,
+      wasInExperience: false,
+      lastPresenceType: null,
+      lastPolledAt: null
+    });
+    saveRobloxTracking();
+    return `Now tracking **${robloxUsername}** for joins into **${robloxTracking.experience.name}**, Sir.`;
+  }
+  if (name === "untrack_roblox_user") {
+    const username = String(args.username ?? "").trim().toLowerCase();
+    const before = robloxTracking.users.length;
+    robloxTracking.users = robloxTracking.users.filter(
+      (u) => u.robloxUsername.toLowerCase() !== username
+    );
+    saveRobloxTracking();
+    return robloxTracking.users.length < before ? `Stopped tracking ${username}, Sir.` : `${username} wasn't being tracked, Sir.`;
+  }
+  if (!robloxTracking.experience)
+    return "No experience is currently set, Sir.";
+  const lines = robloxTracking.users.length ? robloxTracking.users.map((u) => {
+    const status = u.wasInExperience ? "\u{1F7E2} in-game" : "\u26AA not in-game";
+    const diag = u.lastPolledAt === null ? " (never successfully polled \u2014 check logs)" : u.lastPresenceType === 0 ? " (reported offline \u2014 could be genuinely offline, or privacy-restricted)" : "";
+    return `\u2022 ${u.robloxUsername} \u2014 ${status}${diag}`;
+  }).join("\n") : "_No users tracked yet_";
+  return `Watching **${robloxTracking.experience.name}**, Sir.
+Tracked:
+${lines}`;
+};
+var robloxToolHandlers = {
+  lookup_roblox_account: async ({ args, message, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.hr)
+      return "Access Denied \u2014 HR and above only, Sir.";
+    const result = await performRobloxLookup(
+      String(args.username ?? ""),
+      message.author.tag
+    );
+    if ("error" in result) return result.error;
+    if ("sendTyping" in message.channel)
+      await message.channel.send({ embeds: [result.embed] });
+    return "Investigation complete, Sir \u2014 report posted above.";
+  },
+  track_roblox_user: robloxTrackingHandler,
+  untrack_roblox_user: robloxTrackingHandler,
+  set_roblox_experience: robloxTrackingHandler,
+  get_roblox_tracking_status: robloxTrackingHandler
+};
+
+// src/discord/ai/tools/serverTools.ts
+var import_discord14 = __toESM(require_src2(), 1);
+var serverToolDefs = [
+  {
+    type: "function",
+    function: {
+      name: "set_avatar",
+      description: "Changes the bot's own profile picture to the image at the given URL.",
+      parameters: {
+        type: "object",
+        properties: {
+          url: {
+            type: "string",
+            description: "Direct URL to the image (png, jpg, gif)."
+          }
+        },
+        required: ["url"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "set_username",
+      description: "Changes the bot's own username.",
+      parameters: {
+        type: "object",
+        properties: {
+          username: {
+            type: "string",
+            description: "The new username for the bot."
+          }
+        },
+        required: ["username"]
       }
     }
   },
@@ -153275,79 +154804,6 @@ var DISCORD_TOOLS = [
       name: "list_roles",
       description: "Lists every role in the server with member counts.",
       parameters: { type: "object", properties: {}, required: [] }
-    }
-  },
-  // ── Messages ─────────────────────────────────────────────────────────────
-  {
-    type: "function",
-    function: {
-      name: "purge_messages",
-      description: "Bulk-deletes the most recent N messages (max 100, Discord only allows deleting messages under 14 days old) from a channel. Advisor and above only.",
-      parameters: {
-        type: "object",
-        properties: {
-          count: {
-            type: "number",
-            description: "Number of messages to delete, 1-100."
-          },
-          channel_name: {
-            type: "string",
-            description: "Leave empty for the current channel."
-          }
-        },
-        required: ["count"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "pin_last_message",
-      description: "Pins the most recent message in a channel, optionally filtered to one author.",
-      parameters: {
-        type: "object",
-        properties: {
-          channel_name: {
-            type: "string",
-            description: "Leave empty for the current channel."
-          },
-          username: {
-            type: "string",
-            description: "Optional \u2014 only pin the latest message from this member."
-          }
-        },
-        required: []
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "unpin_last_message",
-      description: "Unpins the most recently pinned message in a channel.",
-      parameters: {
-        type: "object",
-        properties: { channel_name: { type: "string" } },
-        required: []
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "react_to_last_message",
-      description: "Adds an emoji reaction to the most recent message in a channel.",
-      parameters: {
-        type: "object",
-        properties: {
-          emoji: {
-            type: "string",
-            description: "A unicode emoji, e.g. '\u2705' or '\u{1F525}'."
-          },
-          channel_name: { type: "string" }
-        },
-        required: ["emoji"]
-      }
     }
   },
   // ── Channels ─────────────────────────────────────────────────────────────
@@ -153502,48 +154958,6 @@ var DISCORD_TOOLS = [
   {
     type: "function",
     function: {
-      name: "move_voice_member",
-      description: "Moves a member currently in a voice channel to a different voice channel.",
-      parameters: {
-        type: "object",
-        properties: {
-          username: { type: "string" },
-          channel_name: { type: "string" }
-        },
-        required: ["username", "channel_name"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "server_mute_member",
-      description: "Server voice-mutes or unmutes a member (distinct from a timeout).",
-      parameters: {
-        type: "object",
-        properties: { username: { type: "string" }, mute: { type: "boolean" } },
-        required: ["username", "mute"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "server_deafen_member",
-      description: "Server voice-deafens or undeafens a member.",
-      parameters: {
-        type: "object",
-        properties: {
-          username: { type: "string" },
-          deafen: { type: "boolean" }
-        },
-        required: ["username", "deafen"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
       name: "create_stage_channel",
       description: "Creates a new stage channel, optionally inside a category.",
       parameters: {
@@ -153553,69 +154967,6 @@ var DISCORD_TOOLS = [
           category_name: { type: "string" }
         },
         required: ["name"]
-      }
-    }
-  },
-  // ── Members ──────────────────────────────────────────────────────────────
-  {
-    type: "function",
-    function: {
-      name: "unban_member",
-      description: "Removes a ban for a user by username or ID. Royalty and above only.",
-      parameters: {
-        type: "object",
-        properties: { username_or_id: { type: "string" } },
-        required: ["username_or_id"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "list_bans",
-      description: "Lists currently banned users in this server.",
-      parameters: { type: "object", properties: {}, required: [] }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "softban_member",
-      description: "Bans then immediately unbans a member, purging their recent messages without a permanent ban. Advisor and above only.",
-      parameters: {
-        type: "object",
-        properties: {
-          username: { type: "string" },
-          reason: { type: "string" }
-        },
-        required: ["username"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "get_member_info",
-      description: "Reports a Discord member's join date, account creation date, and roles.",
-      parameters: {
-        type: "object",
-        properties: { username: { type: "string" } },
-        required: ["username"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "dm_user",
-      description: "Sends a direct message to a member on the user's behalf.",
-      parameters: {
-        type: "object",
-        properties: {
-          username: { type: "string" },
-          message: { type: "string" }
-        },
-        required: ["username", "message"]
       }
     }
   },
@@ -153783,288 +155134,344 @@ var DISCORD_TOOLS = [
         required: ["name", "minutes_from_now"]
       }
     }
-  },
-  // ── Audit log ────────────────────────────────────────────────────────────
-  {
-    type: "function",
-    function: {
-      name: "query_audit_log",
-      description: "Retrieves the most recent Discord server audit log entries.",
-      parameters: {
-        type: "object",
-        properties: {
-          limit: { type: "number", description: "1-25, default 10." }
-        },
-        required: []
-      }
-    }
-  },
-  // ── Fire Nation admin tools brought over from slash-only commands ──────────
-  {
-    type: "function",
-    function: {
-      name: "global_ban",
-      description: "Bans a user from every server Jarvis is currently in. Royalty and above only.",
-      parameters: {
-        type: "object",
-        properties: {
-          username: { type: "string" },
-          reason: { type: "string" }
-        },
-        required: ["username"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "acknowledge_breach",
-      description: "Acknowledges a detected security breach, clears the alarm state, and restores the audit log channel's permissions. Owner/Fire Lord only.",
-      parameters: { type: "object", properties: {}, required: [] }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "royal_guard_alert",
-      description: "Notifies the Royal Guard channel that a royal is currently in-game and needs escort. Royalty and above only.",
-      parameters: {
-        type: "object",
-        properties: { location: { type: "string" } },
-        required: []
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "request_guards",
-      description: "Posts a guard request with a live RSVP list for an HR exam. HR and above only.",
-      parameters: {
-        type: "object",
-        properties: { when: { type: "string" }, location: { type: "string" } },
-        required: ["when", "location"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "lookup_roblox_account",
-      description: "Investigates a Roblox username for account-age, social-presence, and alt-account red flags. HR and above only.",
-      parameters: {
-        type: "object",
-        properties: { username: { type: "string" } },
-        required: ["username"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "inactive_purge",
-      description: "Lists members inactive for X+ days. Advisor and above only. Only pass confirmed:true and actually kick if the user has explicitly asked you to kick them after seeing the list \u2014 otherwise just report the list.",
-      parameters: {
-        type: "object",
-        properties: {
-          days: { type: "number" },
-          confirmed: {
-            type: "boolean",
-            description: "Set true only after the user explicitly confirms kicking."
-          }
-        },
-        required: ["days"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "reload_knowledge_base",
-      description: "Reloads the Fire Nation knowledge file from disk without restarting Jarvis. HR and above only.",
-      parameters: { type: "object", properties: {}, required: [] }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "add_knowledge_entry",
-      description: "Appends a new entry to the Fire Nation knowledge base. HR and above only.",
-      parameters: {
-        type: "object",
-        properties: { entry: { type: "string" } },
-        required: ["entry"]
-      }
-    }
-  },
-  // ── Roblox presence tracking (Fire Lord/Owner only) ─────────────────────────
-  {
-    type: "function",
-    function: {
-      name: "track_roblox_user",
-      description: "Adds a Roblox username to be tracked for joins into the currently-watched experience. Fire Lord/Owner only.",
-      parameters: {
-        type: "object",
-        properties: {
-          username: {
-            type: "string",
-            description: "Roblox username to track."
-          }
-        },
-        required: ["username"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "untrack_roblox_user",
-      description: "Stops tracking a Roblox username. Fire Lord/Owner only.",
-      parameters: {
-        type: "object",
-        properties: { username: { type: "string" } },
-        required: ["username"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "set_roblox_experience",
-      description: "Sets which Roblox experience Jarvis watches for tracked-user joins, given a roblox.com/games/ link. Fire Lord/Owner only.",
-      parameters: {
-        type: "object",
-        properties: {
-          url: {
-            type: "string",
-            description: "A roblox.com/games/<placeId>/... link."
-          }
-        },
-        required: ["url"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "get_roblox_tracking_status",
-      description: "Reports the currently-watched Roblox experience and every tracked user's current in-game status. Fire Lord/Owner only.",
-      parameters: { type: "object", properties: {}, required: [] }
-    }
-  },
-  // ── Reaction watching ────────────────────────────────────────────────────
-  {
-    type: "function",
-    function: {
-      name: "watch_message_reactions",
-      description: "Watches a message and DMs the requester once it accumulates a target number of a specific emoji reaction. Defaults to the most recent message in the given (or current) channel if no message ID is given.",
-      parameters: {
-        type: "object",
-        properties: {
-          emoji: {
-            type: "string",
-            description: "Emoji to watch for, e.g. '\u2705' or '\u{1F525}'."
-          },
-          threshold: {
-            type: "number",
-            description: "Reaction count needed to trigger the notification."
-          },
-          channel_name: {
-            type: "string",
-            description: "Leave empty for the current channel."
-          },
-          message_id: {
-            type: "string",
-            description: "Optional message ID/link. Defaults to the latest message."
-          }
-        },
-        required: ["emoji", "threshold"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "list_reaction_watches",
-      description: "Lists all active reaction watches in this server.",
-      parameters: { type: "object", properties: {}, required: [] }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "cancel_reaction_watch",
-      description: "Cancels a reaction watch by message ID, or the most recently created one if omitted.",
-      parameters: {
-        type: "object",
-        properties: { message_id: { type: "string" } },
-        required: []
-      }
-    }
-  },
-  // ── Nicknames & bot server list ─────────────────────────────────────────
-  {
-    type: "function",
-    function: {
-      name: "search_nicknames",
-      description: "Searches this server's members by nickname/display name. Provide a query to filter, or omit it to list everyone who currently has a nickname set.",
-      parameters: {
-        type: "object",
-        properties: {
-          query: {
-            type: "string",
-            description: "Optional. Partial nickname to search for. Leave empty to list all members with a nickname set."
-          }
-        },
-        required: []
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "list_servers",
-      description: "Reports how many Discord servers Jarvis is currently active in, and lists each one by name. Use this for questions like 'how many servers are you in' or 'what servers are you in'.",
-      parameters: { type: "object", properties: {}, required: [] }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "delete_message",
-      description: "Deletes a single specific message. Defaults to the most recent message in the channel (optionally filtered to one author) if no message ID/link is given. Advisor and above only.",
-      parameters: {
-        type: "object",
-        properties: {
-          channel_name: {
-            type: "string",
-            description: "Leave empty for the current channel."
-          },
-          message_id: {
-            type: "string",
-            description: "Optional message ID or link. Defaults to the latest message."
-          },
-          username: {
-            type: "string",
-            description: "Optional \u2014 only match the latest message if it's from this member. Ignored if message_id is given."
-          }
-        },
-        required: []
-      }
-    }
   }
 ];
-async function findMember(guild, query) {
-  const mention = query.match(/^<@!?(\d+)>$/);
-  if (mention) return guild.members.fetch(mention[1]).catch(() => null);
-  if (/^\d+$/.test(query)) return guild.members.fetch(query).catch(() => null);
-  const results = await guild.members.fetch({ query, limit: 10 }).catch(() => null);
-  if (!results?.size) return null;
-  const norm = query.toLowerCase();
-  return results.find(
-    (m) => m.user.username.toLowerCase() === norm || m.user.globalName?.toLowerCase() === norm || m.displayName.toLowerCase() === norm
-  ) ?? results.first() ?? null;
+var threadStateHandler = async ({ name, args, guild }) => {
+  const threadName = String(args.thread_name ?? "").toLowerCase();
+  const allThreads = await guild.channels.fetchActiveThreads().catch(() => null);
+  const thread = allThreads?.threads.find(
+    (t) => t.name.toLowerCase() === threadName
+  );
+  if (!thread)
+    return `I could not find an active thread named "${args.thread_name}", Sir.`;
+  if (name === "lock_thread") {
+    await thread.setLocked(true).catch(() => null);
+    await thread.setArchived(true).catch(() => null);
+    return `Locked and archived the "${thread.name}" thread, Sir.`;
+  }
+  await thread.setArchived(true).catch(() => null);
+  return `Archived the "${thread.name}" thread, Sir.`;
+};
+var serverToolHandlers = {
+  set_avatar: async ({ args, message }) => {
+    const url2 = String(args.url ?? "");
+    if (!url2) return "No image URL provided, Sir.";
+    try {
+      await message.client.user.setAvatar(url2);
+      return "Avatar updated, Sir.";
+    } catch {
+      return "I was unable to update my avatar, Sir. Discord may be rate-limiting avatar changes \u2014 try again in a few minutes.";
+    }
+  },
+  set_username: async ({ args, message }) => {
+    const username = String(args.username ?? "").trim();
+    if (!username) return "No username provided, Sir.";
+    try {
+      await message.client.user.setUsername(username);
+      return `Username updated to "${username}", Sir.`;
+    } catch {
+      return "I was unable to update my username, Sir. Discord rate-limits username changes \u2014 please wait a while before trying again.";
+    }
+  },
+  create_role: async ({ args, message, guild }) => {
+    const roleName = String(args.role_name ?? "").trim();
+    if (!roleName) return "I need a role name, Sir.";
+    const existing = findRole(guild, roleName);
+    if (existing) return `The "${existing.name}" role already exists, Sir.`;
+    const role = await guild.roles.create({
+      name: roleName,
+      color: args.color ? String(args.color) : void 0,
+      hoist: typeof args.hoist === "boolean" ? args.hoist : void 0,
+      mentionable: typeof args.mentionable === "boolean" ? args.mentionable : void 0,
+      permissions: [],
+      reason: `Created conversationally by ${message.author.tag}`
+    });
+    return `Created the "${role.name}" role with no elevated permissions, Sir.`;
+  },
+  delete_role: async ({ args, message, guild, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
+      return "Access Denied \u2014 Royalty and above only, Sir.";
+    const role = findRole(guild, String(args.role_name ?? ""));
+    if (!role) return `I could not find a role named "${args.role_name}", Sir.`;
+    const roleName = role.name;
+    await role.delete(`Deleted conversationally by ${message.author.tag}`);
+    return `The "${roleName}" role has been deleted, Sir.`;
+  },
+  edit_role: async ({ args, message, guild, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
+      return "Access Denied \u2014 Royalty and above only, Sir.";
+    const role = findRole(guild, String(args.role_name ?? ""));
+    if (!role) return `I could not find a role named "${args.role_name}", Sir.`;
+    await role.edit({
+      name: args.new_name ? String(args.new_name) : void 0,
+      color: args.color ? String(args.color) : void 0,
+      hoist: typeof args.hoist === "boolean" ? args.hoist : void 0,
+      mentionable: typeof args.mentionable === "boolean" ? args.mentionable : void 0,
+      reason: `Edited conversationally by ${message.author.tag}`
+    });
+    return `The "${role.name}" role has been updated, Sir.`;
+  },
+  list_roles: async ({ guild }) => {
+    const roles = [...guild.roles.cache.values()].filter((r) => r.name !== "@everyone").sort((a, b) => b.position - a.position);
+    if (roles.length === 0) return "No custom roles exist in this server, Sir.";
+    return `Roles in this server, Sir:
+${roles.map(
+      (r) => `\u2022 ${r.name} \u2014 ${r.members.size} member${r.members.size === 1 ? "" : "s"}`
+    ).join("\n").slice(0, 1800)}`;
+  },
+  create_channel: async ({ args, message, guild }) => {
+    const catName = args.category_name ? String(args.category_name) : "";
+    const parent = catName ? guild.channels.cache.find(
+      (c) => c.type === import_discord14.ChannelType.GuildCategory && c.name.toLowerCase() === catName.toLowerCase()
+    ) : void 0;
+    const type = args.channel_type === "voice" ? import_discord14.ChannelType.GuildVoice : import_discord14.ChannelType.GuildText;
+    const created = await guild.channels.create({
+      name: String(args.name ?? "new-channel"),
+      type,
+      parent: parent?.id,
+      reason: `Created conversationally by ${message.author.tag}`
+    });
+    return `Created ${args.channel_type === "voice" ? "voice channel" : "channel"} "${created.name}", Sir.`;
+  },
+  delete_channel: async ({ args, message, guild, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
+      return "Access Denied \u2014 Royalty and above only, Sir.";
+    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
+    if (!target)
+      return `I could not find a channel named "${args.channel_name}", Sir.`;
+    const channelName = target.name;
+    await target.delete(`Deleted conversationally by ${message.author.tag}`).catch(() => null);
+    return `The "${channelName}" channel has been deleted, Sir.`;
+  },
+  create_category: async ({ args, message, guild }) => {
+    const created = await guild.channels.create({
+      name: String(args.name ?? "New Category"),
+      type: import_discord14.ChannelType.GuildCategory,
+      reason: `Created conversationally by ${message.author.tag}`
+    });
+    return `Created the "${created.name}" category, Sir.`;
+  },
+  rename_channel: async ({ args, guild }) => {
+    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
+    if (!target || !("setName" in target))
+      return `I could not find a channel named "${args.channel_name}", Sir.`;
+    const oldName = target.name;
+    await target.setName(String(args.new_name ?? oldName));
+    return `Renamed #${oldName} to #${args.new_name}, Sir.`;
+  },
+  set_channel_topic: async ({ args, guild }) => {
+    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
+    if (!target || !("setTopic" in target))
+      return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    await target.setTopic(String(args.topic ?? ""));
+    return `Updated the topic for #${target.name}, Sir.`;
+  },
+  set_slowmode: async ({ args, guild }) => {
+    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
+    if (!target || !("setRateLimitPerUser" in target))
+      return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    const seconds = Math.max(0, Math.min(21600, Number(args.seconds) || 0));
+    await target.setRateLimitPerUser(seconds);
+    return seconds > 0 ? `Slowmode set to ${seconds}s in #${target.name}, Sir.` : `Slowmode disabled in #${target.name}, Sir.`;
+  },
+  set_channel_nsfw: async ({ args, guild }) => {
+    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
+    if (!target || !("setNSFW" in target))
+      return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    await target.setNSFW(Boolean(args.nsfw));
+    return `#${target.name} is now marked ${args.nsfw ? "age-restricted" : "safe for all audiences"}, Sir.`;
+  },
+  create_thread: async ({ args, message, guild }) => {
+    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
+    if (!target || !("threads" in target))
+      return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    const thread = await target.threads.create({
+      name: String(args.thread_name ?? "New Thread"),
+      reason: `Created conversationally by ${message.author.tag}`
+    });
+    if (args.message) await thread.send(String(args.message)).catch(() => null);
+    return `Created thread "${thread.name}" in #${target.name}, Sir.`;
+  },
+  archive_thread: threadStateHandler,
+  lock_thread: threadStateHandler,
+  create_stage_channel: async ({ args, message, guild }) => {
+    const catName = args.category_name ? String(args.category_name) : "";
+    const parent = catName ? guild.channels.cache.find(
+      (c) => c.type === import_discord14.ChannelType.GuildCategory && c.name.toLowerCase() === catName.toLowerCase()
+    ) : void 0;
+    const created = await guild.channels.create({
+      name: String(args.name ?? "Stage"),
+      type: import_discord14.ChannelType.GuildStageVoice,
+      parent: parent?.id,
+      reason: `Created conversationally by ${message.author.tag}`
+    });
+    return `Created stage channel "${created.name}", Sir.`;
+  },
+  rename_server: async ({ args, guild, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
+      return "Access Denied \u2014 Royalty and above only, Sir.";
+    await guild.setName(String(args.name ?? guild.name));
+    return `Server renamed to "${args.name}", Sir.`;
+  },
+  set_server_icon: async ({ args, guild, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
+      return "Access Denied \u2014 Royalty and above only, Sir.";
+    await guild.setIcon(String(args.url ?? "")).catch(() => null);
+    return "Server icon updated, Sir.";
+  },
+  set_afk_channel: async ({ args, guild, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
+      return "Access Denied \u2014 Royalty and above only, Sir.";
+    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
+    if (!target || target.type !== import_discord14.ChannelType.GuildVoice)
+      return `I could not find a voice channel named "${args.channel_name}", Sir.`;
+    await guild.setAFKChannel(target.id);
+    if (args.timeout_minutes)
+      await guild.setAFKTimeout(
+        Number(args.timeout_minutes) * 60
+      );
+    return `AFK channel set to #${target.name}, Sir.`;
+  },
+  set_system_channel: async ({ args, guild, actorRank }) => {
+    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
+      return "Access Denied \u2014 Royalty and above only, Sir.";
+    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
+    if (!target)
+      return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    await guild.setSystemChannel(target.id);
+    return `System messages channel set to #${target.name}, Sir.`;
+  },
+  create_invite: async ({ args, message, guild }) => {
+    const target = args.channel_name ? findAnyChannel(guild, String(args.channel_name)) : message.channel;
+    if (!target || !("createInvite" in target))
+      return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    const maxUses = Number(args.max_uses) || 0;
+    const expiresHours = Number(args.expires_hours) || 0;
+    const invite = await target.createInvite({
+      maxUses,
+      maxAge: expiresHours > 0 ? expiresHours * 3600 : 0,
+      reason: `Created conversationally by ${message.author.tag}`
+    });
+    return `Invite created, Sir: https://discord.gg/${invite.code}`;
+  },
+  list_invites: async ({ guild }) => {
+    const invites = await guild.invites.fetch().catch(() => null);
+    if (!invites || invites.size === 0)
+      return "There are no active invites, Sir.";
+    return `Active invites, Sir:
+${[...invites.values()].slice(0, 20).map(
+      (i) => `\u2022 ${i.code} \u2014 #${i.channel?.name ?? "unknown"} \u2014 ${i.uses ?? 0} uses`
+    ).join("\n")}`;
+  },
+  revoke_invite: async ({ args, message, guild }) => {
+    const invites = await guild.invites.fetch().catch(() => null);
+    const invite = invites?.find((i) => i.code === String(args.code ?? ""));
+    if (!invite)
+      return `I could not find an invite with code "${args.code}", Sir.`;
+    await invite.delete(`Revoked conversationally by ${message.author.tag}`);
+    return `Invite ${args.code} has been revoked, Sir.`;
+  },
+  create_emoji: async ({ args, message, guild }) => {
+    const created = await guild.emojis.create({
+      name: String(args.name ?? "emoji"),
+      attachment: String(args.url ?? ""),
+      reason: `Created conversationally by ${message.author.tag}`
+    }).catch(() => null);
+    return created ? `Created emoji "${created.name}", Sir.` : "\u274C Failed to create the emoji, Sir \u2014 check the image URL and format.";
+  },
+  delete_emoji: async ({ args, message, guild }) => {
+    const emojiName = String(args.name ?? "").toLowerCase();
+    const emoji3 = guild.emojis.cache.find(
+      (e) => e.name?.toLowerCase() === emojiName
+    );
+    if (!emoji3) return `I could not find an emoji named "${args.name}", Sir.`;
+    await emoji3.delete(`Deleted conversationally by ${message.author.tag}`);
+    return `Emoji "${args.name}" has been deleted, Sir.`;
+  },
+  create_webhook: async ({ args, message, guild }) => {
+    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
+    if (!target || !("createWebhook" in target))
+      return `I could not find a text channel named "${args.channel_name}", Sir.`;
+    const webhook = await target.createWebhook({
+      name: String(args.name ?? "Jarvis Webhook"),
+      reason: `Created conversationally by ${message.author.tag}`
+    });
+    return `Webhook created in #${target.name}, Sir: ${webhook.url}`;
+  },
+  create_scheduled_event: async ({ args, message, guild }) => {
+    const startAt = new Date(
+      Date.now() + Number(args.minutes_from_now) * 6e4
+    );
+    const durationMin = Number(args.duration_minutes) || 60;
+    const endAt = new Date(startAt.getTime() + durationMin * 6e4);
+    const channelName = args.channel_name ? String(args.channel_name) : "";
+    const targetChannel = channelName ? findAnyChannel(guild, channelName) : void 0;
+    let entityType = 3;
+    if (targetChannel) {
+      if (targetChannel.type === import_discord14.ChannelType.GuildStageVoice) entityType = 1;
+      else if (targetChannel.type === import_discord14.ChannelType.GuildVoice) entityType = 2;
+      else
+        return "That's not a voice or stage channel, Sir \u2014 scheduled events need one of those.";
+    }
+    const created = await guild.scheduledEvents.create({
+      name: String(args.name ?? "Fire Nation Event"),
+      scheduledStartTime: startAt,
+      scheduledEndTime: endAt,
+      privacyLevel: 2,
+      // GuildOnly
+      entityType,
+      channel: targetChannel?.id,
+      entityMetadata: targetChannel ? void 0 : { location: String(args.location ?? "TBD") },
+      description: args.description ? String(args.description) : void 0,
+      reason: `Created conversationally by ${message.author.tag}`
+    }).catch(() => null);
+    return created ? `Scheduled event "${created.name}" created, starting <t:${Math.floor(startAt.getTime() / 1e3)}:R>, Sir.` : "\u274C Failed to create the scheduled event, Sir.";
+  }
+};
+
+// src/discord/ai/toolExecutor.ts
+var TOOL_HANDLERS = {
+  ...moderationToolHandlers,
+  ...meritToolHandlers,
+  ...robloxToolHandlers,
+  ...serverToolHandlers,
+  ...messageToolHandlers,
+  ...miscToolHandlers
+};
+async function executeTool(name, args, message, actorRank) {
+  const guild = message.guild;
+  if (!guild) return "I am unable to perform server actions here, Sir.";
+  const centralMinRank = TOOL_MIN_RANK[name];
+  if (centralMinRank && RANK_ORDER[actorRank] < RANK_ORDER[centralMinRank]) {
+    return `Access Denied \u2014 ${centralMinRank.charAt(0).toUpperCase() + centralMinRank.slice(1)} and above only, Sir.`;
+  }
+  const legacyMinRank = LEGACY_TOOL_MIN_RANK[name];
+  if (legacyMinRank && RANK_ORDER[actorRank] < RANK_ORDER[legacyMinRank]) {
+    return `Access Denied \u2014 ${legacyMinRank.charAt(0).toUpperCase() + legacyMinRank.slice(1)} and above only, Sir.`;
+  }
+  const handler = TOOL_HANDLERS[name];
+  if (!handler) return "I do not recognise that directive, Sir.";
+  const ownerIds = getConfiguredIds("DISCORD_OWNER_USER_IDS");
+  const reason = `[Jarvis \u2014 requested by ${message.author.tag}]${args.reason ? ` ${args.reason}` : ""}`;
+  return handler({ name, args, message, guild, actorRank, ownerIds, reason });
 }
+
+// src/discord/ai/tools.ts
+var DISCORD_TOOLS = [
+  ...moderationToolDefs,
+  ...meritToolDefs,
+  ...robloxToolDefs,
+  ...serverToolDefs,
+  ...messageToolDefs,
+  ...miscToolDefs
+];
+var CORE_TOOL_NAMES = /* @__PURE__ */ new Set([
+  "get_merits",
+  "get_server_status",
+  "get_token_usage",
+  "get_command_guide",
+  "get_full_capabilities"
+]);
 var TOOL_KEYWORDS = {
   purge: ["purge_messages", "inactive_purge"],
   "clear messages": ["purge_messages"],
@@ -154157,7 +155564,7 @@ var TOOL_KEYWORDS = {
 };
 function toolsForMessage(rank, userText) {
   const text2 = userText.toLowerCase();
-  const wanted = /* @__PURE__ */ new Set();
+  const wanted = new Set(CORE_TOOL_NAMES);
   for (const [kw, names] of Object.entries(TOOL_KEYWORDS)) {
     if (new RegExp(`\\b${escapeRegex2(kw)}s?\\b`, "i").test(text2)) {
       names.forEach((n) => wanted.add(n));
@@ -154169,1330 +155576,6 @@ function toolsForMessage(rank, userText) {
     const min = TOOL_MIN_RANK[t.function.name] ?? LEGACY_TOOL_MIN_RANK[t.function.name];
     return !min || RANK_ORDER[rank] >= RANK_ORDER[min];
   });
-}
-
-// src/discord/ai/toolExecutor.ts
-function findAnyChannel(guild, name) {
-  const norm = name.toLowerCase().replace(/^#/, "");
-  return guild.channels.cache.find((c) => c.name.toLowerCase() === norm);
-}
-function findRole(guild, name) {
-  const norm = name.toLowerCase();
-  return guild.roles.cache.find(
-    (r) => r.name.toLowerCase() === norm && r.name !== "@everyone"
-  );
-}
-async function executeTool(name, args, message, actorRank) {
-  const guild = message.guild;
-  if (!guild) return "I am unable to perform server actions here, Sir.";
-  const centralMinRank = TOOL_MIN_RANK[name];
-  if (centralMinRank && RANK_ORDER[actorRank] < RANK_ORDER[centralMinRank]) {
-    return `Access Denied \u2014 ${centralMinRank.charAt(0).toUpperCase() + centralMinRank.slice(1)} and above only, Sir.`;
-  }
-  if (name === "get_token_usage" || name === "get_server_status") {
-    if (name === "get_server_status") {
-      const allMembers = await guild.members.fetch();
-      const totalMembers = allMembers.filter((m) => !m.user.bot).size;
-      const onlineMembers = allMembers.filter(
-        (m) => !m.user.bot && m.presence?.status && m.presence.status !== "offline"
-      ).size;
-      let roleLine = "";
-      const roleName = args.role_name ? String(args.role_name).trim() : "";
-      if (roleName) {
-        const role = guild.roles.cache.find(
-          (r) => r.name.toLowerCase() === roleName.toLowerCase()
-        );
-        if (role) {
-          const roleMembers = allMembers.filter(
-            (m) => m.roles.cache.has(role.id)
-          );
-          const roleOnline = roleMembers.filter(
-            (m) => m.presence?.status && m.presence.status !== "offline"
-          ).size;
-          roleLine = ` Of those holding the "${role.name}" role: ${roleMembers.size} total, ${roleOnline} currently online.`;
-        } else {
-          roleLine = ` No role named "${roleName}" was found.`;
-        }
-      }
-      return `${onlineMembers} of ${totalMembers} personnel currently online.${roleLine}`;
-    }
-    const dailyRemaining = Math.max(0, GEMINI_DAILY_LIMIT - dailyTokensUsed);
-    const dailyPct = Math.min(
-      100,
-      dailyTokensUsed / GEMINI_DAILY_LIMIT * 100
-    ).toFixed(1);
-    const now = /* @__PURE__ */ new Date();
-    const midnight = new Date(now);
-    midnight.setHours(24, 0, 0, 0);
-    const msUntilDailyReset = midnight.getTime() - now.getTime();
-    const hoursUntilReset = Math.floor(msUntilDailyReset / 36e5);
-    const minsUntilReset = Math.floor(msUntilDailyReset % 36e5 / 6e4);
-    const nowMs = Date.now();
-    const currentMinuteUsed = nowMs - minuteWindowStart >= 6e4 ? 0 : minuteTokensUsed;
-    const minuteRemaining = Math.max(0, GOOGLE_TPM_LIMIT - currentMinuteUsed);
-    const minutePct = Math.min(
-      100,
-      currentMinuteUsed / GOOGLE_TPM_LIMIT * 100
-    ).toFixed(1);
-    const secsUntilMinuteReset = Math.max(
-      0,
-      Math.ceil((6e4 - (nowMs - minuteWindowStart)) / 1e3)
-    );
-    return `Daily: ${dailyTokensUsed.toLocaleString()} / ${GEMINI_DAILY_LIMIT.toLocaleString()} tokens used (${dailyPct}%), ${dailyRemaining.toLocaleString()} remaining \u2014 resets in ${hoursUntilReset}h ${minsUntilReset}m.
-Per-minute: ${currentMinuteUsed.toLocaleString()} / ${GOOGLE_TPM_LIMIT.toLocaleString()} tokens used this minute (${minutePct}%), ${minuteRemaining.toLocaleString()} remaining \u2014 resets in ${secsUntilMinuteReset}s.`;
-  }
-  if (name === "get_command_guide") {
-    const tierArg = String(args.tier ?? "member").toLowerCase();
-    if (tierArg !== "member" && tierArg !== "hr" && tierArg !== "advisor") {
-      return "I need a valid tier \u2014 Member, HR, or Advisor, Sir.";
-    }
-    return buildCommandGuide(tierArg);
-  }
-  if (name === "get_full_capabilities") {
-    const tierArg = String(
-      args.tier ?? "member"
-    ).toLowerCase();
-    if (!GUIDE_TIER_ORDER.includes(tierArg)) return "I need a valid tier, Sir.";
-    return buildFullCapabilityGuide(tierArg);
-  }
-  if (name === "search_nicknames") {
-    const allMembers = await guild.members.fetch();
-    const query = args.query ? String(args.query).trim().toLowerCase() : "";
-    const withNicknames = allMembers.filter(
-      (m) => !!m.nickname && (!query || m.nickname.toLowerCase().includes(query))
-    );
-    if (withNicknames.size === 0) {
-      return query ? `No members found with a nickname matching "${query}", Sir.` : "No members currently have a nickname set, Sir.";
-    }
-    const lines = [...withNicknames.values()].slice(0, 50).map((m) => `\u2022 ${m.user.tag} \u2014 "${m.nickname}"`);
-    const extra = withNicknames.size > 50 ? `
-\u2026and ${withNicknames.size - 50} more not shown` : "";
-    const label = query ? `matching "${query}"` : "with a nickname set";
-    return `Members ${label} (${withNicknames.size}), Sir:
-${lines.join("\n")}${extra}`;
-  }
-  if (name === "list_servers") {
-    const guilds = [...message.client.guilds.cache.values()];
-    const lines = guilds.map((g) => `\u2022 ${g.name} (${g.memberCount ?? "?"} members)`).join("\n");
-    return `I am currently active in **${guilds.length}** server${guilds.length === 1 ? "" : "s"}, Sir:
-${lines}`;
-  }
-  if (name === "delete_message") {
-    const target = args.channel_name ? findAnyChannel(guild, String(args.channel_name)) : message.channel;
-    if (!target || !("messages" in target))
-      return `I could not find a text channel named "${args.channel_name}", Sir.`;
-    let toDelete;
-    const msgIdArg = args.message_id ? String(args.message_id).match(/\d+/)?.[0] : void 0;
-    if (msgIdArg) {
-      toDelete = await target.messages.fetch(msgIdArg).catch(() => void 0);
-      if (!toDelete)
-        return `I could not find a message with ID "${msgIdArg}" in #${target.name}, Sir.`;
-    } else {
-      const recent = await target.messages.fetch({ limit: 20 });
-      const usernameFilter = args.username ? String(args.username).toLowerCase() : null;
-      toDelete = usernameFilter ? recent.find(
-        (m) => m.author.username.toLowerCase().includes(usernameFilter) || m.author.tag.toLowerCase().includes(usernameFilter)
-      ) : recent.first();
-      if (!toDelete)
-        return "I could not find a matching message to delete, Sir.";
-    }
-    const authorTag = toDelete.author.tag;
-    const snippet = toDelete.content ? toDelete.content.slice(0, 80) : "_(no text \u2014 embed/attachment)_";
-    await toDelete.delete().catch(() => null);
-    await writeGenericAuditLog(
-      message.client,
-      "JARVIS // MESSAGE DELETED (conversational)",
-      [
-        { name: "AUTHOR", value: authorTag },
-        { name: "CHANNEL", value: `#${target.name}` },
-        { name: "CONTENT", value: snippet }
-      ],
-      message.author.tag
-    );
-    return `Deleted a message from ${authorTag} in #${target.name}, Sir.`;
-  }
-  if (name === "track_roblox_user" || name === "untrack_roblox_user" || name === "set_roblox_experience" || name === "get_roblox_tracking_status") {
-    if (actorRank !== "owner" && actorRank !== "second") {
-      return "Only the Owner or Fire Lord may manage Roblox tracking, Sir.";
-    }
-    if (name === "set_roblox_experience") {
-      const url2 = String(args.url ?? "").trim();
-      const resolved = await resolveExperience(url2);
-      if ("error" in resolved) return resolved.error;
-      robloxTracking.experience = resolved;
-      robloxTracking.users.forEach((u) => u.wasInExperience = false);
-      saveRobloxTracking();
-      return `Now watching **${resolved.name}**, Sir.`;
-    }
-    if (name === "track_roblox_user") {
-      if (!robloxTracking.experience)
-        return "Set an experience first with set_roblox_experience, Sir.";
-      const username = String(args.username ?? "").trim();
-      const resolvedUser = await resolveRobloxUser(username);
-      if (!resolvedUser)
-        return `No Roblox account found for "${username}", Sir.`;
-      const { id: robloxUserId, name: robloxUsername } = resolvedUser;
-      robloxTracking.users.push({
-        robloxUserId,
-        robloxUsername,
-        wasInExperience: false,
-        lastPresenceType: null,
-        lastPolledAt: null
-      });
-      saveRobloxTracking();
-      return `Now tracking **${robloxUsername}** for joins into **${robloxTracking.experience.name}**, Sir.`;
-    }
-    if (name === "untrack_roblox_user") {
-      const username = String(args.username ?? "").trim().toLowerCase();
-      const before = robloxTracking.users.length;
-      robloxTracking.users = robloxTracking.users.filter(
-        (u) => u.robloxUsername.toLowerCase() !== username
-      );
-      saveRobloxTracking();
-      return robloxTracking.users.length < before ? `Stopped tracking ${username}, Sir.` : `${username} wasn't being tracked, Sir.`;
-    }
-    if (!robloxTracking.experience)
-      return "No experience is currently set, Sir.";
-    const lines = robloxTracking.users.length ? robloxTracking.users.map((u) => {
-      const status = u.wasInExperience ? "\u{1F7E2} in-game" : "\u26AA not in-game";
-      const diag = u.lastPolledAt === null ? " (never successfully polled \u2014 check logs)" : u.lastPresenceType === 0 ? " (reported offline \u2014 could be genuinely offline, or privacy-restricted)" : "";
-      return `\u2022 ${u.robloxUsername} \u2014 ${status}${diag}`;
-    }).join("\n") : "_No users tracked yet_";
-    return `Watching **${robloxTracking.experience.name}**, Sir.
-Tracked:
-${lines}`;
-  }
-  if (name === "activate_overwatch_mode") {
-    overwatchActiveGuilds.add(guild.id);
-    return "Overwatch Mode engaged, Sir. I will monitor silently and act on filtered language, invite links, and ping abuse without further prompting.";
-  }
-  if (name === "deactivate_overwatch_mode") {
-    overwatchActiveGuilds.delete(guild.id);
-    return "Overwatch Mode disengaged, Sir. Automated monitoring is off.";
-  }
-  if (name === "get_overwatch_status") {
-    const active = overwatchActiveGuilds.has(guild.id);
-    const totalViolations = [...overwatchViolations.entries()].filter(([k]) => k.startsWith(`${guild.id}:`)).reduce((sum, [, v]) => sum + v, 0);
-    return active ? `Overwatch Mode is currently **ON**, Sir. ${totalViolations} tracked violation${totalViolations === 1 ? "" : "s"} across monitored members since activation.` : "Overwatch Mode is currently **OFF**, Sir.";
-  }
-  if (name === "get_overwatch_detail") {
-    const usernameFilter = args.username ? String(args.username).trim() : void 0;
-    return buildOverwatchDetailReport(guild, usernameFilter);
-  }
-  if (name === "grant_jarvis_access" || name === "revoke_jarvis_access") {
-    if (actorRank !== "owner" && actorRank !== "second") {
-      return "Only the Owner or Fire Lord may modify Jarvis access, Sir.";
-    }
-    const usernameArg = String(args.username ?? "").trim();
-    if (!usernameArg) return "I need a user to target, Sir.";
-    const targetMember = await findMember(guild, usernameArg);
-    if (!targetMember)
-      return `I could not locate a member matching "${usernameArg}", Sir.`;
-    if (name === "grant_jarvis_access") {
-      jarvisAccessIds.add(targetMember.id);
-      saveJarvisAccess();
-      await writeGenericAuditLog(
-        message.client,
-        "JARVIS // STANDING ACCESS GRANTED",
-        [
-          { name: "TARGET", value: `${targetMember.user.tag} (${targetMember.id})` },
-          { name: "TOTAL WITH ACCESS", value: String(jarvisAccessIds.size), inline: true }
-        ],
-        message.author.tag
-      );
-      return `${targetMember.user.tag} now has standing access to speak with me, Sir \u2014 this persists until revoked. (${jarvisAccessIds.size} total with granted access.)`;
-    }
-    const had = jarvisAccessIds.delete(targetMember.id);
-    saveJarvisAccess();
-    if (had) {
-      await writeGenericAuditLog(
-        message.client,
-        "JARVIS // STANDING ACCESS REVOKED",
-        [
-          { name: "TARGET", value: `${targetMember.user.tag} (${targetMember.id})` },
-          { name: "REMAINING WITH ACCESS", value: String(jarvisAccessIds.size), inline: true }
-        ],
-        message.author.tag
-      );
-    }
-    return had ? `${targetMember.user.tag}'s access has been revoked, Sir. (${jarvisAccessIds.size} remaining with granted access.)` : `${targetMember.user.tag} did not have standing access to begin with, Sir.`;
-  }
-  if (name === "get_jarvis_access_status") {
-    if (jarvisAccessIds.size === 0)
-      return "No one currently holds granted access, Sir \u2014 only the Owner and Fire Lord may speak with me by default.";
-    const names = [...jarvisAccessIds].map((id) => {
-      const m = guild.members.cache.get(id);
-      return m ? m.user.tag : `Unknown User (${id})`;
-    });
-    return `${jarvisAccessIds.size} member${jarvisAccessIds.size === 1 ? "" : "s"} currently hold${jarvisAccessIds.size === 1 ? "s" : ""} granted access, Sir: ${names.join(", ")}`;
-  }
-  if (name === "set_avatar") {
-    const url2 = String(args.url ?? "");
-    if (!url2) return "No image URL provided, Sir.";
-    try {
-      await message.client.user.setAvatar(url2);
-      return "Avatar updated, Sir.";
-    } catch {
-      return "I was unable to update my avatar, Sir. Discord may be rate-limiting avatar changes \u2014 try again in a few minutes.";
-    }
-  }
-  if (name === "set_username") {
-    const username = String(args.username ?? "").trim();
-    if (!username) return "No username provided, Sir.";
-    try {
-      await message.client.user.setUsername(username);
-      return `Username updated to "${username}", Sir.`;
-    } catch {
-      return "I was unable to update my username, Sir. Discord rate-limits username changes \u2014 please wait a while before trying again.";
-    }
-  }
-  if (name === "set_reminder") {
-    const minutes = Number(args.minutes_from_now);
-    if (!minutes || minutes <= 0)
-      return "I need a valid time for the reminder, Sir.";
-    const reminderMsg = String(args.message ?? "").trim();
-    if (!reminderMsg) return "I need something to remind you about, Sir.";
-    const dueAt = new Date(Date.now() + minutes * 6e4);
-    await db.insert(remindersTable).values({ userId: message.author.id, message: reminderMsg, dueAt });
-    const timeStr = dueAt.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "America/New_York"
-    });
-    const label = minutes < 60 ? `${Math.round(minutes)} minute${Math.round(minutes) === 1 ? "" : "s"}` : `${(minutes / 60).toFixed(1).replace(/\.0$/, "")} hour${minutes === 60 ? "" : "s"}`;
-    return `Understood, Sir. I will remind you about "${reminderMsg}" in ${label} (at ${timeStr} ET).`;
-  }
-  if (name === "activate_protocol_silent") {
-    const everyoneRole = guild.roles.everyone;
-    const channels = guild.channels.cache.filter(
-      (c) => c.type === import_discord12.ChannelType.GuildText || c.type === import_discord12.ChannelType.GuildAnnouncement
-    );
-    let count = 0;
-    for (const [, ch] of channels) {
-      try {
-        await ch.permissionOverwrites.edit(everyoneRole, {
-          SendMessages: false
-        });
-        count++;
-      } catch {
-      }
-    }
-    setProtocolSilent(true, guild.id);
-    setStatusRotationPaused(true);
-    message.client.user.setActivity("\u{1F512} Protocol Silent \u2014 Server Locked");
-    return `Protocol Silent activated, Sir. ${count} channel${count === 1 ? "" : "s"} locked.`;
-  }
-  if (name === "deactivate_protocol_silent") {
-    const everyoneRole = guild.roles.everyone;
-    const channels = guild.channels.cache.filter(
-      (c) => c.type === import_discord12.ChannelType.GuildText || c.type === import_discord12.ChannelType.GuildAnnouncement
-    );
-    let count = 0;
-    for (const [, ch] of channels) {
-      try {
-        await ch.permissionOverwrites.edit(everyoneRole, {
-          SendMessages: null
-        });
-        count++;
-      } catch {
-      }
-    }
-    setProtocolSilent(false, null);
-    setStatusRotationPaused(false);
-    triggerStatusRotation();
-    return `Protocol Silent deactivated, Sir. ${count} channel${count === 1 ? "" : "s"} restored.`;
-  }
-  if (name === "lock_channel") {
-    const target = guild.channels.cache.find(
-      (c) => (c.type === import_discord12.ChannelType.GuildText || c.type === import_discord12.ChannelType.GuildAnnouncement) && c.name.toLowerCase() === String(args.channel_name).toLowerCase()
-    );
-    if (!target)
-      return `I could not find a text channel named "${args.channel_name}", Sir.`;
-    await target.permissionOverwrites.edit(guild.roles.everyone, {
-      SendMessages: false
-    });
-    return `#${target.name} has been locked, Sir.`;
-  }
-  if (name === "unlock_channel") {
-    const target = guild.channels.cache.find(
-      (c) => (c.type === import_discord12.ChannelType.GuildText || c.type === import_discord12.ChannelType.GuildAnnouncement) && c.name.toLowerCase() === String(args.channel_name).toLowerCase()
-    );
-    if (!target)
-      return `I could not find a text channel named "${args.channel_name}", Sir.`;
-    await target.permissionOverwrites.edit(guild.roles.everyone, {
-      SendMessages: null
-    });
-    return `#${target.name} has been unlocked, Sir.`;
-  }
-  if (name === "award_merit") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.hr)
-      return "Access Denied \u2014 HR and above only, Sir.";
-    const meritType = String(args.merit_type ?? "");
-    const usernames = Array.isArray(args.usernames) ? args.usernames : [];
-    if ((meritType === "raid" || meritType === "bonus") && RANK_ORDER[actorRank] < RANK_ORDER.advisor)
-      return "Only Advisors and above can award Raid or Bonus merits, Sir.";
-    const ownerIdsForAward = getConfiguredIds("DISCORD_OWNER_USER_IDS");
-    if (meritType === "bonus") {
-      if (!usernames.length) return "I need at least one member to award, Sir.";
-      const amount2 = Number(args.amount);
-      if (!amount2 || amount2 < 0.1 || amount2 > 7)
-        return "Bonus amount must be between 0.1 and 7, Sir.";
-      const resolvedBonus = [];
-      const notFoundBonus = [];
-      for (const u of usernames) {
-        const m = await findMember(guild, u);
-        if (m) resolvedBonus.push(m);
-        else notFoundBonus.push(u);
-      }
-      if (resolvedBonus.length === 0)
-        return "I could not locate any of the members you named, Sir.";
-      if (resolvedBonus.some(
-        (m) => isProtectedOwner(actorRank, m.id, ownerIdsForAward)
-      ))
-        return "Fire Lord cannot award merits that affect the Owner, Sir.";
-      await db.insert(meritAwardsTable).values(
-        resolvedBonus.map((m) => ({
-          guildId: guild.id,
-          memberId: m.id,
-          memberTag: m.user.tag,
-          amount: amount2,
-          proofUrl: "Bonus (conversational)",
-          awardedById: message.author.id,
-          awardedByTag: message.author.tag
-        }))
-      );
-      await writeGenericAuditLog(
-        message.client,
-        "JARVIS // MERIT AWARD AUDIT",
-        [
-          {
-            name: "RECIPIENTS",
-            value: resolvedBonus.map((m) => `\u2022 ${m.user.tag} (+${amount2})`).join("\n").slice(0, 1024)
-          },
-          { name: "TYPE", value: "Bonus (conversational)" }
-        ],
-        message.author.tag
-      );
-      const notFoundNote = notFoundBonus.length > 0 ? ` (${notFoundBonus.length} not found: ${notFoundBonus.join(", ")} \u2014 skipped)` : "";
-      return `Recorded **+${amount2}** Bonus merit${amount2 === 1 ? "" : "s"} for **${resolvedBonus.length}** member${resolvedBonus.length === 1 ? "" : "s"}${notFoundNote}, Sir \u2014 logged for owners.`;
-    }
-    const hostQuery = String(args.host ?? "").trim();
-    if (!hostQuery)
-      return "I need a host for that award, Sir \u2014 that's who receives the merit.";
-    const hostMember = await findMember(guild, hostQuery);
-    if (!hostMember)
-      return `I could not locate a host matching "${hostQuery}", Sir.`;
-    if (isProtectedOwner(actorRank, hostMember.id, ownerIdsForAward))
-      return "Fire Lord cannot award merits that affect the Owner, Sir.";
-    const resolvedMembers = [];
-    for (const u of usernames) {
-      const m = await findMember(guild, u);
-      if (m) resolvedMembers.push(m);
-    }
-    if (resolvedMembers.some(
-      (m) => isProtectedOwner(actorRank, m.id, ownerIdsForAward)
-    ))
-      return "Fire Lord cannot award merits that affect the Owner, Sir.";
-    const amount = meritType === "raid" ? 3 : 1;
-    if (!resolvedMembers.some((m) => m.id === hostMember.id))
-      resolvedMembers.push(hostMember);
-    await db.transaction(async (tx) => {
-      await tx.insert(meritAwardsTable).values(
-        resolvedMembers.map((m) => ({
-          guildId: guild.id,
-          memberId: m.id,
-          memberTag: m.user.tag,
-          amount,
-          proofUrl: `${meritType[0].toUpperCase()}${meritType.slice(1)} (conversational)`,
-          awardedById: message.author.id,
-          awardedByTag: message.author.tag
-        }))
-      );
-    });
-    await writeGenericAuditLog(
-      message.client,
-      "JARVIS // MERIT AWARD AUDIT",
-      [
-        {
-          name: "RECIPIENTS",
-          value: resolvedMembers.map((m) => `\u2022 ${m.user.tag} (+${amount})`).join("\n").slice(0, 1024)
-        },
-        { name: "TYPE", value: meritType },
-        { name: "HOST", value: hostMember.user.tag }
-      ],
-      message.author.tag
-    );
-    return `Recorded **+${amount}** ${meritType} merit${amount === 1 ? "" : "s"} for **${resolvedMembers.length}** member${resolvedMembers.length === 1 ? "" : "s"} (Host: ${hostMember.user.tag}), Sir \u2014 logged for owners.`;
-  }
-  if (name === "remove_merit") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.advisor)
-      return "Access Denied \u2014 Advisor and above only, Sir.";
-    const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
-    const amount = Number(args.amount);
-    if (!amount || amount < 0.1 || amount > 7)
-      return "Amount must be between 0.1 and 7, Sir.";
-    const reasonText = String(args.reason ?? "").trim();
-    if (!reasonText) return "I need a reason for the removal, Sir.";
-    const ownerIdsForRemove = getConfiguredIds("DISCORD_OWNER_USER_IDS");
-    if (isProtectedOwner(actorRank, target.id, ownerIdsForRemove))
-      return "Fire Lord cannot remove merits from the Owner, Sir.";
-    await db.insert(meritAwardsTable).values({
-      guildId: guild.id,
-      memberId: target.id,
-      memberTag: target.user.tag,
-      amount: -amount,
-      proofUrl: reasonText,
-      awardedById: message.author.id,
-      awardedByTag: message.author.tag
-    });
-    await writeGenericAuditLog(
-      message.client,
-      "JARVIS // MERIT REMOVAL AUDIT",
-      [
-        { name: "MEMBER", value: `${target.user.tag} (${target.id})` },
-        { name: "AMOUNT REMOVED", value: `-${amount}` },
-        { name: "REASON", value: reasonText }
-      ],
-      message.author.tag
-    );
-    return `Recorded **-${amount}** merit${amount === 1 ? "" : "s"} for ${target.user.tag}, Sir \u2014 logged for owners.`;
-  }
-  if (name === "get_merits") {
-    const usernameArg = args.username ? String(args.username).trim() : "";
-    if (usernameArg) {
-      const target = await findMember(guild, usernameArg);
-      if (!target)
-        return `I could not locate a member matching "${usernameArg}", Sir.`;
-      const [result] = await db.select({
-        total: sql`coalesce(sum(${meritAwardsTable.amount}), 0)`
-      }).from(meritAwardsTable).where(eq(meritAwardsTable.memberId, target.id));
-      return `${target.user.tag} currently has **${Number(result?.total ?? 0)}** merits, Sir.`;
-    }
-    const leaderboard = await db.select({
-      memberTag: meritAwardsTable.memberTag,
-      total: sql`sum(${meritAwardsTable.amount})`
-    }).from(meritAwardsTable).groupBy(meritAwardsTable.memberId, meritAwardsTable.memberTag).orderBy(desc(sql`sum(${meritAwardsTable.amount})`)).limit(10);
-    if (leaderboard.length === 0)
-      return "No merits have been recorded yet, Sir.";
-    return `Top personnel by merit, Sir:
-${leaderboard.map((e, i) => `${i + 1}. ${e.memberTag} \u2014 ${Number(e.total)}`).join("\n")}`;
-  }
-  if (name === "get_merit_history") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.hr)
-      return "Access Denied \u2014 HR and above only, Sir.";
-    const usernameArg = args.username ? String(args.username).trim() : "";
-    const target = usernameArg ? await findMember(guild, usernameArg) : message.member;
-    if (!target)
-      return `I could not locate a member matching "${usernameArg}", Sir.`;
-    const history = await db.select().from(meritAwardsTable).where(eq(meritAwardsTable.memberId, target.id)).orderBy(desc(meritAwardsTable.createdAt));
-    if (history.length === 0)
-      return `No merit history found for ${target.user.tag}, Sir.`;
-    return `Full merit history for ${target.user.tag} (${history.length} total), Sir:
-${history.map((a) => `\u2022 ${a.amount > 0 ? "+" : ""}${a.amount} \u2014 ${a.proofUrl}`).join("\n")}`;
-  }
-  if (name === "reset_merit_data") {
-    if (actorRank !== "owner" && actorRank !== "second")
-      return "Access Denied \u2014 only the Owner or Fire Lord can reset system data, Sir.";
-    if (args.confirmed !== true)
-      return "This permanently wipes all merit data, Sir. Please confirm explicitly before I proceed.";
-    const { backupLines } = await exportAndResetMeritData(
-      guild.id,
-      message.author.tag
-    );
-    await writeGenericAuditLog(
-      message.client,
-      "JARVIS // SYSTEM DATA BACKUP & RESET EXPORT",
-      [{ name: "DATA BACKUP AT RESET", value: backupLines.slice(0, 1024) }],
-      message.author.tag
-    );
-    return "\u2705 All merit data has been reset, Sir. A full backup was logged to the owner channel first.";
-  }
-  if (name === "create_role") {
-    const roleName = String(args.role_name ?? "").trim();
-    if (!roleName) return "I need a role name, Sir.";
-    const existing = findRole(guild, roleName);
-    if (existing) return `The "${existing.name}" role already exists, Sir.`;
-    const role = await guild.roles.create({
-      name: roleName,
-      color: args.color ? String(args.color) : void 0,
-      hoist: typeof args.hoist === "boolean" ? args.hoist : void 0,
-      mentionable: typeof args.mentionable === "boolean" ? args.mentionable : void 0,
-      permissions: [],
-      reason: `Created conversationally by ${message.author.tag}`
-    });
-    return `Created the "${role.name}" role with no elevated permissions, Sir.`;
-  }
-  if (name === "delete_role") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
-      return "Access Denied \u2014 Royalty and above only, Sir.";
-    const role = findRole(guild, String(args.role_name ?? ""));
-    if (!role) return `I could not find a role named "${args.role_name}", Sir.`;
-    const roleName = role.name;
-    await role.delete(`Deleted conversationally by ${message.author.tag}`);
-    return `The "${roleName}" role has been deleted, Sir.`;
-  }
-  if (name === "edit_role") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
-      return "Access Denied \u2014 Royalty and above only, Sir.";
-    const role = findRole(guild, String(args.role_name ?? ""));
-    if (!role) return `I could not find a role named "${args.role_name}", Sir.`;
-    await role.edit({
-      name: args.new_name ? String(args.new_name) : void 0,
-      color: args.color ? String(args.color) : void 0,
-      hoist: typeof args.hoist === "boolean" ? args.hoist : void 0,
-      mentionable: typeof args.mentionable === "boolean" ? args.mentionable : void 0,
-      reason: `Edited conversationally by ${message.author.tag}`
-    });
-    return `The "${role.name}" role has been updated, Sir.`;
-  }
-  if (name === "list_roles") {
-    const roles = [...guild.roles.cache.values()].filter((r) => r.name !== "@everyone").sort((a, b) => b.position - a.position);
-    if (roles.length === 0) return "No custom roles exist in this server, Sir.";
-    return `Roles in this server, Sir:
-${roles.map(
-      (r) => `\u2022 ${r.name} \u2014 ${r.members.size} member${r.members.size === 1 ? "" : "s"}`
-    ).join("\n").slice(0, 1800)}`;
-  }
-  if (name === "purge_messages") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.advisor)
-      return "Access Denied \u2014 Advisor and above only, Sir.";
-    const rawCount = Number(args.count);
-    if (!Number.isFinite(rawCount) || rawCount < 1)
-      return "I need a valid number of messages to delete, Sir.";
-    const count = Math.min(100, Math.floor(rawCount));
-    const target = args.channel_name ? findAnyChannel(guild, String(args.channel_name)) : message.channel;
-    if (!target || !("bulkDelete" in target))
-      return `I could not find a text channel named "${args.channel_name}", Sir.`;
-    const deleted = await target.bulkDelete(count, true).catch(() => null);
-    return deleted ? `Deleted ${deleted.size} message${deleted.size === 1 ? "" : "s"} from #${target.name}, Sir. (Messages older than 14 days can't be bulk-deleted by Discord's API.)` : "\u274C Failed to purge messages, Sir \u2014 check my Manage Messages permission.";
-  }
-  if (name === "pin_last_message") {
-    const target = args.channel_name ? findAnyChannel(guild, String(args.channel_name)) : message.channel;
-    if (!target || !("messages" in target))
-      return `I could not find a text channel named "${args.channel_name}", Sir.`;
-    const recent = await target.messages.fetch({ limit: 20 });
-    const usernameFilter = args.username ? String(args.username).toLowerCase() : null;
-    const toPin = usernameFilter ? recent.find(
-      (m) => m.author.username.toLowerCase().includes(usernameFilter) || m.author.tag.toLowerCase().includes(usernameFilter)
-    ) : recent.first();
-    if (!toPin) return "I could not find a matching message to pin, Sir.";
-    const pinnedOk = await toPin.pin().catch(() => null);
-    return pinnedOk ? `Pinned a message from ${toPin.author.tag} in #${target.name}, Sir.` : `\u274C I was unable to pin that message in #${target.name}, Sir \u2014 check my Manage Messages permission (or whether the pin limit has been reached).`;
-  }
-  if (name === "unpin_last_message") {
-    const target = args.channel_name ? findAnyChannel(guild, String(args.channel_name)) : message.channel;
-    if (!target || !("messages" in target))
-      return `I could not find a text channel named "${args.channel_name}", Sir.`;
-    const pinned = await target.messages.fetchPinned();
-    const latest = pinned.first();
-    if (!latest) return `There are no pinned messages in #${target.name}, Sir.`;
-    const unpinnedOk = await latest.unpin().catch(() => null);
-    return unpinnedOk ? `Unpinned the most recent pin in #${target.name}, Sir.` : `\u274C I was unable to unpin that message in #${target.name}, Sir \u2014 check my Manage Messages permission.`;
-  }
-  if (name === "react_to_last_message") {
-    const target = args.channel_name ? findAnyChannel(guild, String(args.channel_name)) : message.channel;
-    if (!target || !("messages" in target))
-      return `I could not find a text channel named "${args.channel_name}", Sir.`;
-    const recent = await target.messages.fetch({ limit: 1 });
-    const last = recent.first();
-    if (!last) return `There are no messages in #${target.name}, Sir.`;
-    const reacted = await last.react(String(args.emoji ?? "\u{1F44D}")).catch(() => null);
-    return reacted ? `Reacted to the latest message in #${target.name}, Sir.` : `\u274C I was unable to react to that message in #${target.name}, Sir \u2014 the emoji may be unavailable to me, or I lack the Add Reactions permission.`;
-  }
-  if (name === "create_poll") {
-    const target = args.channel_name ? findAnyChannel(guild, String(args.channel_name)) : message.channel;
-    if (!target || !("send" in target))
-      return `I could not find a text channel named "${args.channel_name}", Sir.`;
-    const options = Array.isArray(args.options) ? args.options.slice(0, 10) : [];
-    if (options.length < 2)
-      return "A poll needs at least 2 answer options, Sir.";
-    const durationHours = Math.min(
-      768,
-      Math.max(1, Number(args.duration_hours) || 24)
-    );
-    await target.send({
-      poll: {
-        question: { text: String(args.question ?? "Poll") },
-        answers: options.map((text2) => ({ text: text2 })),
-        duration: durationHours,
-        allowMultiselect: false
-      }
-    });
-    return `Poll posted in #${target.name}, Sir.`;
-  }
-  if (name === "create_channel") {
-    const catName = args.category_name ? String(args.category_name) : "";
-    const parent = catName ? guild.channels.cache.find(
-      (c) => c.type === import_discord12.ChannelType.GuildCategory && c.name.toLowerCase() === catName.toLowerCase()
-    ) : void 0;
-    const type = args.channel_type === "voice" ? import_discord12.ChannelType.GuildVoice : import_discord12.ChannelType.GuildText;
-    const created = await guild.channels.create({
-      name: String(args.name ?? "new-channel"),
-      type,
-      parent: parent?.id,
-      reason: `Created conversationally by ${message.author.tag}`
-    });
-    return `Created ${args.channel_type === "voice" ? "voice channel" : "channel"} "${created.name}", Sir.`;
-  }
-  if (name === "delete_channel") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
-      return "Access Denied \u2014 Royalty and above only, Sir.";
-    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
-    if (!target)
-      return `I could not find a channel named "${args.channel_name}", Sir.`;
-    const channelName = target.name;
-    await target.delete(`Deleted conversationally by ${message.author.tag}`).catch(() => null);
-    return `The "${channelName}" channel has been deleted, Sir.`;
-  }
-  if (name === "create_category") {
-    const created = await guild.channels.create({
-      name: String(args.name ?? "New Category"),
-      type: import_discord12.ChannelType.GuildCategory,
-      reason: `Created conversationally by ${message.author.tag}`
-    });
-    return `Created the "${created.name}" category, Sir.`;
-  }
-  if (name === "rename_channel") {
-    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
-    if (!target || !("setName" in target))
-      return `I could not find a channel named "${args.channel_name}", Sir.`;
-    const oldName = target.name;
-    await target.setName(String(args.new_name ?? oldName));
-    return `Renamed #${oldName} to #${args.new_name}, Sir.`;
-  }
-  if (name === "set_channel_topic") {
-    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
-    if (!target || !("setTopic" in target))
-      return `I could not find a text channel named "${args.channel_name}", Sir.`;
-    await target.setTopic(String(args.topic ?? ""));
-    return `Updated the topic for #${target.name}, Sir.`;
-  }
-  if (name === "set_slowmode") {
-    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
-    if (!target || !("setRateLimitPerUser" in target))
-      return `I could not find a text channel named "${args.channel_name}", Sir.`;
-    const seconds = Math.max(0, Math.min(21600, Number(args.seconds) || 0));
-    await target.setRateLimitPerUser(seconds);
-    return seconds > 0 ? `Slowmode set to ${seconds}s in #${target.name}, Sir.` : `Slowmode disabled in #${target.name}, Sir.`;
-  }
-  if (name === "set_channel_nsfw") {
-    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
-    if (!target || !("setNSFW" in target))
-      return `I could not find a text channel named "${args.channel_name}", Sir.`;
-    await target.setNSFW(Boolean(args.nsfw));
-    return `#${target.name} is now marked ${args.nsfw ? "age-restricted" : "safe for all audiences"}, Sir.`;
-  }
-  if (name === "create_thread") {
-    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
-    if (!target || !("threads" in target))
-      return `I could not find a text channel named "${args.channel_name}", Sir.`;
-    const thread = await target.threads.create({
-      name: String(args.thread_name ?? "New Thread"),
-      reason: `Created conversationally by ${message.author.tag}`
-    });
-    if (args.message) await thread.send(String(args.message)).catch(() => null);
-    return `Created thread "${thread.name}" in #${target.name}, Sir.`;
-  }
-  if (name === "archive_thread" || name === "lock_thread") {
-    const threadName = String(args.thread_name ?? "").toLowerCase();
-    const allThreads = await guild.channels.fetchActiveThreads().catch(() => null);
-    const thread = allThreads?.threads.find(
-      (t) => t.name.toLowerCase() === threadName
-    );
-    if (!thread)
-      return `I could not find an active thread named "${args.thread_name}", Sir.`;
-    if (name === "lock_thread") {
-      await thread.setLocked(true).catch(() => null);
-      await thread.setArchived(true).catch(() => null);
-      return `Locked and archived the "${thread.name}" thread, Sir.`;
-    }
-    await thread.setArchived(true).catch(() => null);
-    return `Archived the "${thread.name}" thread, Sir.`;
-  }
-  if (name === "move_voice_member") {
-    const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
-    if (!target.voice.channel)
-      return `${target.user.tag} is not currently in a voice channel, Sir.`;
-    const destination = findAnyChannel(guild, String(args.channel_name ?? ""));
-    if (!destination || destination.type !== import_discord12.ChannelType.GuildVoice)
-      return `I could not find a voice channel named "${args.channel_name}", Sir.`;
-    await target.voice.setChannel(destination.id);
-    return `Moved ${target.user.tag} to #${destination.name}, Sir.`;
-  }
-  if (name === "server_mute_member" || name === "server_deafen_member") {
-    const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
-    if (name === "server_mute_member") {
-      const muted = await target.voice.setMute(Boolean(args.mute)).catch(() => null);
-      return muted ? `${target.user.tag} has been ${args.mute ? "server-muted" : "unmuted"}, Sir.` : `\u274C I was unable to ${args.mute ? "server-mute" : "unmute"} ${target.user.tag}, Sir \u2014 they may not be in a voice channel, or I lack the Mute Members permission.`;
-    }
-    const deafened = await target.voice.setDeaf(Boolean(args.deafen)).catch(() => null);
-    return deafened ? `${target.user.tag} has been ${args.deafen ? "server-deafened" : "undeafened"}, Sir.` : `\u274C I was unable to ${args.deafen ? "server-deafen" : "undeafen"} ${target.user.tag}, Sir \u2014 they may not be in a voice channel, or I lack the Deafen Members permission.`;
-  }
-  if (name === "create_stage_channel") {
-    const catName = args.category_name ? String(args.category_name) : "";
-    const parent = catName ? guild.channels.cache.find(
-      (c) => c.type === import_discord12.ChannelType.GuildCategory && c.name.toLowerCase() === catName.toLowerCase()
-    ) : void 0;
-    const created = await guild.channels.create({
-      name: String(args.name ?? "Stage"),
-      type: import_discord12.ChannelType.GuildStageVoice,
-      parent: parent?.id,
-      reason: `Created conversationally by ${message.author.tag}`
-    });
-    return `Created stage channel "${created.name}", Sir.`;
-  }
-  if (name === "unban_member") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
-      return "Access Denied \u2014 Royalty and above only, Sir.";
-    const idOrName = String(args.username_or_id ?? "");
-    const bans = await guild.bans.fetch().catch(() => null);
-    const ban = bans?.find(
-      (b) => b.user.id === idOrName || b.user.username.toLowerCase() === idOrName.toLowerCase() || b.user.tag.toLowerCase() === idOrName.toLowerCase()
-    );
-    if (!ban) return `I could not find a ban matching "${idOrName}", Sir.`;
-    await guild.bans.remove(
-      ban.user.id,
-      `Unbanned conversationally by ${message.author.tag}`
-    );
-    return `${ban.user.tag} has been unbanned, Sir.`;
-  }
-  if (name === "list_bans") {
-    const bans = await guild.bans.fetch().catch(() => null);
-    if (!bans || bans.size === 0)
-      return "There are no active bans in this server, Sir.";
-    return `Currently banned, Sir:
-${[...bans.values()].slice(0, 30).map((b) => `\u2022 ${b.user.tag} (${b.user.id})`).join("\n")}`;
-  }
-  if (name === "softban_member") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.advisor)
-      return "Access Denied \u2014 Advisor and above only, Sir.";
-    const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
-    const reasonText = `[Jarvis Softban \u2014 requested by ${message.author.tag}]${args.reason ? ` ${args.reason}` : ""}`;
-    await guild.bans.create(target.id, {
-      reason: reasonText,
-      deleteMessageSeconds: 7 * 86400
-    });
-    await guild.bans.remove(target.id, "Softban cleanup").catch(() => null);
-    return `${target.user.tag} has been softbanned \u2014 recent messages purged, Sir.`;
-  }
-  if (name === "get_member_info") {
-    const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
-    const roles = target.roles.cache.filter((r) => r.name !== "@everyone").map((r) => r.name);
-    return `**${target.user.tag}**, Sir:
-\u2022 Joined server: <t:${Math.floor((target.joinedTimestamp ?? 0) / 1e3)}:D>
-\u2022 Account created: <t:${Math.floor(target.user.createdTimestamp / 1e3)}:D>
-\u2022 Roles: ${roles.length > 0 ? roles.join(", ") : "None"}`;
-  }
-  if (name === "dm_user") {
-    const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
-    try {
-      await target.send(String(args.message ?? ""));
-      return `Message sent to ${target.user.tag} via DM, Sir.`;
-    } catch {
-      return `I was unable to DM ${target.user.tag}, Sir \u2014 they likely have DMs disabled.`;
-    }
-  }
-  if (name === "rename_server") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
-      return "Access Denied \u2014 Royalty and above only, Sir.";
-    await guild.setName(String(args.name ?? guild.name));
-    return `Server renamed to "${args.name}", Sir.`;
-  }
-  if (name === "set_server_icon") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
-      return "Access Denied \u2014 Royalty and above only, Sir.";
-    await guild.setIcon(String(args.url ?? "")).catch(() => null);
-    return "Server icon updated, Sir.";
-  }
-  if (name === "set_afk_channel") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
-      return "Access Denied \u2014 Royalty and above only, Sir.";
-    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
-    if (!target || target.type !== import_discord12.ChannelType.GuildVoice)
-      return `I could not find a voice channel named "${args.channel_name}", Sir.`;
-    await guild.setAFKChannel(target.id);
-    if (args.timeout_minutes)
-      await guild.setAFKTimeout(
-        Number(args.timeout_minutes) * 60
-      );
-    return `AFK channel set to #${target.name}, Sir.`;
-  }
-  if (name === "set_system_channel") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
-      return "Access Denied \u2014 Royalty and above only, Sir.";
-    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
-    if (!target)
-      return `I could not find a text channel named "${args.channel_name}", Sir.`;
-    await guild.setSystemChannel(target.id);
-    return `System messages channel set to #${target.name}, Sir.`;
-  }
-  if (name === "create_invite") {
-    const target = args.channel_name ? findAnyChannel(guild, String(args.channel_name)) : message.channel;
-    if (!target || !("createInvite" in target))
-      return `I could not find a text channel named "${args.channel_name}", Sir.`;
-    const maxUses = Number(args.max_uses) || 0;
-    const expiresHours = Number(args.expires_hours) || 0;
-    const invite = await target.createInvite({
-      maxUses,
-      maxAge: expiresHours > 0 ? expiresHours * 3600 : 0,
-      reason: `Created conversationally by ${message.author.tag}`
-    });
-    return `Invite created, Sir: https://discord.gg/${invite.code}`;
-  }
-  if (name === "list_invites") {
-    const invites = await guild.invites.fetch().catch(() => null);
-    if (!invites || invites.size === 0)
-      return "There are no active invites, Sir.";
-    return `Active invites, Sir:
-${[...invites.values()].slice(0, 20).map(
-      (i) => `\u2022 ${i.code} \u2014 #${i.channel?.name ?? "unknown"} \u2014 ${i.uses ?? 0} uses`
-    ).join("\n")}`;
-  }
-  if (name === "revoke_invite") {
-    const invites = await guild.invites.fetch().catch(() => null);
-    const invite = invites?.find((i) => i.code === String(args.code ?? ""));
-    if (!invite)
-      return `I could not find an invite with code "${args.code}", Sir.`;
-    await invite.delete(`Revoked conversationally by ${message.author.tag}`);
-    return `Invite ${args.code} has been revoked, Sir.`;
-  }
-  if (name === "create_emoji") {
-    const created = await guild.emojis.create({
-      name: String(args.name ?? "emoji"),
-      attachment: String(args.url ?? ""),
-      reason: `Created conversationally by ${message.author.tag}`
-    }).catch(() => null);
-    return created ? `Created emoji "${created.name}", Sir.` : "\u274C Failed to create the emoji, Sir \u2014 check the image URL and format.";
-  }
-  if (name === "delete_emoji") {
-    const emojiName = String(args.name ?? "").toLowerCase();
-    const emoji3 = guild.emojis.cache.find(
-      (e) => e.name?.toLowerCase() === emojiName
-    );
-    if (!emoji3) return `I could not find an emoji named "${args.name}", Sir.`;
-    await emoji3.delete(`Deleted conversationally by ${message.author.tag}`);
-    return `Emoji "${args.name}" has been deleted, Sir.`;
-  }
-  if (name === "create_webhook") {
-    const target = findAnyChannel(guild, String(args.channel_name ?? ""));
-    if (!target || !("createWebhook" in target))
-      return `I could not find a text channel named "${args.channel_name}", Sir.`;
-    const webhook = await target.createWebhook({
-      name: String(args.name ?? "Jarvis Webhook"),
-      reason: `Created conversationally by ${message.author.tag}`
-    });
-    return `Webhook created in #${target.name}, Sir: ${webhook.url}`;
-  }
-  if (name === "create_scheduled_event") {
-    const startAt = new Date(
-      Date.now() + Number(args.minutes_from_now) * 6e4
-    );
-    const durationMin = Number(args.duration_minutes) || 60;
-    const endAt = new Date(startAt.getTime() + durationMin * 6e4);
-    const channelName = args.channel_name ? String(args.channel_name) : "";
-    const targetChannel = channelName ? findAnyChannel(guild, channelName) : void 0;
-    let entityType = 3;
-    if (targetChannel) {
-      if (targetChannel.type === import_discord12.ChannelType.GuildStageVoice) entityType = 1;
-      else if (targetChannel.type === import_discord12.ChannelType.GuildVoice) entityType = 2;
-      else
-        return "That's not a voice or stage channel, Sir \u2014 scheduled events need one of those.";
-    }
-    const created = await guild.scheduledEvents.create({
-      name: String(args.name ?? "Fire Nation Event"),
-      scheduledStartTime: startAt,
-      scheduledEndTime: endAt,
-      privacyLevel: 2,
-      // GuildOnly
-      entityType,
-      channel: targetChannel?.id,
-      entityMetadata: targetChannel ? void 0 : { location: String(args.location ?? "TBD") },
-      description: args.description ? String(args.description) : void 0,
-      reason: `Created conversationally by ${message.author.tag}`
-    }).catch(() => null);
-    return created ? `Scheduled event "${created.name}" created, starting <t:${Math.floor(startAt.getTime() / 1e3)}:R>, Sir.` : "\u274C Failed to create the scheduled event, Sir.";
-  }
-  if (name === "query_audit_log") {
-    const limit2 = Math.min(25, Math.max(1, Number(args.limit) || 10));
-    const logs = await guild.fetchAuditLogs({ limit: limit2 }).catch(() => null);
-    if (!logs || logs.entries.size === 0)
-      return "No audit log entries found, Sir.";
-    return `Recent audit log entries, Sir:
-${[...logs.entries.values()].map(
-      (e) => `\u2022 ${e.actionType} by ${e.executor?.tag ?? "unknown"} \u2014 target: ${e.targetId ?? "n/a"}${e.reason ? ` \u2014 "${e.reason}"` : ""}`
-    ).join("\n").slice(0, 1800)}`;
-  }
-  if (name === "global_ban") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
-      return "Access Denied \u2014 Royalty and above only, Sir.";
-    const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
-    const ownerIdsForGlobal = getConfiguredIds("DISCORD_OWNER_USER_IDS");
-    if (isProtectedOwner(actorRank, target.id, ownerIdsForGlobal))
-      return "Fire Lord cannot run global actions that affect the Owner, Sir.";
-    const reasonText = `[Jarvis Global Ban] ${args.reason ?? "No reason provided."} \u2014 by ${message.author.tag}`;
-    let success2 = 0, skipped = 0, failed = 0;
-    for (const g of message.client.guilds.cache.values()) {
-      try {
-        await g.bans.create(target.id, {
-          reason: reasonText,
-          deleteMessageSeconds: 0
-        });
-        success2++;
-      } catch (e) {
-        const code = e.code;
-        if (code === 10007 || code === 10013) skipped++;
-        else failed++;
-      }
-    }
-    await writeGenericAuditLog(
-      message.client,
-      "JARVIS // GLOBAL BAN EXECUTED",
-      [
-        { name: "TARGET", value: `${target.user.tag} (${target.id})` },
-        {
-          name: "RESULTS",
-          value: `\u2705 Banned: ${success2} | \u23ED\uFE0F Not found: ${skipped} | \u274C Failed: ${failed}`
-        }
-      ],
-      message.author.tag
-    );
-    return `Global ban complete, Sir \u2014 ${success2} banned, ${skipped} not found, ${failed} failed.`;
-  }
-  if (name === "acknowledge_breach") {
-    if (actorRank !== "owner" && actorRank !== "second")
-      return "Access Denied \u2014 only the Owner or Fire Lord can silence alarms, Sir.";
-    const logChannelId = process.env.DISCORD_OWNER_LOG_CHANNEL_ID?.trim();
-    if (!logChannelId)
-      return "\u274C I cannot lift the lockdown, Sir \u2014 no owner log channel is configured (DISCORD_OWNER_LOG_CHANNEL_ID).";
-    const ch = await message.client.channels.fetch(logChannelId).catch(() => null);
-    if (!ch || !("permissionOverwrites" in ch))
-      return "\u274C I cannot lift the lockdown, Sir \u2014 the configured owner log channel could not be reached.";
-    const restored = await ch.permissionOverwrites.edit(guild.roles.everyone, { ViewChannel: null, SendMessages: null }).catch(() => null);
-    if (restored === null)
-      return "\u274C I could not restore the channel permissions, Sir \u2014 check my Manage Roles/Manage Channels permission there.";
-    return `\u{1F7E2} Lockdown lifted, Sir \u2014 breach acknowledged and the channel has been restored.`;
-  }
-  if (name === "royal_guard_alert") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
-      return "Access Denied \u2014 Royalty and above only, Sir.";
-    const ch = await message.client.channels.fetch(ROYAL_GUARD_CHANNEL_ID).catch(() => null);
-    if (!ch || !ch.isTextBased() || !("send" in ch))
-      return "Could not reach the Royal Guard channel, Sir.";
-    const embed = new import_discord12.EmbedBuilder().setTitle("\u{1F6E1}\uFE0F ROYAL GUARD ALERT").setDescription("A Royal is currently in game and requires escort.").setColor(FIRE_RED).addFields(
-      { name: "ROYAL", value: message.author.tag },
-      ...args.location ? [{ name: "LOCATION", value: String(args.location) }] : []
-    ).setTimestamp();
-    await ch.send({ content: "@everyone", embeds: [embed] });
-    return "Royal Guard has been notified, Sir.";
-  }
-  if (name === "request_guards") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.hr)
-      return "Access Denied \u2014 HR and above only, Sir.";
-    const result = await postGuardRequest(
-      message.client,
-      guild,
-      { id: message.author.id, tag: message.author.tag },
-      String(args.when ?? "TBD"),
-      String(args.location ?? "TBD")
-    );
-    return result.ok ? "Guard request posted, Sir. I'll DM you privately as people confirm \u2014 no one else can see who's RSVP'd." : `Could not post the guard request: ${result.error}`;
-  }
-  if (name === "lookup_roblox_account") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.hr)
-      return "Access Denied \u2014 HR and above only, Sir.";
-    const result = await performRobloxLookup(
-      String(args.username ?? ""),
-      message.author.tag
-    );
-    if ("error" in result) return result.error;
-    if ("sendTyping" in message.channel)
-      await message.channel.send({ embeds: [result.embed] });
-    return "Investigation complete, Sir \u2014 report posted above.";
-  }
-  if (name === "inactive_purge") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.advisor)
-      return "Access Denied \u2014 Advisor and above only, Sir.";
-    const days = Math.max(1, Number(args.days) || 30);
-    const cutoff = new Date(Date.now() - days * 864e5);
-    const allMembers = await guild.members.fetch();
-    const nonBotIds = [...allMembers.values()].filter((m) => !m.user.bot).map((m) => m.id);
-    const activeRecords = await db.select({ userId: memberActivityTable.userId }).from(memberActivityTable).where(
-      sql`${memberActivityTable.guildId} = ${guild.id} AND ${memberActivityTable.lastSeenAt} >= ${cutoff}`
-    );
-    const activeIds = new Set(activeRecords.map((r) => r.userId));
-    const inactiveMembers = nonBotIds.filter((id) => !activeIds.has(id)).map((id) => allMembers.get(id)).filter(Boolean);
-    if (inactiveMembers.length === 0)
-      return `No members found with ${days}+ days of inactivity, Sir.`;
-    if (args.confirmed !== true) {
-      return `Found **${inactiveMembers.length}** member${inactiveMembers.length === 1 ? "" : "s"} inactive for ${days}+ days, Sir:
-${inactiveMembers.slice(0, 30).map((m) => `\u2022 ${m.user.tag}`).join("\n")}
-
-Say the word if you'd like me to kick them.`;
-    }
-    let kicked = 0;
-    for (const m of inactiveMembers) {
-      try {
-        await m.kick(`Inactivity purge \u2014 ${days}d \u2014 by ${message.author.tag}`);
-        kicked++;
-      } catch {
-      }
-    }
-    return `\u2705 Kicked **${kicked}** inactive member${kicked === 1 ? "" : "s"}, Sir.`;
-  }
-  if (name === "reload_knowledge_base") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.hr)
-      return "Access Denied \u2014 HR and above only, Sir.";
-    const before = cachedKnowledge.length;
-    loadKnowledge();
-    return cachedKnowledge.length > 0 ? `Knowledge base reloaded, Sir. (${before} \u2192 ${cachedKnowledge.length} characters)` : "Knowledge base reload failed, Sir \u2014 the file could not be read.";
-  }
-  if (name === "add_knowledge_entry") {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.hr)
-      return "Access Denied \u2014 HR and above only, Sir.";
-    const entry = String(args.entry ?? "").trim();
-    if (!entry) return "I need something to add, Sir.";
-    const timestamp2 = (/* @__PURE__ */ new Date()).toISOString();
-    appendFileSync2(
-      KNOWLEDGE_FILE_PATH,
-      `
-[Added ${timestamp2} by ${message.author.tag}] ${entry}
-`,
-      "utf-8"
-    );
-    loadKnowledge();
-    return `Knowledge base updated, Sir. (${cachedKnowledge.length} characters total)`;
-  }
-  if (name === "watch_message_reactions") {
-    const target = args.channel_name ? findAnyChannel(guild, String(args.channel_name)) : message.channel;
-    if (!target || !("messages" in target))
-      return `I could not find a text channel named "${args.channel_name}", Sir.`;
-    const emoji3 = String(args.emoji ?? "").trim();
-    if (!emoji3) return "I need an emoji to watch for, Sir.";
-    const rawThreshold = Number(args.threshold);
-    if (!Number.isFinite(rawThreshold) || rawThreshold < 1)
-      return "I need a valid target reaction count, Sir.";
-    const threshold = Math.floor(rawThreshold);
-    let targetMessage;
-    const msgIdArg = args.message_id ? String(args.message_id).match(/\d+/)?.[0] : void 0;
-    if (msgIdArg) {
-      targetMessage = await target.messages.fetch(msgIdArg).catch(() => void 0);
-      if (!targetMessage)
-        return `I could not find a message with ID "${msgIdArg}" in #${target.name}, Sir.`;
-    } else {
-      targetMessage = (await target.messages.fetch({ limit: 1 })).first();
-      if (!targetMessage)
-        return `There are no messages in #${target.name} to watch, Sir.`;
-    }
-    const key = `${targetMessage.id}:${emoji3}`;
-    reactionWatches.set(key, {
-      guildId: guild.id,
-      channelId: target.id,
-      messageId: targetMessage.id,
-      emoji: emoji3,
-      threshold,
-      requesterId: message.author.id,
-      createdAt: Date.now()
-    });
-    const currentCount = targetMessage.reactions.cache.get(emoji3)?.count ?? 0;
-    return `Watching that message in #${target.name} for **${threshold}** ${emoji3} reactions, Sir. (Currently at ${currentCount}.) I'll DM you the moment it hits the target.`;
-  }
-  if (name === "list_reaction_watches") {
-    const entries = [...reactionWatches.entries()].filter(
-      ([, w]) => w.guildId === guild.id
-    );
-    if (entries.length === 0)
-      return "No active reaction watches in this server, Sir.";
-    return `Active reaction watches, Sir:
-${entries.map(
-      ([, w]) => `\u2022 [${w.messageId}] ${w.emoji} \u2192 ${w.threshold} in <#${w.channelId}> (requested by <@${w.requesterId}>)`
-    ).join("\n")}`;
-  }
-  if (name === "cancel_reaction_watch") {
-    const msgIdArg = args.message_id ? String(args.message_id).match(/\d+/)?.[0] : void 0;
-    const guildEntries = [...reactionWatches.entries()].filter(
-      ([, w]) => w.guildId === guild.id
-    );
-    const toCancel = msgIdArg ? guildEntries.filter(([, w]) => w.messageId === msgIdArg) : guildEntries.sort((a, b) => b[1].createdAt - a[1].createdAt).slice(0, 1);
-    if (toCancel.length === 0)
-      return "I could not find a matching reaction watch to cancel, Sir.";
-    for (const [key] of toCancel) reactionWatches.delete(key);
-    return `Cancelled ${toCancel.length} reaction watch${toCancel.length === 1 ? "" : "es"}, Sir.`;
-  }
-  const ownerIds = getConfiguredIds("DISCORD_OWNER_USER_IDS");
-  const reason = `[Jarvis \u2014 requested by ${message.author.tag}]${args.reason ? ` ${args.reason}` : ""}`;
-  const requiredRank = LEGACY_TOOL_MIN_RANK[name];
-  if (requiredRank && RANK_ORDER[actorRank] < RANK_ORDER[requiredRank]) {
-    return `Access Denied \u2014 ${requiredRank.charAt(0).toUpperCase() + requiredRank.slice(1)} and above only, Sir.`;
-  }
-  switch (name) {
-    case "ping_everyone": {
-      const content = `@everyone${args.message ? ` ${args.message}` : ""}`;
-      if (args.channel_name) {
-        const ch2 = guild.channels.cache.find(
-          (c) => c.isTextBased() && c.name.toLowerCase() === String(args.channel_name).toLowerCase()
-        );
-        if (!ch2)
-          return `I could not find a channel named "${args.channel_name}", Sir.`;
-        await ch2.send({ content, allowedMentions: { parse: ["everyone"] } });
-        return `@everyone ping sent to #${ch2.name}, Sir.`;
-      }
-      const ch = message.channel;
-      await ch.send({ content, allowedMentions: { parse: ["everyone"] } });
-      return "@everyone ping sent, Sir.";
-    }
-    case "kick_member": {
-      const target = await findMember(guild, String(args.username));
-      if (!target)
-        return `I could not locate a member matching "${args.username}", Sir.`;
-      if (isProtectedOwner(actorRank, target.id, ownerIds))
-        return "I cannot perform that action on the Owner, Sir.";
-      await target.kick(reason);
-      await writeGenericAuditLog(
-        message.client,
-        "JARVIS // MEMBER KICKED (conversational)",
-        [
-          { name: "TARGET", value: `${target.user.tag} (${target.id})` },
-          {
-            name: "REASON",
-            value: String(args.reason ?? "No reason provided.")
-          }
-        ],
-        message.author.tag
-      );
-      return `${target.user.tag} has been removed from the server, Sir.`;
-    }
-    case "ban_member": {
-      const target = await findMember(guild, String(args.username));
-      if (!target)
-        return `I could not locate a member matching "${args.username}", Sir.`;
-      if (isProtectedOwner(actorRank, target.id, ownerIds))
-        return "I cannot perform that action on the Owner, Sir.";
-      await target.ban({ reason, deleteMessageSeconds: 0 });
-      await writeGenericAuditLog(
-        message.client,
-        "JARVIS // MEMBER BANNED (conversational)",
-        [
-          { name: "TARGET", value: `${target.user.tag} (${target.id})` },
-          {
-            name: "REASON",
-            value: String(args.reason ?? "No reason provided.")
-          }
-        ],
-        message.author.tag
-      );
-      return `${target.user.tag} has been permanently banned, Sir.`;
-    }
-    case "mute_member": {
-      const target = await findMember(guild, String(args.username));
-      if (!target)
-        return `I could not locate a member matching "${args.username}", Sir.`;
-      if (isProtectedOwner(actorRank, target.id, ownerIds))
-        return "I cannot perform that action on the Owner, Sir.";
-      const durationMs = Number(args.duration_minutes) * 60 * 1e3;
-      const until = new Date(Date.now() + durationMs);
-      await target.disableCommunicationUntil(until, reason);
-      await writeGenericAuditLog(
-        message.client,
-        "JARVIS // MEMBER MUTED (conversational)",
-        [
-          { name: "TARGET", value: `${target.user.tag} (${target.id})` },
-          { name: "DURATION", value: `${args.duration_minutes} minute(s)` },
-          {
-            name: "REASON",
-            value: String(args.reason ?? "No reason provided.")
-          }
-        ],
-        message.author.tag
-      );
-      return `${target.user.tag} has been muted for ${args.duration_minutes} minute${Number(args.duration_minutes) === 1 ? "" : "s"}, Sir.`;
-    }
-    case "unmute_member": {
-      const target = await findMember(guild, String(args.username));
-      if (!target)
-        return `I could not locate a member matching "${args.username}", Sir.`;
-      await target.disableCommunicationUntil(null, reason);
-      return `${target.user.tag}'s timeout has been lifted, Sir.`;
-    }
-    case "assign_role": {
-      const target = await findMember(guild, String(args.username));
-      if (!target)
-        return `I could not locate a member matching "${args.username}", Sir.`;
-      if (isProtectedOwner(actorRank, target.id, ownerIds))
-        return "I cannot perform that action on the Owner, Sir.";
-      const role = guild.roles.cache.find(
-        (r) => r.name.toLowerCase() === String(args.role_name).toLowerCase()
-      );
-      if (!role)
-        return `I could not find a role named "${args.role_name}", Sir.`;
-      await target.roles.add(role, reason);
-      await writeGenericAuditLog(
-        message.client,
-        "JARVIS // ROLE ASSIGNED (conversational)",
-        [
-          { name: "TARGET", value: `${target.user.tag} (${target.id})` },
-          { name: "ROLE", value: role.name }
-        ],
-        message.author.tag
-      );
-      return `The "${role.name}" role has been assigned to ${target.user.tag}, Sir.`;
-    }
-    case "remove_role": {
-      const target = await findMember(guild, String(args.username));
-      if (!target)
-        return `I could not locate a member matching "${args.username}", Sir.`;
-      if (isProtectedOwner(actorRank, target.id, ownerIds))
-        return "I cannot perform that action on the Owner, Sir.";
-      const role = guild.roles.cache.find(
-        (r) => r.name.toLowerCase() === String(args.role_name).toLowerCase()
-      );
-      if (!role)
-        return `I could not find a role named "${args.role_name}", Sir.`;
-      await target.roles.remove(role, reason);
-      await writeGenericAuditLog(
-        message.client,
-        "JARVIS // ROLE REMOVED (conversational)",
-        [
-          { name: "TARGET", value: `${target.user.tag} (${target.id})` },
-          { name: "ROLE", value: role.name }
-        ],
-        message.author.tag
-      );
-      return `The "${role.name}" role has been removed from ${target.user.tag}, Sir.`;
-    }
-    case "set_nickname": {
-      const target = await findMember(guild, String(args.username));
-      if (!target)
-        return `I could not locate a member matching "${args.username}", Sir.`;
-      const nick = args.nickname ? String(args.nickname) : null;
-      await target.setNickname(nick, reason);
-      return nick ? `${target.user.tag}'s nickname has been set to "${nick}", Sir.` : `${target.user.tag}'s nickname has been reset, Sir.`;
-    }
-    case "send_message": {
-      const ch = guild.channels.cache.find(
-        (c) => c.isTextBased() && c.name.toLowerCase() === String(args.channel_name).toLowerCase()
-      );
-      if (!ch)
-        return `I could not find a channel named "${args.channel_name}", Sir.`;
-      await ch.send(String(args.content));
-      return `Message sent to #${ch.name}, Sir.`;
-    }
-    default:
-      return "I do not recognise that directive, Sir.";
-  }
 }
 
 // src/discord/ai/chat.ts
@@ -155815,7 +155898,7 @@ async function handleMessageDelete(message) {
     }).catch((e) => logger.warn({ err: e }, "Failed to lock channel"));
   }
   const authorMention = message.author ? `<@${message.author.id}> (${message.author.tag})` : "An unknown user";
-  const breachEmbed = new import_discord13.EmbedBuilder().setTitle("\u{1F6A8} SYSTEM BREACH DETECTED \u2014 CHANNEL LOCKED").setDescription(
+  const breachEmbed = new import_discord15.EmbedBuilder().setTitle("\u{1F6A8} SYSTEM BREACH DETECTED \u2014 CHANNEL LOCKED").setDescription(
     `**A MESSAGE WAS DELETED FROM THE AUDIT LOGS.**
 
 **Target:** ${authorMention}
@@ -155858,26 +155941,26 @@ async function startBot() {
     logger.warn("DISCORD_BOT_TOKEN not configured; Jarvis will not start.");
     return;
   }
-  const client = new import_discord14.Client({
+  const client = new import_discord16.Client({
     intents: [
-      import_discord14.GatewayIntentBits.Guilds,
-      import_discord14.GatewayIntentBits.GuildMessages,
-      import_discord14.GatewayIntentBits.DirectMessages,
-      import_discord14.GatewayIntentBits.MessageContent,
-      import_discord14.GatewayIntentBits.GuildMembers,
-      import_discord14.GatewayIntentBits.GuildPresences,
-      import_discord14.GatewayIntentBits.GuildMessageReactions
+      import_discord16.GatewayIntentBits.Guilds,
+      import_discord16.GatewayIntentBits.GuildMessages,
+      import_discord16.GatewayIntentBits.DirectMessages,
+      import_discord16.GatewayIntentBits.MessageContent,
+      import_discord16.GatewayIntentBits.GuildMembers,
+      import_discord16.GatewayIntentBits.GuildPresences,
+      import_discord16.GatewayIntentBits.GuildMessageReactions
     ]
   });
   setBotClient(client);
-  client.once(import_discord14.Events.ClientReady, async (ready) => {
+  client.once(import_discord16.Events.ClientReady, async (ready) => {
     const commands = ALL_COMMANDS.map((c) => c.toJSON());
-    const rest = new import_discord14.REST({ version: "10" }).setToken(token);
+    const rest = new import_discord16.REST({ version: "10" }).setToken(token);
     const testGuildId = process.env.DISCORD_TEST_GUILD_ID?.trim();
     try {
       if (testGuildId) {
         const result = await rest.put(
-          import_discord14.Routes.applicationGuildCommands(ready.user.id, testGuildId),
+          import_discord16.Routes.applicationGuildCommands(ready.user.id, testGuildId),
           { body: commands }
         );
         logger.info(
@@ -155890,7 +155973,7 @@ async function startBot() {
         );
       } else {
         const result = await rest.put(
-          import_discord14.Routes.applicationCommands(ready.user.id),
+          import_discord16.Routes.applicationCommands(ready.user.id),
           { body: commands }
         );
         logger.info(
@@ -155938,22 +156021,22 @@ async function startBot() {
     }, PRESENCE_POLL_INTERVAL_MS);
     logger.info({ botUser: ready.user.tag }, "Jarvis online");
   });
-  client.on(import_discord14.Events.InteractionCreate, (interaction) => {
+  client.on(import_discord16.Events.InteractionCreate, (interaction) => {
     void handleInteraction(interaction).catch(
       (e) => logger.error({ err: e }, "Discord interaction failed")
     );
   });
-  client.on(import_discord14.Events.MessageCreate, (message) => {
+  client.on(import_discord16.Events.MessageCreate, (message) => {
     void handleMessageCreate(message).catch(
       (e) => logger.error({ err: e }, "MessageCreate handler failed")
     );
   });
-  client.on(import_discord14.Events.MessageDelete, (message) => {
+  client.on(import_discord16.Events.MessageDelete, (message) => {
     void handleMessageDelete(message).catch(
       (e) => logger.error({ err: e }, "MessageDelete handler failed")
     );
   });
-  client.on(import_discord14.Events.MessageReactionAdd, (reaction, user) => {
+  client.on(import_discord16.Events.MessageReactionAdd, (reaction, user) => {
     void handleReactionAdd(reaction, user, client).catch(
       (e) => logger.error({ err: e }, "MessageReactionAdd handler failed")
     );
