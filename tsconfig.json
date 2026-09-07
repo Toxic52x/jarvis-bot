@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["esnext", "dom"],
+    "strict": false,
+    // Left on deliberately: with strictNullChecks off, TypeScript stops treating
+    // `true`/`false` literal properties as discriminants, so correct code like
+    // `result.ok ? … : result.error` gets flagged as an error. Enabling just this
+    // one flag removes those false positives and still catches real null misuse.
+    "strictNullChecks": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src"]
+}
