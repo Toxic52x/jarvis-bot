@@ -155747,9 +155747,12 @@ async function processAiChat(message, rank) {
       "list_servers",
       "get_merit_history"
     ]);
+    const recentUserText = history.filter(
+      (m) => m.role === "user" && typeof m.content === "string"
+    ).slice(-2).map((m) => m.content).join(" ");
     const { tools: selectedTools, actionRequested } = toolsForMessage(
       rank,
-      text2
+      recentUserText
     );
     try {
       let finalReply = null;

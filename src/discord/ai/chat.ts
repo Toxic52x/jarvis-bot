@@ -234,17 +234,31 @@ async function processAiChat(
       "get_merit_history",
     ]);
 
-    // Computed once per turn from the ORIGINAL user message: a keyword match
-    // (e.g. "merit", "kick", "ban") is a strong signal of real intent, unlike
-    // the always-on core/read-only tools. When one matched, the FIRST hop
-    // forces a tool call rather than leaving it optional — this is what
-    // actually stops the model from narrating a plausible-sounding "done" in
-    // plain text without ever calling the tool that would make it true.
-    // Later hops fall back to "auto" so the model can still wrap up with a
-    // normal text reply once a tool has run.
+    // Keyword-match against a short window of recent user turns, not just
+    // this message in isolation. A tool that asks a clarifying follow-up
+    // ("what reason should I log?") often gets a reply with no action
+    // keyword in it at all ("Log GG") — matching on `text` alone would drop
+    // that tool from the offered set entirely mid-flow, making it
+    // impossible for the model to finish what it already started.
+    const recentUserText = history
+      .filter(
+        (m): m is ChatMessage & { role: "user"; content: string } =>
+          m.role === "user" && typeof m.content === "string",
+      )
+      .slice(-2)
+      .map((m) => m.content)
+      .join(" ");
+
+    // A keyword match (e.g. "merit", "kick", "ban") is a strong signal of
+    // real intent, unlike the always-on core/read-only tools. When one
+    // matched, the FIRST hop forces a tool call rather than leaving it
+    // optional — this is what actually stops the model from narrating a
+    // plausible-sounding "done" in plain text without ever calling the tool
+    // that would make it true. Later hops fall back to "auto" so the model
+    // can still wrap up with a normal text reply once a tool has run.
     const { tools: selectedTools, actionRequested } = toolsForMessage(
       rank,
-      text,
+      recentUserText,
     );
 
     try {
