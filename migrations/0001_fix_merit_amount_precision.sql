@@ -1,0 +1,1 @@
+ALTER TABLE "merit_awards" ALTER COLUMN "amount" SET DATA TYPE numeric(4, 1);

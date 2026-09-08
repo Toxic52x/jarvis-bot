@@ -8,6 +8,13 @@
       "when": 1786827068285,
       "tag": "0000_bright_fat_cobra",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788861930089,
+      "tag": "0001_fix_merit_amount_precision",
+      "breakpoints": true
     }
   ]
 }
