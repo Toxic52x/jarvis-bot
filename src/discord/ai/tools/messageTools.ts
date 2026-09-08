@@ -326,8 +326,7 @@ export const messageToolHandlers: Record<string, ToolHandler> = {
 
   dm_user: async ({ args, guild }) => {
     const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     try {
       await target.send(String(args.message ?? ""));
       return `Message sent to ${target.user.tag} via DM, Sir.`;

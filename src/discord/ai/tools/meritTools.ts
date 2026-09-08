@@ -135,11 +135,17 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
 
       const resolvedBonus: GuildMember[] = [];
       const notFoundBonus: string[] = [];
+      const ambiguousBonus: string[] = [];
       for (const u of usernames) {
         const m = await findMember(guild, u);
-        if (m) resolvedBonus.push(m);
-        else notFoundBonus.push(u);
+        if ("error" in m) {
+          if (m.error.startsWith("I found multiple")) ambiguousBonus.push(m.error);
+          else notFoundBonus.push(u);
+        } else {
+          resolvedBonus.push(m);
+        }
       }
+      if (ambiguousBonus.length > 0) return ambiguousBonus.join("\n");
       if (resolvedBonus.length === 0)
         return "I could not locate any of the members you named, Sir.";
       if (
@@ -187,16 +193,20 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
     const hostQuery = String(args.host ?? "").trim();
     if (!hostQuery)
       return "I need a host for that award, Sir — that's who receives the merit.";
-    const hostMember = await findMember(guild, hostQuery);
-    if (!hostMember)
-      return `I could not locate a host matching "${hostQuery}", Sir.`;
+    const hostResult = await findMember(guild, hostQuery);
+    if ("error" in hostResult) return hostResult.error;
+    const hostMember = hostResult;
     if (isProtectedOwner(actorRank, hostMember.id, ownerIdsForAward))
       return "Fire Lord cannot award merits that affect the Owner, Sir.";
 
     const resolvedMembers: GuildMember[] = [];
     for (const u of usernames) {
       const m = await findMember(guild, u);
-      if (m) resolvedMembers.push(m);
+      if ("error" in m) {
+        if (m.error.startsWith("I found multiple")) return m.error;
+      } else {
+        resolvedMembers.push(m);
+      }
     }
     if (
       resolvedMembers.some((m) =>
@@ -245,8 +255,7 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
     if (RANK_ORDER[actorRank] < RANK_ORDER.advisor)
       return "Access Denied — Advisor and above only, Sir.";
     const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     const amount = Number(args.amount);
     if (!amount || amount < 0.1 || amount > 7)
       return "Amount must be between 0.1 and 7, Sir.";
@@ -282,8 +291,7 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
     const usernameArg = args.username ? String(args.username).trim() : "";
     if (usernameArg) {
       const target = await findMember(guild, usernameArg);
-      if (!target)
-        return `I could not locate a member matching "${usernameArg}", Sir.`;
+      if ("error" in target) return target.error;
       const [result] = await db
         .select({
           total: sql<number>`coalesce(sum(${meritAwardsTable.amount}), 0)`,
@@ -310,11 +318,12 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
     if (RANK_ORDER[actorRank] < RANK_ORDER.hr)
       return "Access Denied — HR and above only, Sir.";
     const usernameArg = args.username ? String(args.username).trim() : "";
-    const target = usernameArg
-      ? await findMember(guild, usernameArg)
-      : message.member!;
-    if (!target)
-      return `I could not locate a member matching "${usernameArg}", Sir.`;
+    let target: GuildMember = message.member!;
+    if (usernameArg) {
+      const result = await findMember(guild, usernameArg);
+      if ("error" in result) return result.error;
+      target = result;
+    }
     const history = await db
       .select()
       .from(meritAwardsTable)

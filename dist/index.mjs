@@ -152438,16 +152438,37 @@ VERIFIED SPEAKER IDENTITY: You are currently speaking with ${speakerName}, verif
 }
 
 // src/discord/ai/tools/shared.ts
-async function findMember(guild, query) {
+async function findMemberResult(guild, query) {
   const mention = query.match(/^<@!?(\d+)>$/);
-  if (mention) return guild.members.fetch(mention[1]).catch(() => null);
-  if (/^\d+$/.test(query)) return guild.members.fetch(query).catch(() => null);
+  if (mention) {
+    const m = await guild.members.fetch(mention[1]).catch(() => null);
+    return m ? { status: "found", member: m } : { status: "not_found" };
+  }
+  if (/^\d+$/.test(query)) {
+    const m = await guild.members.fetch(query).catch(() => null);
+    return m ? { status: "found", member: m } : { status: "not_found" };
+  }
   const results = await guild.members.fetch({ query, limit: 10 }).catch(() => null);
-  if (!results?.size) return null;
+  if (!results?.size) return { status: "not_found" };
   const norm = query.toLowerCase();
-  return results.find(
+  const exact = results.find(
     (m) => m.user.username.toLowerCase() === norm || m.user.globalName?.toLowerCase() === norm || m.displayName.toLowerCase() === norm
-  ) ?? results.first() ?? null;
+  );
+  if (exact) return { status: "found", member: exact };
+  if (results.size === 1) return { status: "found", member: results.first() };
+  return { status: "ambiguous", candidates: [...results.values()] };
+}
+function formatAmbiguousMembers(query, candidates) {
+  const names = candidates.slice(0, 5).map((m) => `${m.user.tag}${m.nickname ? ` (${m.nickname})` : ""}`).join(", ");
+  const more = candidates.length > 5 ? `, and ${candidates.length - 5} more` : "";
+  return `I found multiple members matching "${query}", Sir \u2014 did you mean: ${names}${more}? Please be more specific.`;
+}
+async function findMember(guild, query) {
+  const result = await findMemberResult(guild, query);
+  if (result.status === "found") return result.member;
+  if (result.status === "ambiguous")
+    return { error: formatAmbiguousMembers(query, result.candidates) };
+  return { error: `I could not locate a member matching "${query}", Sir.` };
 }
 function findAnyChannel(guild, name) {
   const norm = name.toLowerCase().replace(/^#/, "");
@@ -152566,11 +152587,17 @@ var meritToolHandlers = {
         return "Bonus amount must be between 0.1 and 7, Sir.";
       const resolvedBonus = [];
       const notFoundBonus = [];
+      const ambiguousBonus = [];
       for (const u of usernames) {
         const m = await findMember(guild, u);
-        if (m) resolvedBonus.push(m);
-        else notFoundBonus.push(u);
+        if ("error" in m) {
+          if (m.error.startsWith("I found multiple")) ambiguousBonus.push(m.error);
+          else notFoundBonus.push(u);
+        } else {
+          resolvedBonus.push(m);
+        }
       }
+      if (ambiguousBonus.length > 0) return ambiguousBonus.join("\n");
       if (resolvedBonus.length === 0)
         return "I could not locate any of the members you named, Sir.";
       if (resolvedBonus.some(
@@ -152606,15 +152633,19 @@ var meritToolHandlers = {
     const hostQuery = String(args.host ?? "").trim();
     if (!hostQuery)
       return "I need a host for that award, Sir \u2014 that's who receives the merit.";
-    const hostMember = await findMember(guild, hostQuery);
-    if (!hostMember)
-      return `I could not locate a host matching "${hostQuery}", Sir.`;
+    const hostResult = await findMember(guild, hostQuery);
+    if ("error" in hostResult) return hostResult.error;
+    const hostMember = hostResult;
     if (isProtectedOwner(actorRank, hostMember.id, ownerIdsForAward))
       return "Fire Lord cannot award merits that affect the Owner, Sir.";
     const resolvedMembers = [];
     for (const u of usernames) {
       const m = await findMember(guild, u);
-      if (m) resolvedMembers.push(m);
+      if ("error" in m) {
+        if (m.error.startsWith("I found multiple")) return m.error;
+      } else {
+        resolvedMembers.push(m);
+      }
     }
     if (resolvedMembers.some(
       (m) => isProtectedOwner(actorRank, m.id, ownerIdsForAward)
@@ -152655,8 +152686,7 @@ var meritToolHandlers = {
     if (RANK_ORDER[actorRank] < RANK_ORDER.advisor)
       return "Access Denied \u2014 Advisor and above only, Sir.";
     const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     const amount = Number(args.amount);
     if (!amount || amount < 0.1 || amount > 7)
       return "Amount must be between 0.1 and 7, Sir.";
@@ -152690,8 +152720,7 @@ var meritToolHandlers = {
     const usernameArg = args.username ? String(args.username).trim() : "";
     if (usernameArg) {
       const target = await findMember(guild, usernameArg);
-      if (!target)
-        return `I could not locate a member matching "${usernameArg}", Sir.`;
+      if ("error" in target) return target.error;
       const [result] = await db.select({
         total: sql`coalesce(sum(${meritAwardsTable.amount}), 0)`
       }).from(meritAwardsTable).where(eq(meritAwardsTable.memberId, target.id));
@@ -152710,9 +152739,12 @@ ${leaderboard.map((e, i) => `${i + 1}. ${e.memberTag} \u2014 ${Number(e.total)}`
     if (RANK_ORDER[actorRank] < RANK_ORDER.hr)
       return "Access Denied \u2014 HR and above only, Sir.";
     const usernameArg = args.username ? String(args.username).trim() : "";
-    const target = usernameArg ? await findMember(guild, usernameArg) : message.member;
-    if (!target)
-      return `I could not locate a member matching "${usernameArg}", Sir.`;
+    let target = message.member;
+    if (usernameArg) {
+      const result = await findMember(guild, usernameArg);
+      if ("error" in result) return result.error;
+      target = result;
+    }
     const history = await db.select().from(meritAwardsTable).where(eq(meritAwardsTable.memberId, target.id)).orderBy(desc(meritAwardsTable.createdAt));
     if (history.length === 0)
       return `No merit history found for ${target.user.tag}, Sir.`;
@@ -153234,8 +153266,7 @@ var messageToolHandlers = {
   },
   dm_user: async ({ args, guild }) => {
     const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     try {
       await target.send(String(args.message ?? ""));
       return `Message sent to ${target.user.tag} via DM, Sir.`;
@@ -153623,8 +153654,7 @@ var jarvisAccessHandler = async ({
   const usernameArg = String(args.username ?? "").trim();
   if (!usernameArg) return "I need a user to target, Sir.";
   const targetMember = await findMember(guild, usernameArg);
-  if (!targetMember)
-    return `I could not locate a member matching "${usernameArg}", Sir.`;
+  if ("error" in targetMember) return targetMember.error;
   if (name === "grant_jarvis_access") {
     jarvisAccessIds.add(targetMember.id);
     saveJarvisAccess();
@@ -153700,8 +153730,7 @@ var miscToolHandlers = {
   },
   get_member_info: async ({ args, guild }) => {
     const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     const roles = target.roles.cache.filter((r) => r.name !== "@everyone").map((r) => r.name);
     return `**${target.user.tag}**, Sir:
 \u2022 Joined server: <t:${Math.floor((target.joinedTimestamp ?? 0) / 1e3)}:D>
@@ -154179,8 +154208,7 @@ var serverVoiceStateHandler = async ({
   guild
 }) => {
   const target = await findMember(guild, String(args.username ?? ""));
-  if (!target)
-    return `I could not locate a member matching "${args.username}", Sir.`;
+  if ("error" in target) return target.error;
   if (name === "server_mute_member") {
     const muted = await target.voice.setMute(Boolean(args.mute)).catch(() => null);
     return muted ? `${target.user.tag} has been ${args.mute ? "server-muted" : "unmuted"}, Sir.` : `\u274C I was unable to ${args.mute ? "server-mute" : "unmute"} ${target.user.tag}, Sir \u2014 they may not be in a voice channel, or I lack the Mute Members permission.`;
@@ -154206,8 +154234,7 @@ var moderationToolHandlers = {
   },
   kick_member: async ({ args, message, guild, actorRank, ownerIds, reason }) => {
     const target = await findMember(guild, String(args.username));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     if (isProtectedOwner(actorRank, target.id, ownerIds))
       return "I cannot perform that action on the Owner, Sir.";
     await target.kick(reason);
@@ -154227,8 +154254,7 @@ var moderationToolHandlers = {
   },
   ban_member: async ({ args, message, guild, actorRank, ownerIds, reason }) => {
     const target = await findMember(guild, String(args.username));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     if (isProtectedOwner(actorRank, target.id, ownerIds))
       return "I cannot perform that action on the Owner, Sir.";
     await target.ban({ reason, deleteMessageSeconds: 0 });
@@ -154248,8 +154274,7 @@ var moderationToolHandlers = {
   },
   mute_member: async ({ args, message, guild, actorRank, ownerIds, reason }) => {
     const target = await findMember(guild, String(args.username));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     if (isProtectedOwner(actorRank, target.id, ownerIds))
       return "I cannot perform that action on the Owner, Sir.";
     const durationMs = Number(args.duration_minutes) * 60 * 1e3;
@@ -154272,15 +154297,13 @@ var moderationToolHandlers = {
   },
   unmute_member: async ({ args, guild, reason }) => {
     const target = await findMember(guild, String(args.username));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     await target.disableCommunicationUntil(null, reason);
     return `${target.user.tag}'s timeout has been lifted, Sir.`;
   },
   assign_role: async ({ args, message, guild, actorRank, ownerIds, reason }) => {
     const target = await findMember(guild, String(args.username));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     if (isProtectedOwner(actorRank, target.id, ownerIds))
       return "I cannot perform that action on the Owner, Sir.";
     const role = guild.roles.cache.find(
@@ -154302,8 +154325,7 @@ var moderationToolHandlers = {
   },
   remove_role: async ({ args, message, guild, actorRank, ownerIds, reason }) => {
     const target = await findMember(guild, String(args.username));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     if (isProtectedOwner(actorRank, target.id, ownerIds))
       return "I cannot perform that action on the Owner, Sir.";
     const role = guild.roles.cache.find(
@@ -154325,8 +154347,7 @@ var moderationToolHandlers = {
   },
   set_nickname: async ({ args, guild, reason }) => {
     const target = await findMember(guild, String(args.username));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     const nick = args.nickname ? String(args.nickname) : null;
     await target.setNickname(nick, reason);
     return nick ? `${target.user.tag}'s nickname has been set to "${nick}", Sir.` : `${target.user.tag}'s nickname has been reset, Sir.`;
@@ -154425,8 +154446,7 @@ var moderationToolHandlers = {
   },
   move_voice_member: async ({ args, guild }) => {
     const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     if (!target.voice.channel)
       return `${target.user.tag} is not currently in a voice channel, Sir.`;
     const destination = findAnyChannel(guild, String(args.channel_name ?? ""));
@@ -154463,8 +154483,7 @@ ${[...bans.values()].slice(0, 30).map((b) => `\u2022 ${b.user.tag} (${b.user.id}
     if (RANK_ORDER[actorRank] < RANK_ORDER.advisor)
       return "Access Denied \u2014 Advisor and above only, Sir.";
     const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     const reasonText = `[Jarvis Softban \u2014 requested by ${message.author.tag}]${args.reason ? ` ${args.reason}` : ""}`;
     await guild.bans.create(target.id, {
       reason: reasonText,
@@ -154477,8 +154496,7 @@ ${[...bans.values()].slice(0, 30).map((b) => `\u2022 ${b.user.tag} (${b.user.id}
     if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
       return "Access Denied \u2014 Royalty and above only, Sir.";
     const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     const ownerIdsForGlobal = getConfiguredIds("DISCORD_OWNER_USER_IDS");
     if (isProtectedOwner(actorRank, target.id, ownerIdsForGlobal))
       return "Fire Lord cannot run global actions that affect the Owner, Sir.";

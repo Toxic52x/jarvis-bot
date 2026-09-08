@@ -348,8 +348,7 @@ const jarvisAccessHandler: ToolHandler = async ({
   const usernameArg = String(args.username ?? "").trim();
   if (!usernameArg) return "I need a user to target, Sir.";
   const targetMember = await findMember(guild, usernameArg);
-  if (!targetMember)
-    return `I could not locate a member matching "${usernameArg}", Sir.`;
+  if ("error" in targetMember) return targetMember.error;
 
   if (name === "grant_jarvis_access") {
     jarvisAccessIds.add(targetMember.id);
@@ -442,8 +441,7 @@ export const miscToolHandlers: Record<string, ToolHandler> = {
 
   get_member_info: async ({ args, guild }) => {
     const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     const roles = target.roles.cache
       .filter((r) => r.name !== "@everyone")
       .map((r) => r.name);

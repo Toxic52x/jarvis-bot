@@ -443,8 +443,7 @@ const serverVoiceStateHandler: ToolHandler = async ({
   guild,
 }) => {
   const target = await findMember(guild, String(args.username ?? ""));
-  if (!target)
-    return `I could not locate a member matching "${args.username}", Sir.`;
+  if ("error" in target) return target.error;
   if (name === "server_mute_member") {
     const muted = await target.voice
       .setMute(Boolean(args.mute))
@@ -482,8 +481,7 @@ export const moderationToolHandlers: Record<string, ToolHandler> = {
 
   kick_member: async ({ args, message, guild, actorRank, ownerIds, reason }) => {
     const target = await findMember(guild, String(args.username));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     if (isProtectedOwner(actorRank, target.id, ownerIds))
       return "I cannot perform that action on the Owner, Sir.";
     await target.kick(reason);
@@ -504,8 +502,7 @@ export const moderationToolHandlers: Record<string, ToolHandler> = {
 
   ban_member: async ({ args, message, guild, actorRank, ownerIds, reason }) => {
     const target = await findMember(guild, String(args.username));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     if (isProtectedOwner(actorRank, target.id, ownerIds))
       return "I cannot perform that action on the Owner, Sir.";
     await target.ban({ reason, deleteMessageSeconds: 0 });
@@ -526,8 +523,7 @@ export const moderationToolHandlers: Record<string, ToolHandler> = {
 
   mute_member: async ({ args, message, guild, actorRank, ownerIds, reason }) => {
     const target = await findMember(guild, String(args.username));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     if (isProtectedOwner(actorRank, target.id, ownerIds))
       return "I cannot perform that action on the Owner, Sir.";
     const durationMs = Number(args.duration_minutes) * 60 * 1000;
@@ -551,16 +547,14 @@ export const moderationToolHandlers: Record<string, ToolHandler> = {
 
   unmute_member: async ({ args, guild, reason }) => {
     const target = await findMember(guild, String(args.username));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     await target.disableCommunicationUntil(null, reason);
     return `${target.user.tag}'s timeout has been lifted, Sir.`;
   },
 
   assign_role: async ({ args, message, guild, actorRank, ownerIds, reason }) => {
     const target = await findMember(guild, String(args.username));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     if (isProtectedOwner(actorRank, target.id, ownerIds))
       return "I cannot perform that action on the Owner, Sir.";
     const role = guild.roles.cache.find(
@@ -583,8 +577,7 @@ export const moderationToolHandlers: Record<string, ToolHandler> = {
 
   remove_role: async ({ args, message, guild, actorRank, ownerIds, reason }) => {
     const target = await findMember(guild, String(args.username));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     if (isProtectedOwner(actorRank, target.id, ownerIds))
       return "I cannot perform that action on the Owner, Sir.";
     const role = guild.roles.cache.find(
@@ -607,8 +600,7 @@ export const moderationToolHandlers: Record<string, ToolHandler> = {
 
   set_nickname: async ({ args, guild, reason }) => {
     const target = await findMember(guild, String(args.username));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     const nick = args.nickname ? String(args.nickname) : null;
     await target.setNickname(nick, reason);
     return nick
@@ -743,8 +735,7 @@ export const moderationToolHandlers: Record<string, ToolHandler> = {
 
   move_voice_member: async ({ args, guild }) => {
     const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     if (!target.voice.channel)
       return `${target.user.tag} is not currently in a voice channel, Sir.`;
     const destination = findAnyChannel(guild, String(args.channel_name ?? ""));
@@ -791,8 +782,7 @@ export const moderationToolHandlers: Record<string, ToolHandler> = {
     if (RANK_ORDER[actorRank] < RANK_ORDER.advisor)
       return "Access Denied — Advisor and above only, Sir.";
     const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     const reasonText = `[Jarvis Softban — requested by ${message.author.tag}]${args.reason ? ` ${args.reason}` : ""}`;
     await guild.bans.create(target.id, {
       reason: reasonText,
@@ -806,8 +796,7 @@ export const moderationToolHandlers: Record<string, ToolHandler> = {
     if (RANK_ORDER[actorRank] < RANK_ORDER.royalty)
       return "Access Denied — Royalty and above only, Sir.";
     const target = await findMember(guild, String(args.username ?? ""));
-    if (!target)
-      return `I could not locate a member matching "${args.username}", Sir.`;
+    if ("error" in target) return target.error;
     const ownerIdsForGlobal = getConfiguredIds("DISCORD_OWNER_USER_IDS");
     if (isProtectedOwner(actorRank, target.id, ownerIdsForGlobal))
       return "Fire Lord cannot run global actions that affect the Owner, Sir.";
