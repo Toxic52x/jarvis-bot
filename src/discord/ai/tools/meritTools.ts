@@ -1,5 +1,5 @@
 import type { GuildMember } from "discord.js";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import type OpenAI from "openai";
 import { RANK_ORDER, getConfiguredIds } from "../../../config";
 import { db, meritAwardsTable } from "../../../lib/db";
@@ -297,16 +297,22 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
           total: sql<number>`coalesce(sum(${meritAwardsTable.amount}), 0)`,
         })
         .from(meritAwardsTable)
-        .where(eq(meritAwardsTable.memberId, target.id));
+        .where(
+          and(
+            eq(meritAwardsTable.guildId, guild.id),
+            eq(meritAwardsTable.memberId, target.id),
+          ),
+        );
       return `${target.user.tag} currently has **${Number(result?.total ?? 0)}** merits, Sir.`;
     }
     const leaderboard = await db
       .select({
-        memberTag: meritAwardsTable.memberTag,
+        memberTag: sql<string>`(array_agg(${meritAwardsTable.memberTag} order by ${meritAwardsTable.createdAt} desc))[1]`,
         total: sql<number>`sum(${meritAwardsTable.amount})`,
       })
       .from(meritAwardsTable)
-      .groupBy(meritAwardsTable.memberId, meritAwardsTable.memberTag)
+      .where(eq(meritAwardsTable.guildId, guild.id))
+      .groupBy(meritAwardsTable.memberId)
       .orderBy(desc(sql`sum(${meritAwardsTable.amount})`))
       .limit(10);
     if (leaderboard.length === 0)
@@ -327,7 +333,12 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
     const history = await db
       .select()
       .from(meritAwardsTable)
-      .where(eq(meritAwardsTable.memberId, target.id))
+      .where(
+        and(
+          eq(meritAwardsTable.guildId, guild.id),
+          eq(meritAwardsTable.memberId, target.id),
+        ),
+      )
       .orderBy(desc(meritAwardsTable.createdAt));
     if (history.length === 0)
       return `No merit history found for ${target.user.tag}, Sir.`;

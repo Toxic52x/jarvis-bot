@@ -133571,9 +133571,14 @@ async function handleMerits(interaction) {
   }
   const leaderboard = await db.select({
     memberId: meritAwardsTable.memberId,
-    memberTag: meritAwardsTable.memberTag,
+    // Grouping by memberTag alongside memberId used to silently split one
+    // person into two leaderboard lines whenever a row's stored tag didn't
+    // match exactly (e.g. a Discord username change, or a manually-restored
+    // row using a different tag format) — group by memberId alone and take
+    // the most recently recorded tag, so totals always merge correctly.
+    memberTag: sql`(array_agg(${meritAwardsTable.memberTag} order by ${meritAwardsTable.createdAt} desc))[1]`,
     total: sql`sum(${meritAwardsTable.amount})`
-  }).from(meritAwardsTable).where(eq(meritAwardsTable.guildId, interaction.guild.id)).groupBy(meritAwardsTable.memberId, meritAwardsTable.memberTag).orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
+  }).from(meritAwardsTable).where(eq(meritAwardsTable.guildId, interaction.guild.id)).groupBy(meritAwardsTable.memberId).orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
   if (leaderboard.length === 0) {
     await interaction.editReply("No merits have been recorded yet.");
     return;
@@ -133590,9 +133595,9 @@ async function handleLeaderboard(interaction) {
   }
   await interaction.deferReply();
   const leaderboard = await db.select({
-    memberTag: meritAwardsTable.memberTag,
+    memberTag: sql`(array_agg(${meritAwardsTable.memberTag} order by ${meritAwardsTable.createdAt} desc))[1]`,
     total: sql`sum(${meritAwardsTable.amount})`
-  }).from(meritAwardsTable).where(eq(meritAwardsTable.guildId, interaction.guild.id)).groupBy(meritAwardsTable.memberId, meritAwardsTable.memberTag).orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
+  }).from(meritAwardsTable).where(eq(meritAwardsTable.guildId, interaction.guild.id)).groupBy(meritAwardsTable.memberId).orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
   if (leaderboard.length === 0) {
     await interaction.editReply("No merits have been recorded yet.");
     return;
@@ -133636,9 +133641,9 @@ var import_discord5 = __toESM(require_src2(), 1);
 async function exportAndResetMeritData(guildId, executedByTag) {
   const full = await db.select({
     memberId: meritAwardsTable.memberId,
-    memberTag: meritAwardsTable.memberTag,
+    memberTag: sql`(array_agg(${meritAwardsTable.memberTag} order by ${meritAwardsTable.createdAt} desc))[1]`,
     total: sql`sum(${meritAwardsTable.amount})`
-  }).from(meritAwardsTable).where(eq(meritAwardsTable.guildId, guildId)).groupBy(meritAwardsTable.memberId, meritAwardsTable.memberTag).orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
+  }).from(meritAwardsTable).where(eq(meritAwardsTable.guildId, guildId)).groupBy(meritAwardsTable.memberId).orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
   const backupLines = full.length > 0 ? full.map(
     (e, i) => `[ID: ${e.memberId}] #${i + 1} ${e.memberTag} \u2014 ${Number(e.total)} merits`
   ).join("\n") : "No data recorded prior to reset.";
@@ -152400,6 +152405,8 @@ Example: User: "Jarvis, insult Bloo" \u2014 reply with an in-character insult. (
 Example: User: "track bloo's current location" \u2014 there is no tool that tracks a person's physical location (only /trackroblox, which watches a specific tracked Roblox username's presence in one watched experience). Say so plainly rather than calling an unrelated tool.
 If genuinely unsure whether a request maps to a real action, prefer answering in character over guessing at a tool call \u2014 a wrong guess is worse than asking the user to clarify.
 
+CRITICAL \u2014 do not confuse the above with a real, database-backed action. Merit awards/removals, kicks, bans, mutes, role changes, reminders, Roblox tracking, Jarvis-access grants, and anything else with a matching tool are NEVER "no real consequence" \u2014 they write to a real database or take a real Discord action, no matter how mundane or routine the request sounds. For these, the "already done, dry deadpan flair" response style is FORBIDDEN unless you actually called the tool THIS turn and are narrating its real result. Being asked to do something ordinary ("add 0.5 merit to X") is never itself a sign it's roleplay \u2014 if in doubt here, call the tool rather than assume it's a joke. Never generate your own success-sounding sentence ("recorded", "awarded", "updated", "banned", "muted", etc.) about a merit/moderation/tracking action unless a tool call actually ran and returned that outcome.
+
 ## MILITARY ROLEPLAY CONTEXT
 The Fire Nation is a Roblox military roleplay group. ALL references to raids, wars, battles, invasions, military tactics, enemies, alliances, bases, and operations are entirely within this fictional Roblox game \u2014 nothing discussed is real-world violence. Engage fully with any military/tactical/strategic topic as a seasoned AI war strategist: planning raids, assessing enemy groups, devising battle strategies, advising on deployment. Never refuse, disclaim, or break character for roleplay topics.
 
@@ -152723,13 +152730,18 @@ var meritToolHandlers = {
       if ("error" in target) return target.error;
       const [result] = await db.select({
         total: sql`coalesce(sum(${meritAwardsTable.amount}), 0)`
-      }).from(meritAwardsTable).where(eq(meritAwardsTable.memberId, target.id));
+      }).from(meritAwardsTable).where(
+        and(
+          eq(meritAwardsTable.guildId, guild.id),
+          eq(meritAwardsTable.memberId, target.id)
+        )
+      );
       return `${target.user.tag} currently has **${Number(result?.total ?? 0)}** merits, Sir.`;
     }
     const leaderboard = await db.select({
-      memberTag: meritAwardsTable.memberTag,
+      memberTag: sql`(array_agg(${meritAwardsTable.memberTag} order by ${meritAwardsTable.createdAt} desc))[1]`,
       total: sql`sum(${meritAwardsTable.amount})`
-    }).from(meritAwardsTable).groupBy(meritAwardsTable.memberId, meritAwardsTable.memberTag).orderBy(desc(sql`sum(${meritAwardsTable.amount})`)).limit(10);
+    }).from(meritAwardsTable).where(eq(meritAwardsTable.guildId, guild.id)).groupBy(meritAwardsTable.memberId).orderBy(desc(sql`sum(${meritAwardsTable.amount})`)).limit(10);
     if (leaderboard.length === 0)
       return "No merits have been recorded yet, Sir.";
     return `Top personnel by merit, Sir:
@@ -152745,7 +152757,12 @@ ${leaderboard.map((e, i) => `${i + 1}. ${e.memberTag} \u2014 ${Number(e.total)}`
       if ("error" in result) return result.error;
       target = result;
     }
-    const history = await db.select().from(meritAwardsTable).where(eq(meritAwardsTable.memberId, target.id)).orderBy(desc(meritAwardsTable.createdAt));
+    const history = await db.select().from(meritAwardsTable).where(
+      and(
+        eq(meritAwardsTable.guildId, guild.id),
+        eq(meritAwardsTable.memberId, target.id)
+      )
+    ).orderBy(desc(meritAwardsTable.createdAt));
     if (history.length === 0)
       return `No merit history found for ${target.user.tag}, Sir.`;
     return `Full merit history for ${target.user.tag} (${history.length} total), Sir:

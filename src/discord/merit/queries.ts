@@ -224,12 +224,17 @@ export async function handleMerits(
 const leaderboard = await db
   .select({
     memberId: meritAwardsTable.memberId,
-    memberTag: meritAwardsTable.memberTag,
+    // Grouping by memberTag alongside memberId used to silently split one
+    // person into two leaderboard lines whenever a row's stored tag didn't
+    // match exactly (e.g. a Discord username change, or a manually-restored
+    // row using a different tag format) — group by memberId alone and take
+    // the most recently recorded tag, so totals always merge correctly.
+    memberTag: sql<string>`(array_agg(${meritAwardsTable.memberTag} order by ${meritAwardsTable.createdAt} desc))[1]`,
     total: sql<number>`sum(${meritAwardsTable.amount})`,
   })
   .from(meritAwardsTable)
   .where(eq(meritAwardsTable.guildId, interaction.guild.id))
-  .groupBy(meritAwardsTable.memberId, meritAwardsTable.memberTag)
+  .groupBy(meritAwardsTable.memberId)
   .orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
 
 if (leaderboard.length === 0) {
@@ -255,12 +260,12 @@ export async function handleLeaderboard(
 
   const leaderboard = await db
     .select({
-      memberTag: meritAwardsTable.memberTag,
+      memberTag: sql<string>`(array_agg(${meritAwardsTable.memberTag} order by ${meritAwardsTable.createdAt} desc))[1]`,
       total: sql<number>`sum(${meritAwardsTable.amount})`,
     })
     .from(meritAwardsTable)
     .where(eq(meritAwardsTable.guildId, interaction.guild.id))
-    .groupBy(meritAwardsTable.memberId, meritAwardsTable.memberTag)
+    .groupBy(meritAwardsTable.memberId)
     .orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
 
   if (leaderboard.length === 0) {

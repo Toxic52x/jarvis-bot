@@ -24,12 +24,12 @@ export async function exportAndResetMeritData(
   const full = await db
     .select({
       memberId: meritAwardsTable.memberId,
-      memberTag: meritAwardsTable.memberTag,
+      memberTag: sql<string>`(array_agg(${meritAwardsTable.memberTag} order by ${meritAwardsTable.createdAt} desc))[1]`,
       total: sql<number>`sum(${meritAwardsTable.amount})`,
     })
     .from(meritAwardsTable)
     .where(eq(meritAwardsTable.guildId, guildId))
-    .groupBy(meritAwardsTable.memberId, meritAwardsTable.memberTag)
+    .groupBy(meritAwardsTable.memberId)
     .orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
 
   const backupLines =
