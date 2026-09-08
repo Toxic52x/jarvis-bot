@@ -6,16 +6,19 @@ import {
   EmbedBuilder,
   type ChatInputCommandInteraction,
 } from "discord.js";
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, sql } from "drizzle-orm";
 import { FIRE_RED } from "../../config";
 import { db, meritAwardsTable } from "../../lib/db";
 import { canManageJarvis } from "../permissions";
 import { logger } from "../../lib/logger";
 
 /**
- * Exports every merit record for ONE guild, then deletes that guild's records.
- * Both the /resetdata slash command and the reset_merit_data conversational
- * tool go through here, so the guild scoping can never drift apart again.
+ * Exports every merit record, then deletes all of them. Both the /resetdata
+ * slash command and the reset_merit_data conversational tool go through
+ * here. Merit is one shared ledger across every server Jarvis is in (by
+ * deliberate choice, not an oversight) — this wipes ALL of it regardless of
+ * which server the command was run from. `guildId` is kept only so the log
+ * line below records where the reset was triggered from.
  */
 export async function exportAndResetMeritData(
   guildId: string,
@@ -28,7 +31,6 @@ export async function exportAndResetMeritData(
       total: sql<number>`sum(${meritAwardsTable.amount})`,
     })
     .from(meritAwardsTable)
-    .where(eq(meritAwardsTable.guildId, guildId))
     .groupBy(meritAwardsTable.memberId)
     .orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
 
@@ -61,9 +63,12 @@ export async function exportAndResetMeritData(
     .setFooter({ text: `RESET EXECUTED BY ${executedByTag}` })
     .setTimestamp();
 
-  await db.delete(meritAwardsTable).where(eq(meritAwardsTable.guildId, guildId));
+  await db.delete(meritAwardsTable);
 
-  logger.info({ guildId, exported: full.length }, "Merit data reset");
+  logger.info(
+    { triggeredFromGuildId: guildId, exported: full.length },
+    "Merit data reset (global — every server's data)",
+  );
 
   return { backupEmbed, backupLines };
 }

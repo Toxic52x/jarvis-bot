@@ -1,5 +1,5 @@
 import type { GuildMember } from "discord.js";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import type OpenAI from "openai";
 import { RANK_ORDER, getConfiguredIds } from "../../../config";
 import { db, meritAwardsTable } from "../../../lib/db";
@@ -292,17 +292,14 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
     if (usernameArg) {
       const target = await findMember(guild, usernameArg);
       if ("error" in target) return target.error;
+      // Merit is one shared ledger across every server Jarvis is in — not
+      // filtered by guildId, by design.
       const [result] = await db
         .select({
           total: sql<number>`coalesce(sum(${meritAwardsTable.amount}), 0)`,
         })
         .from(meritAwardsTable)
-        .where(
-          and(
-            eq(meritAwardsTable.guildId, guild.id),
-            eq(meritAwardsTable.memberId, target.id),
-          ),
-        );
+        .where(eq(meritAwardsTable.memberId, target.id));
       return `${target.user.tag} currently has **${Number(result?.total ?? 0)}** merits, Sir.`;
     }
     const leaderboard = await db
@@ -311,7 +308,6 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
         total: sql<number>`sum(${meritAwardsTable.amount})`,
       })
       .from(meritAwardsTable)
-      .where(eq(meritAwardsTable.guildId, guild.id))
       .groupBy(meritAwardsTable.memberId)
       .orderBy(desc(sql`sum(${meritAwardsTable.amount})`))
       .limit(10);
@@ -333,12 +329,7 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
     const history = await db
       .select()
       .from(meritAwardsTable)
-      .where(
-        and(
-          eq(meritAwardsTable.guildId, guild.id),
-          eq(meritAwardsTable.memberId, target.id),
-        ),
-      )
+      .where(eq(meritAwardsTable.memberId, target.id))
       .orderBy(desc(meritAwardsTable.createdAt));
     if (history.length === 0)
       return `No merit history found for ${target.user.tag}, Sir.`;

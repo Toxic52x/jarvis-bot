@@ -133555,12 +133555,7 @@ async function handleMerits(interaction) {
   if (target) {
     const [result] = await db.select({
       total: sql`coalesce(sum(${meritAwardsTable.amount}), 0)`
-    }).from(meritAwardsTable).where(
-      and(
-        eq(meritAwardsTable.guildId, interaction.guild.id),
-        eq(meritAwardsTable.memberId, target.id)
-      )
-    );
+    }).from(meritAwardsTable).where(eq(meritAwardsTable.memberId, target.id));
     const total = Number(result?.total ?? 0);
     const embed = new import_discord4.EmbedBuilder().setTitle("JARVIS // PERSONNEL MERIT RECORD").setDescription("Current standing for the selected personnel.").setColor(FIRE_RED).addFields(
       { name: "PERSONNEL", value: target.tag, inline: true },
@@ -133578,7 +133573,7 @@ async function handleMerits(interaction) {
     // the most recently recorded tag, so totals always merge correctly.
     memberTag: sql`(array_agg(${meritAwardsTable.memberTag} order by ${meritAwardsTable.createdAt} desc))[1]`,
     total: sql`sum(${meritAwardsTable.amount})`
-  }).from(meritAwardsTable).where(eq(meritAwardsTable.guildId, interaction.guild.id)).groupBy(meritAwardsTable.memberId).orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
+  }).from(meritAwardsTable).groupBy(meritAwardsTable.memberId).orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
   if (leaderboard.length === 0) {
     await interaction.editReply("No merits have been recorded yet.");
     return;
@@ -133597,7 +133592,7 @@ async function handleLeaderboard(interaction) {
   const leaderboard = await db.select({
     memberTag: sql`(array_agg(${meritAwardsTable.memberTag} order by ${meritAwardsTable.createdAt} desc))[1]`,
     total: sql`sum(${meritAwardsTable.amount})`
-  }).from(meritAwardsTable).where(eq(meritAwardsTable.guildId, interaction.guild.id)).groupBy(meritAwardsTable.memberId).orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
+  }).from(meritAwardsTable).groupBy(meritAwardsTable.memberId).orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
   if (leaderboard.length === 0) {
     await interaction.editReply("No merits have been recorded yet.");
     return;
@@ -133621,12 +133616,7 @@ async function handleMeritHistory(interaction) {
     return;
   }
   const target = interaction.options.getUser("user") ?? interaction.user;
-  const history = await db.select().from(meritAwardsTable).where(
-    and(
-      eq(meritAwardsTable.guildId, interaction.guild.id),
-      eq(meritAwardsTable.memberId, target.id)
-    )
-  ).orderBy(desc(meritAwardsTable.createdAt));
+  const history = await db.select().from(meritAwardsTable).where(eq(meritAwardsTable.memberId, target.id)).orderBy(desc(meritAwardsTable.createdAt));
   if (history.length === 0) {
     await interaction.editReply(
       `No merit history found for **${target.tag}**.`
@@ -133643,7 +133633,7 @@ async function exportAndResetMeritData(guildId, executedByTag) {
     memberId: meritAwardsTable.memberId,
     memberTag: sql`(array_agg(${meritAwardsTable.memberTag} order by ${meritAwardsTable.createdAt} desc))[1]`,
     total: sql`sum(${meritAwardsTable.amount})`
-  }).from(meritAwardsTable).where(eq(meritAwardsTable.guildId, guildId)).groupBy(meritAwardsTable.memberId).orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
+  }).from(meritAwardsTable).groupBy(meritAwardsTable.memberId).orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
   const backupLines = full.length > 0 ? full.map(
     (e, i) => `[ID: ${e.memberId}] #${i + 1} ${e.memberTag} \u2014 ${Number(e.total)} merits`
   ).join("\n") : "No data recorded prior to reset.";
@@ -133655,8 +133645,11 @@ async function exportAndResetMeritData(guildId, executedByTag) {
 
 ${richBackupLines.slice(0, 4e3)}`
   ).setColor(FIRE_RED).setFooter({ text: `RESET EXECUTED BY ${executedByTag}` }).setTimestamp();
-  await db.delete(meritAwardsTable).where(eq(meritAwardsTable.guildId, guildId));
-  logger.info({ guildId, exported: full.length }, "Merit data reset");
+  await db.delete(meritAwardsTable);
+  logger.info(
+    { triggeredFromGuildId: guildId, exported: full.length },
+    "Merit data reset (global \u2014 every server's data)"
+  );
   return { backupEmbed, backupLines };
 }
 async function handleResetData(interaction) {
@@ -152730,18 +152723,13 @@ var meritToolHandlers = {
       if ("error" in target) return target.error;
       const [result] = await db.select({
         total: sql`coalesce(sum(${meritAwardsTable.amount}), 0)`
-      }).from(meritAwardsTable).where(
-        and(
-          eq(meritAwardsTable.guildId, guild.id),
-          eq(meritAwardsTable.memberId, target.id)
-        )
-      );
+      }).from(meritAwardsTable).where(eq(meritAwardsTable.memberId, target.id));
       return `${target.user.tag} currently has **${Number(result?.total ?? 0)}** merits, Sir.`;
     }
     const leaderboard = await db.select({
       memberTag: sql`(array_agg(${meritAwardsTable.memberTag} order by ${meritAwardsTable.createdAt} desc))[1]`,
       total: sql`sum(${meritAwardsTable.amount})`
-    }).from(meritAwardsTable).where(eq(meritAwardsTable.guildId, guild.id)).groupBy(meritAwardsTable.memberId).orderBy(desc(sql`sum(${meritAwardsTable.amount})`)).limit(10);
+    }).from(meritAwardsTable).groupBy(meritAwardsTable.memberId).orderBy(desc(sql`sum(${meritAwardsTable.amount})`)).limit(10);
     if (leaderboard.length === 0)
       return "No merits have been recorded yet, Sir.";
     return `Top personnel by merit, Sir:
@@ -152757,12 +152745,7 @@ ${leaderboard.map((e, i) => `${i + 1}. ${e.memberTag} \u2014 ${Number(e.total)}`
       if ("error" in result) return result.error;
       target = result;
     }
-    const history = await db.select().from(meritAwardsTable).where(
-      and(
-        eq(meritAwardsTable.guildId, guild.id),
-        eq(meritAwardsTable.memberId, target.id)
-      )
-    ).orderBy(desc(meritAwardsTable.createdAt));
+    const history = await db.select().from(meritAwardsTable).where(eq(meritAwardsTable.memberId, target.id)).orderBy(desc(meritAwardsTable.createdAt));
     if (history.length === 0)
       return `No merit history found for ${target.user.tag}, Sir.`;
     return `Full merit history for ${target.user.tag} (${history.length} total), Sir:

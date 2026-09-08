@@ -6,7 +6,7 @@ import {
   EmbedBuilder,
   type ChatInputCommandInteraction,
 } from "discord.js";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { FIRE_ORANGE, FIRE_RED } from "../../config";
 import { db, meritAwardsTable } from "../../lib/db";
 import { rankAtLeast } from "../permissions";
@@ -193,17 +193,14 @@ export async function handleMerits(
   const target = interaction.options.getUser("user");
 
   if (target) {
+    // Merit is one shared ledger across every server Jarvis is in — not
+    // filtered by guildId, by design (see git history if this looks wrong).
     const [result] = await db
       .select({
         total: sql<number>`coalesce(sum(${meritAwardsTable.amount}), 0)`,
       })
       .from(meritAwardsTable)
-      .where(
-        and(
-          eq(meritAwardsTable.guildId, interaction.guild.id),
-          eq(meritAwardsTable.memberId, target.id),
-        ),
-      );
+      .where(eq(meritAwardsTable.memberId, target.id));
 
     const total = Number(result?.total ?? 0);
     const embed = new EmbedBuilder()
@@ -233,7 +230,6 @@ const leaderboard = await db
     total: sql<number>`sum(${meritAwardsTable.amount})`,
   })
   .from(meritAwardsTable)
-  .where(eq(meritAwardsTable.guildId, interaction.guild.id))
   .groupBy(meritAwardsTable.memberId)
   .orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
 
@@ -264,7 +260,6 @@ export async function handleLeaderboard(
       total: sql<number>`sum(${meritAwardsTable.amount})`,
     })
     .from(meritAwardsTable)
-    .where(eq(meritAwardsTable.guildId, interaction.guild.id))
     .groupBy(meritAwardsTable.memberId)
     .orderBy(desc(sql`sum(${meritAwardsTable.amount})`));
 
@@ -302,12 +297,7 @@ export async function handleMeritHistory(
   const history = await db
     .select()
     .from(meritAwardsTable)
-    .where(
-      and(
-        eq(meritAwardsTable.guildId, interaction.guild.id),
-        eq(meritAwardsTable.memberId, target.id),
-      ),
-    )
+    .where(eq(meritAwardsTable.memberId, target.id))
     .orderBy(desc(meritAwardsTable.createdAt));
 
   if (history.length === 0) {
