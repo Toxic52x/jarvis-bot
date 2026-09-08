@@ -234,6 +234,19 @@ async function processAiChat(
       "get_merit_history",
     ]);
 
+    // Computed once per turn from the ORIGINAL user message: a keyword match
+    // (e.g. "merit", "kick", "ban") is a strong signal of real intent, unlike
+    // the always-on core/read-only tools. When one matched, the FIRST hop
+    // forces a tool call rather than leaving it optional — this is what
+    // actually stops the model from narrating a plausible-sounding "done" in
+    // plain text without ever calling the tool that would make it true.
+    // Later hops fall back to "auto" so the model can still wrap up with a
+    // normal text reply once a tool has run.
+    const { tools: selectedTools, actionRequested } = toolsForMessage(
+      rank,
+      text,
+    );
+
     try {
       let finalReply: string | null = null;
       let lastToolResult: string | null = null;
@@ -248,9 +261,9 @@ async function processAiChat(
             },
             ...history,
           ],
-          tool_choice: "auto",
+          tool_choice: hop === 0 && actionRequested ? "required" : "auto",
           max_tokens: 550,
-          tools: toolsForMessage(rank, text),
+          tools: selectedTools,
         });
 
         if (completion.usage?.total_tokens)

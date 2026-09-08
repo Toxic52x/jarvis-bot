@@ -126,25 +126,42 @@ export const TOOL_KEYWORDS: Record<string, string[]> = {
   "capabilities": ["get_full_capabilities"],
 };
 
+export type MessageToolSelection = {
+  tools: OpenAI.Chat.ChatCompletionTool[];
+  // True when the message matched a real TOOL_KEYWORDS entry (kick, merit,
+  // ban, ...), as opposed to only the always-on CORE_TOOL_NAMES. A keyword
+  // match is a strong signal of real intent — the chat handler uses this to
+  // force a tool call rather than let the model optionally skip calling one
+  // and just narrate a plausible-sounding "done" in plain text instead.
+  actionRequested: boolean;
+};
+
 export function toolsForMessage(
   rank: JarvisRank,
   userText: string,
-): OpenAI.Chat.ChatCompletionTool[] {
+): MessageToolSelection {
   const text = userText.toLowerCase();
   const wanted = new Set<string>(CORE_TOOL_NAMES);
+  let actionRequested = false;
 
   for (const [kw, names] of Object.entries(TOOL_KEYWORDS)) {
     if (new RegExp(`\\b${escapeRegex(kw)}s?\\b`, "i").test(text)) {
+      actionRequested = true;
       names.forEach((n) => wanted.add(n));
     }
   }
 
-  logger.info({ tools: [...wanted] }, "Jarvis: tools sent this turn");
+  logger.info(
+    { tools: [...wanted], actionRequested },
+    "Jarvis: tools sent this turn",
+  );
 
-  return DISCORD_TOOLS.filter((t) => {
+  const tools = DISCORD_TOOLS.filter((t) => {
     if (!wanted.has(t.function.name)) return false;
     const min =
       TOOL_MIN_RANK[t.function.name] ?? LEGACY_TOOL_MIN_RANK[t.function.name];
     return !min || RANK_ORDER[rank] >= RANK_ORDER[min];
   });
+
+  return { tools, actionRequested };
 }

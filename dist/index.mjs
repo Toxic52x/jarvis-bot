@@ -155600,17 +155600,23 @@ var TOOL_KEYWORDS = {
 function toolsForMessage(rank, userText) {
   const text2 = userText.toLowerCase();
   const wanted = new Set(CORE_TOOL_NAMES);
+  let actionRequested = false;
   for (const [kw, names] of Object.entries(TOOL_KEYWORDS)) {
     if (new RegExp(`\\b${escapeRegex2(kw)}s?\\b`, "i").test(text2)) {
+      actionRequested = true;
       names.forEach((n) => wanted.add(n));
     }
   }
-  logger.info({ tools: [...wanted] }, "Jarvis: tools sent this turn");
-  return DISCORD_TOOLS.filter((t) => {
+  logger.info(
+    { tools: [...wanted], actionRequested },
+    "Jarvis: tools sent this turn"
+  );
+  const tools = DISCORD_TOOLS.filter((t) => {
     if (!wanted.has(t.function.name)) return false;
     const min = TOOL_MIN_RANK[t.function.name] ?? LEGACY_TOOL_MIN_RANK[t.function.name];
     return !min || RANK_ORDER[rank] >= RANK_ORDER[min];
   });
+  return { tools, actionRequested };
 }
 
 // src/discord/ai/chat.ts
@@ -155741,6 +155747,10 @@ async function processAiChat(message, rank) {
       "list_servers",
       "get_merit_history"
     ]);
+    const { tools: selectedTools, actionRequested } = toolsForMessage(
+      rank,
+      text2
+    );
     try {
       let finalReply = null;
       let lastToolResult = null;
@@ -155754,9 +155764,9 @@ async function processAiChat(message, rank) {
             },
             ...history
           ],
-          tool_choice: "auto",
+          tool_choice: hop === 0 && actionRequested ? "required" : "auto",
           max_tokens: 550,
-          tools: toolsForMessage(rank, text2)
+          tools: selectedTools
         });
         if (completion.usage?.total_tokens)
           trackTokens(completion.usage.total_tokens);
