@@ -38,6 +38,11 @@ export const meritToolDefs = [
             type: "number",
             description: "Required only for 'bonus' — amount between 0.1 and 7.",
           },
+          proof: {
+            type: "string",
+            description:
+              "Optional Discord message link as proof (e.g. https://discord.com/channels/...).",
+          },
         },
         required: ["merit_type", "usernames"],
       },
@@ -127,6 +132,8 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
 
     const ownerIdsForAward = getConfiguredIds("DISCORD_OWNER_USER_IDS");
 
+    const rawProof = typeof args.proof === "string" ? args.proof.trim() : "";
+
     if (meritType === "bonus") {
       if (!usernames.length) return "I need at least one member to award, Sir.";
       const amount = Number(args.amount);
@@ -155,30 +162,37 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
       )
         return "Fire Lord cannot award merits that affect the Owner, Sir.";
 
+      const proofUrl = rawProof || "Bonus (conversational)";
       await db.insert(meritAwardsTable).values(
         resolvedBonus.map((m) => ({
           guildId: guild.id,
           memberId: m.id,
           memberTag: m.user.tag,
           amount,
-          proofUrl: "Bonus (conversational)",
+          proofUrl,
           awardedById: message.author.id,
           awardedByTag: message.author.tag,
         })),
       );
+
+      const auditFields: { name: string; value: string; inline?: boolean }[] = [
+        {
+          name: "RECIPIENTS",
+          value: resolvedBonus
+            .map((m) => `• ${m.user.tag} (+${amount})`)
+            .join("\n")
+            .slice(0, 1024),
+        },
+        { name: "TYPE", value: "Bonus (conversational)" },
+      ];
+      if (rawProof) {
+        auditFields.push({ name: "PROOF", value: rawProof });
+      }
+
       await writeGenericAuditLog(
         message.client,
         "JARVIS // MERIT AWARD AUDIT",
-        [
-          {
-            name: "RECIPIENTS",
-            value: resolvedBonus
-              .map((m) => `• ${m.user.tag} (+${amount})`)
-              .join("\n")
-              .slice(0, 1024),
-          },
-          { name: "TYPE", value: "Bonus (conversational)" },
-        ],
+        auditFields,
         message.author.tag,
       );
 
@@ -186,7 +200,8 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
         notFoundBonus.length > 0
           ? ` (${notFoundBonus.length} not found: ${notFoundBonus.join(", ")} — skipped)`
           : "";
-      return `Recorded **+${amount}** Bonus merit${amount === 1 ? "" : "s"} for **${resolvedBonus.length}** member${resolvedBonus.length === 1 ? "" : "s"}${notFoundNote}, Sir — logged for owners.`;
+      const proofNote = rawProof ? `\nProof: <${rawProof}>` : "";
+      return `Recorded **+${amount}** Bonus merit${amount === 1 ? "" : "s"} for **${resolvedBonus.length}** member${resolvedBonus.length === 1 ? "" : "s"}${notFoundNote}, Sir — logged for owners.${proofNote}`;
     }
 
     // exam / event / raid — host is required and is the one credited
@@ -219,6 +234,10 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
     if (!resolvedMembers.some((m) => m.id === hostMember.id))
       resolvedMembers.push(hostMember);
 
+    const proofUrl =
+      rawProof ||
+      `${meritType[0].toUpperCase()}${meritType.slice(1)} (conversational)`;
+
     await db.transaction(async (tx) => {
       await tx.insert(meritAwardsTable).values(
         resolvedMembers.map((m) => ({
@@ -226,29 +245,36 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
           memberId: m.id,
           memberTag: m.user.tag,
           amount,
-          proofUrl: `${meritType[0].toUpperCase()}${meritType.slice(1)} (conversational)`,
+          proofUrl,
           awardedById: message.author.id,
           awardedByTag: message.author.tag,
         })),
       );
     });
+
+    const auditFields: { name: string; value: string; inline?: boolean }[] = [
+      {
+        name: "RECIPIENTS",
+        value: resolvedMembers
+          .map((m) => `• ${m.user.tag} (+${amount})`)
+          .join("\n")
+          .slice(0, 1024),
+      },
+      { name: "TYPE", value: meritType },
+      { name: "HOST", value: hostMember.user.tag },
+    ];
+    if (rawProof) {
+      auditFields.push({ name: "PROOF", value: rawProof });
+    }
+
     await writeGenericAuditLog(
       message.client,
       "JARVIS // MERIT AWARD AUDIT",
-      [
-        {
-          name: "RECIPIENTS",
-          value: resolvedMembers
-            .map((m) => `• ${m.user.tag} (+${amount})`)
-            .join("\n")
-            .slice(0, 1024),
-        },
-        { name: "TYPE", value: meritType },
-        { name: "HOST", value: hostMember.user.tag },
-      ],
+      auditFields,
       message.author.tag,
     );
-    return `Recorded **+${amount}** ${meritType} merit${amount === 1 ? "" : "s"} for **${resolvedMembers.length}** member${resolvedMembers.length === 1 ? "" : "s"} (Host: ${hostMember.user.tag}), Sir — logged for owners.`;
+    const proofNote = rawProof ? `\nProof: <${rawProof}>` : "";
+    return `Recorded **+${amount}** ${meritType} merit${amount === 1 ? "" : "s"} for **${resolvedMembers.length}** member${resolvedMembers.length === 1 ? "" : "s"} (Host: ${hostMember.user.tag}), Sir — logged for owners.${proofNote}`;
   },
 
   remove_merit: async ({ args, message, guild, actorRank }) => {

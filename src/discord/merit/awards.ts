@@ -3,6 +3,7 @@ import type { ChatInputCommandInteraction, GuildMember } from "discord.js";
 import { FIRE_RED, getConfiguredIds } from "../../config";
 import { db, meritAwardsTable } from "../../lib/db";
 import { writeOwnerAuditLog } from "../auditLog";
+import { isValidDiscordMessageLink } from "../commands/definitions";
 import { getJarvisRank, isProtectedOwner, rankAtLeast } from "../permissions";
 import { logger } from "../../lib/logger";
 
@@ -180,6 +181,14 @@ export async function handleAddMerit(
     if (sub === "bonus") {
       const usersRaw = interaction.options.getString("users", true);
       const bonusAmount = interaction.options.getNumber("amount", true);
+      const proof = interaction.options.getString("proof", true).trim();
+
+      if (!isValidDiscordMessageLink(proof)) {
+        throw new Error(
+          "Invalid proof URL. Please provide a valid Discord message link (e.g. https://discord.com/channels/...).",
+        );
+      }
+
       const mentionIds = extractMentionIds(usersRaw);
       if (mentionIds.length === 0) {
         throw new Error(
@@ -210,10 +219,16 @@ export async function handleAddMerit(
         interaction,
         targetMembers,
         bonusAmount,
-        `Bonus award authorized by ${interaction.user.tag}`,
+        proof,
         "Bonus",
       );
-      await writeOwnerAuditLog(interaction, targetMembers, bonusAmount, "Bonus");
+      await writeOwnerAuditLog(
+        interaction,
+        targetMembers,
+        bonusAmount,
+        "Bonus",
+        proof,
+      );
 
       const skipped = mentionIds.length - targetMembers.length;
       const skippedNote =
@@ -221,14 +236,22 @@ export async function handleAddMerit(
           ? ` (${skipped} mention${skipped === 1 ? "" : "s"} not found in server — skipped)`
           : "";
       await interaction.editReply(
-        `Recorded **+${bonusAmount}** Bonus merit${bonusAmount === 1 ? "" : "s"} for **${targetMembers.length}** member${targetMembers.length === 1 ? "" : "s"}${skippedNote} — logged for owners.`,
+        `Recorded **+${bonusAmount}** Bonus merit${bonusAmount === 1 ? "" : "s"} for **${targetMembers.length}** member${targetMembers.length === 1 ? "" : "s"}${skippedNote} — logged for owners.\n• **Proof:** <${proof}>`,
       );
       return;
     }
 
-    // ── Exam / Event / Raid: extract @mentions + explicit host ────────────────
+    // ── Exam / Event / Raid: extract @mentions + explicit host + proof ────────
     const announcement = interaction.options.getString("announcement", true);
     const hostUser = interaction.options.getUser("host", true);
+    const proof = interaction.options.getString("proof", true).trim();
+
+    if (!isValidDiscordMessageLink(proof)) {
+      throw new Error(
+        "Invalid proof URL. Please provide a valid Discord message link (e.g. https://discord.com/channels/...).",
+      );
+    }
+
     const mentionIds = extractMentionIds(announcement);
     if (mentionIds.length === 0) {
       throw new Error(
@@ -275,10 +298,16 @@ export async function handleAddMerit(
       interaction,
       allMembers,
       meritAmount,
-      announcement,
+      proof,
       label,
     );
-    await writeOwnerAuditLog(interaction, allMembers, meritAmount, label);
+    await writeOwnerAuditLog(
+      interaction,
+      allMembers,
+      meritAmount,
+      label,
+      proof,
+    );
 
     const skipped = mentionIds.length - mentioned.length;
     const skippedNote =
@@ -286,7 +315,7 @@ export async function handleAddMerit(
         ? ` (${skipped} mention${skipped === 1 ? "" : "s"} not found in server — skipped)`
         : "";
     await interaction.editReply(
-      `Recorded **+${meritAmount}** ${label} merit${meritAmount === 1 ? "" : "s"} for **${allMembers.length}** member${allMembers.length === 1 ? "" : "s"} (Host: ${hostMember.user.tag})${skippedNote} — logged for owners.`,
+      `Recorded **+${meritAmount}** ${label} merit${meritAmount === 1 ? "" : "s"} for **${allMembers.length}** member${allMembers.length === 1 ? "" : "s"} (Host: ${hostMember.user.tag})${skippedNote} — logged for owners.\n• **Proof:** <${proof}>`,
     );
   } catch (error) {
     const message =

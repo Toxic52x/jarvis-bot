@@ -60,10 +60,13 @@ export function buildMeritHistoryPageEmbed(
 ): EmbedBuilder {
   const start = page * MERIT_HISTORY_PAGE_SIZE;
   const pageRows = rows.slice(start, start + MERIT_HISTORY_PAGE_SIZE);
-  const lines = pageRows.map(
-    (a) =>
-      `**${a.amount > 0 ? "+" : ""}${a.amount}**  •  [Proof of action](${a.proofUrl})  •  <t:${Math.floor(a.createdAt.getTime() / 1000)}:R>`,
-  );
+  const lines = pageRows.map((a) => {
+    const isUrl = /^https?:\/\//i.test(a.proofUrl.trim());
+    const proofLink = isUrl
+      ? `[Proof of action](${a.proofUrl.trim()})`
+      : a.proofUrl;
+    return `**${a.amount > 0 ? "+" : ""}${a.amount}**  •  ${proofLink}  •  <t:${Math.floor(a.createdAt.getTime() / 1000)}:R>`;
+  });
   return new EmbedBuilder()
     .setTitle("JARVIS // MERIT HISTORY")
     .setDescription(`**PERSONNEL:** ${targetTag}\n\n${lines.join("\n")}`)

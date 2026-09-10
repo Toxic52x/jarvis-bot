@@ -41,6 +41,7 @@ export async function writeOwnerAuditLog(
   members: GuildMember[],
   amount: number,
   meritType: string,
+  proofUrl?: string,
 ): Promise<void> {
   const logChannelId = process.env.DISCORD_OWNER_LOG_CHANNEL_ID?.trim();
   if (!logChannelId)
@@ -58,23 +59,29 @@ export async function writeOwnerAuditLog(
     .map((m) => `• ${m.user.tag} (${m.id}) — **+${amount}**`)
     .join("\n");
 
+  const fields: { name: string; value: string; inline?: boolean }[] = [
+    { name: "RECIPIENTS", value: memberLines.slice(0, 1024) },
+    {
+      name: "MERIT VALUE",
+      value: `**+${amount}** merit${amount === 1 ? "" : "s"} per recipient`,
+      inline: true,
+    },
+    { name: "TYPE", value: meritType, inline: true },
+    {
+      name: "AUTHORIZED BY",
+      value: `${interaction.user.tag} (${interaction.user.id})`,
+    },
+  ];
+
+  if (proofUrl) {
+    fields.push({ name: "PROOF", value: proofUrl, inline: false });
+  }
+
   const embed = new EmbedBuilder()
     .setTitle("JARVIS // MERIT AWARD AUDIT")
     .setDescription("A merit transaction has been authorized and recorded.")
     .setColor(FIRE_RED)
-    .addFields(
-      { name: "RECIPIENTS", value: memberLines.slice(0, 1024) },
-      {
-        name: "MERIT VALUE",
-        value: `**+${amount}** merit${amount === 1 ? "" : "s"} per recipient`,
-        inline: true,
-      },
-      { name: "TYPE", value: meritType, inline: true },
-      {
-        name: "AUTHORIZED BY",
-        value: `${interaction.user.tag} (${interaction.user.id})`,
-      },
-    )
+    .addFields(...fields)
     .setFooter({ text: "FIRE NATION • OWNER AUDIT CHANNEL" })
     .setTimestamp();
 
