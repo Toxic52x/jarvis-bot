@@ -2,32 +2,23 @@ import type {
   ChatInputCommandInteraction,
   Interaction,
 } from "discord.js";
-import { handleAddMerit, handleRemoveMerit } from "../merit/awards";
 import {
+  handleAddMerit,
   handleLeaderboard,
   handleMeritHistory,
   handleMerits,
-} from "../merit/queries";
-import { handleResetData } from "../merit/resetData";
+  handleRemoveMerit,
+  handleResetData,
+} from "../../features/merit/commands";
 import {
   handleCreateAdvisor,
   handleCreateHr,
   handleCreateRoyalty,
-} from "../roles";
-import {
-  handleGlobalBan,
-  handleGlobalKick,
-  handleGlobalMute,
-} from "../moderation/globalActions";
-import { handleInactivePurge } from "../moderation/inactivePurge";
-import { handleRequestGuards, handleRoyalGuard } from "../guard";
-import { handleLookup } from "../roblox/lookup";
-import { handleTrackRoblox } from "../roblox/tracking";
+} from "../../features/merit/roles";
 import {
   handleAddKnowledge,
   handleReloadKnowledge,
-  handleStaydown,
-} from "./misc";
+} from "../../features/knowledge/commands";
 import { logger } from "../../lib/logger";
 
 /**
@@ -48,17 +39,8 @@ export const COMMAND_HANDLERS: Record<
   createadvisor: handleCreateAdvisor,
   createroyalty: handleCreateRoyalty,
   resetdata: handleResetData,
-  staydown: handleStaydown,
-  globalkick: handleGlobalKick,
-  globalban: handleGlobalBan,
-  globalmute: handleGlobalMute,
-  royalguard: handleRoyalGuard,
-  requestguards: handleRequestGuards,
-  lookup: handleLookup,
-  inactivepurge: handleInactivePurge,
   reloadknowledge: handleReloadKnowledge,
   addknowledge: handleAddKnowledge,
-  trackroblox: handleTrackRoblox,
 };
 
 /**
@@ -66,10 +48,9 @@ export const COMMAND_HANDLERS: Record<
  *
  * Only chat-input commands are dispatched here. Every button in this bot is
  * served by a component collector attached to the message that produced it
- * (leaderboard/merit-history paging, the /resetdata and /inactivepurge
- * confirmations, and the guard RSVP + close buttons), so button, select-menu,
- * modal and autocomplete interactions are intentionally left alone rather than
- * being answered twice.
+ * (leaderboard/merit-history paging, the /resetdata confirmation), so button,
+ * select-menu, modal and autocomplete interactions are intentionally left
+ * alone rather than being answered twice.
  */
 export async function handleInteraction(
   interaction: Interaction,

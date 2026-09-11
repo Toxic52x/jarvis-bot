@@ -13,25 +13,6 @@ export const ROYALTY_ROLE_NAME = "Royalty";
 export const FIRE_RED = 0xb91c1c;
 export const FIRE_ORANGE = 0xf97316;
 
-// ─── Channel IDs ─────────────────────────────────────────────────────────────
-// Configurable via environment; the defaults are the values this deployment has
-// always used, so an existing install keeps working with no env changes.
-
-export const ROYAL_GUARD_CHANNEL_ID =
-  process.env.DISCORD_ROYAL_GUARD_CHANNEL_ID?.trim() || "1539490573193449533";
-export const NORMAL_GUARD_CHANNEL_ID =
-  process.env.DISCORD_NORMAL_GUARD_CHANNEL_ID?.trim() || "1528554465060327474";
-export const GUARD_RSVP_TRACKER_CHANNEL_ID =
-  process.env.DISCORD_GUARD_RSVP_TRACKER_CHANNEL_ID?.trim() ||
-  "1528555314998149231";
-
-// ─── Overwatch Mode constants ─────────────────────────────────────────────────
-
-export const OVERWATCH_PING_THRESHOLD = 5; // mentions in one message that counts as "ping abuse"
-export const OVERWATCH_VIOLATIONS_BEFORE_MUTE = 3; // strikes before auto-mute
-export const OVERWATCH_MUTE_DURATION_MIN = 15;
-export const OVERWATCH_WARNING_LIFESPAN_MS = 15_000; // how long the public warning stays before self-deleting
-
 // ─── AI quota constants ───────────────────────────────────────────────────────
 
 // The 100,000 fallback is a guess, not a real Google quota figure — set
@@ -45,11 +26,6 @@ export const GEMINI_DAILY_LIMIT =
 // limit that varies by tier and model. Set GOOGLE_TPM_LIMIT in your environment to
 // your account's real TPM limit for gemini-2.0-flash; this fallback is only a guess.
 export const GOOGLE_TPM_LIMIT = Number(process.env.GOOGLE_TPM_LIMIT) || 12_000;
-
-// ─── Timing constants ─────────────────────────────────────────────────────────
-
-export const PRESENCE_POLL_INTERVAL_MS = 60_000;
-export const GUARD_REQUEST_LIFESPAN_MS = 24 * 60 * 60 * 1000;
 
 // ─── Sleep / wake phrases ─────────────────────────────────────────────────────
 // "jarvis go to sleep" / "jarvis good night" takes Jarvis fully offline: presence

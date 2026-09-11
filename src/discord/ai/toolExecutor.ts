@@ -4,24 +4,14 @@ import {
   getConfiguredIds,
   type JarvisRank,
 } from "../../config";
+import { meritToolHandlers } from "../../features/merit/aiTools";
 import { TOOL_MIN_RANK, LEGACY_TOOL_MIN_RANK } from "../permissions";
-import { meritToolHandlers } from "./tools/meritTools";
-import { messageToolHandlers } from "./tools/messageTools";
-import { miscToolHandlers } from "./tools/miscTools";
-import { moderationToolHandlers } from "./tools/moderationTools";
-import { robloxToolHandlers } from "./tools/robloxTools";
-import { serverToolHandlers } from "./tools/serverTools";
 import type { ToolHandler } from "./tools/shared";
 
-// Flat dispatch table assembled from the six domain files. Each domain owns
-// both its tool schemas and the handlers that implement them.
+// Flat dispatch table assembled from each feature's own AI tool handlers.
+// A new feature with AI tools adds one spread here.
 const TOOL_HANDLERS: Record<string, ToolHandler> = {
-  ...moderationToolHandlers,
   ...meritToolHandlers,
-  ...robloxToolHandlers,
-  ...serverToolHandlers,
-  ...messageToolHandlers,
-  ...miscToolHandlers,
 };
 
 // Execute a tool call returned by the AI
@@ -40,9 +30,6 @@ export async function executeTool(
     return `Access Denied — ${centralMinRank.charAt(0).toUpperCase() + centralMinRank.slice(1)} and above only, Sir.`;
   }
 
-  // ── Rank gate for the legacy conversational actions ───────────────────────
-  // No tool appears in both tables, so running this alongside the central gate
-  // is equivalent to the old fall-through-to-the-switch ordering.
   const legacyMinRank = LEGACY_TOOL_MIN_RANK[name];
   if (legacyMinRank && RANK_ORDER[actorRank] < RANK_ORDER[legacyMinRank]) {
     return `Access Denied — ${legacyMinRank.charAt(0).toUpperCase() + legacyMinRank.slice(1)} and above only, Sir.`;

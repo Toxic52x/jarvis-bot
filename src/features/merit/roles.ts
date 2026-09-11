@@ -3,9 +3,9 @@ import {
   ADVISOR_ROLE_NAME,
   HR_ROLE_NAME,
   ROYALTY_ROLE_NAME,
-} from "../config";
-import { canManageJarvis, rankAtLeast } from "./permissions";
-import { logger } from "../lib/logger";
+} from "../../config";
+import { canManageJarvis, rankAtLeast } from "../../discord/permissions";
+import { logger } from "../../lib/logger";
 
 export async function handleCreateHr(
   interaction: ChatInputCommandInteraction,

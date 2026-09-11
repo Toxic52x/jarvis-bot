@@ -54,46 +54,17 @@ export function isProtectedOwner(
 
 // ─── Conversational-tool rank gates ───────────────────────────────────────────
 
-// Central rank gate for conversational tools that have no per-tool check
-// of their own in the tool executor. Add new tools here as they're added to
+// Central rank gate for conversational tools that have no per-tool check of
+// their own in the tool executor. Add new tools here as they're added to
 // DISCORD_TOOLS — if a tool isn't listed, it runs with NO rank restriction.
+// Merit's AI tools currently gate themselves inline via
+// features/merit/service.ts's assert* functions, so this table is empty for
+// now — it exists as the seam for a future tool domain that wants a simple
+// declarative rank floor instead.
 
-export const TOOL_MIN_RANK: Partial<Record<string, JarvisRank>> = {
-  delete_message: "advisor",
-  create_channel: "hr",
-  create_category: "hr",
-  create_role: "hr",
-  create_thread: "hr",
-  archive_thread: "hr",
-  lock_thread: "advisor",
-  create_stage_channel: "hr",
-  move_voice_member: "hr",
-  server_mute_member: "hr",
-  server_deafen_member: "hr",
-  dm_user: "advisor",
-  create_invite: "hr",
-  revoke_invite: "advisor",
-  create_emoji: "hr",
-  delete_emoji: "advisor",
-  create_webhook: "royalty",
-  create_scheduled_event: "hr",
-  query_audit_log: "advisor",
-  watch_message_reactions: "hr",
-  list_reaction_watches: "hr",
-  cancel_reaction_watch: "hr",
-};
+export const TOOL_MIN_RANK: Partial<Record<string, JarvisRank>> = {};
 
-// Rank gate for the legacy conversational actions in the switch statement
-// at the bottom of executeTool.
+// Rank gate for legacy conversational actions dispatched outside the normal
+// per-domain handler tables. Empty for the same reason as TOOL_MIN_RANK above.
 
-export const LEGACY_TOOL_MIN_RANK: Partial<Record<string, JarvisRank>> = {
-  ping_everyone: "hr",
-  kick_member: "advisor",
-  ban_member: "royalty",
-  mute_member: "advisor",
-  unmute_member: "advisor",
-  assign_role: "hr",
-  remove_role: "hr",
-  set_nickname: "hr",
-  send_message: "hr",
-};
+export const LEGACY_TOOL_MIN_RANK: Partial<Record<string, JarvisRank>> = {};

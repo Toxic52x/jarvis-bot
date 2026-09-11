@@ -1,14 +1,34 @@
 import type { GuildMember } from "discord.js";
-import { desc, eq, sql } from "drizzle-orm";
 import type OpenAI from "openai";
-import { RANK_ORDER, getConfiguredIds } from "../../../config";
-import { db, meritAwardsTable } from "../../../lib/db";
-import { writeGenericAuditLog } from "../../auditLog";
-import { exportAndResetMeritData } from "../../merit/resetData";
-import { isProtectedOwner } from "../../permissions";
-import { findMember, type ToolHandler } from "./shared";
+import { findMember, type ToolHandler } from "../../discord/ai/tools/shared";
+import {
+  MeritError,
+  assertCanAward,
+  assertCanManageData,
+  assertCanRemove,
+  assertCanViewHistory,
+  assertNotProtectedOwner,
+  assertValidAmount,
+  auditAward,
+  auditRemoval,
+  auditReset,
+  fixedMeritAmount,
+  getLeaderboard,
+  getMemberHistory,
+  getMemberTotal,
+  meritTypeLabel,
+  recordAward,
+  recordRemoval,
+  resetAllData,
+  type MeritType,
+} from "./service";
 
-// ── Merit system ──────────────────────────────────────────────────────────
+// The conversational (AI chat) equivalent of the /addmerit, /removemerit,
+// /merits, /merithistory, and /resetdata slash commands. Every rank check,
+// DB write, and audit log call here goes through service.ts — the exact same
+// functions the slash-command handlers in commands.ts call — so the rules
+// can't drift between the two entry points.
+
 export const meritToolDefs = [
   {
     type: "function" as const,
@@ -65,7 +85,7 @@ export const meritToolDefs = [
     function: {
       name: "get_merits",
       description:
-        "Reports a specific member's total merit count, or the top-30 leaderboard if no username is given.",
+        "Reports a specific member's total merit count, or the top-10 leaderboard if no username is given.",
       parameters: {
         type: "object",
         properties: { username: { type: "string" } },
@@ -109,29 +129,25 @@ export const meritToolDefs = [
 
 export const meritToolHandlers: Record<string, ToolHandler> = {
   award_merit: async ({ args, message, guild, actorRank }) => {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.hr)
-      return "Access Denied — HR and above only, Sir.";
-    const meritType = String(args.merit_type ?? "") as
-      | "exam"
-      | "event"
-      | "raid"
-      | "bonus";
+    const meritType = String(args.merit_type ?? "") as MeritType;
     const usernames = Array.isArray(args.usernames)
       ? (args.usernames as string[])
       : [];
-    if (
-      (meritType === "raid" || meritType === "bonus") &&
-      RANK_ORDER[actorRank] < RANK_ORDER.advisor
-    )
-      return "Only Advisors and above can award Raid or Bonus merits, Sir.";
 
-    const ownerIdsForAward = getConfiguredIds("DISCORD_OWNER_USER_IDS");
+    try {
+      assertCanAward(actorRank, meritType);
+    } catch (e) {
+      return e instanceof MeritError ? `${e.message}, Sir.` : "Access Denied, Sir.";
+    }
 
     if (meritType === "bonus") {
       if (!usernames.length) return "I need at least one member to award, Sir.";
       const amount = Number(args.amount);
-      if (!amount || amount < 0.1 || amount > 7)
-        return "Bonus amount must be between 0.1 and 7, Sir.";
+      try {
+        assertValidAmount(amount);
+      } catch (e) {
+        return e instanceof MeritError ? `${e.message}, Sir.` : "Invalid amount, Sir.";
+      }
 
       const resolvedBonus: GuildMember[] = [];
       const notFoundBonus: string[] = [];
@@ -148,39 +164,22 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
       if (ambiguousBonus.length > 0) return ambiguousBonus.join("\n");
       if (resolvedBonus.length === 0)
         return "I could not locate any of the members you named, Sir.";
-      if (
-        resolvedBonus.some((m) =>
-          isProtectedOwner(actorRank, m.id, ownerIdsForAward),
-        )
-      )
-        return "Fire Lord cannot award merits that affect the Owner, Sir.";
+      try {
+        for (const m of resolvedBonus) assertNotProtectedOwner(actorRank, m.id);
+      } catch (e) {
+        return e instanceof MeritError ? `${e.message}, Sir.` : "Access Denied, Sir.";
+      }
 
-      await db.insert(meritAwardsTable).values(
-        resolvedBonus.map((m) => ({
-          guildId: guild.id,
-          memberId: m.id,
-          memberTag: m.user.tag,
-          amount,
-          proofUrl: "Bonus (conversational)",
-          awardedById: message.author.id,
-          awardedByTag: message.author.tag,
-        })),
-      );
-      await writeGenericAuditLog(
-        message.client,
-        "JARVIS // MERIT AWARD AUDIT",
-        [
-          {
-            name: "RECIPIENTS",
-            value: resolvedBonus
-              .map((m) => `• ${m.user.tag} (+${amount})`)
-              .join("\n")
-              .slice(0, 1024),
-          },
-          { name: "TYPE", value: "Bonus (conversational)" },
-        ],
-        message.author.tag,
-      );
+      const recipients = resolvedBonus.map((m) => ({ id: m.id, tag: m.user.tag }));
+      await recordAward({
+        guildId: guild.id,
+        recipients,
+        amount,
+        proofUrl: "Bonus (conversational)",
+        awardedById: message.author.id,
+        awardedByTag: message.author.tag,
+      });
+      await auditAward(message.client, recipients, amount, "Bonus", message.author.tag);
 
       const notFoundNote =
         notFoundBonus.length > 0
@@ -196,8 +195,11 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
     const hostResult = await findMember(guild, hostQuery);
     if ("error" in hostResult) return hostResult.error;
     const hostMember = hostResult;
-    if (isProtectedOwner(actorRank, hostMember.id, ownerIdsForAward))
-      return "Fire Lord cannot award merits that affect the Owner, Sir.";
+    try {
+      assertNotProtectedOwner(actorRank, hostMember.id);
+    } catch (e) {
+      return e instanceof MeritError ? `${e.message}, Sir.` : "Access Denied, Sir.";
+    }
 
     const resolvedMembers: GuildMember[] = [];
     for (const u of usernames) {
@@ -208,82 +210,67 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
         resolvedMembers.push(m);
       }
     }
-    if (
-      resolvedMembers.some((m) =>
-        isProtectedOwner(actorRank, m.id, ownerIdsForAward),
-      )
-    )
-      return "Fire Lord cannot award merits that affect the Owner, Sir.";
+    try {
+      for (const m of resolvedMembers) assertNotProtectedOwner(actorRank, m.id);
+    } catch (e) {
+      return e instanceof MeritError ? `${e.message}, Sir.` : "Access Denied, Sir.";
+    }
 
-    const amount = meritType === "raid" ? 3 : 1;
+    const amount = fixedMeritAmount(meritType as Exclude<MeritType, "bonus">);
     if (!resolvedMembers.some((m) => m.id === hostMember.id))
       resolvedMembers.push(hostMember);
 
-    await db.transaction(async (tx) => {
-      await tx.insert(meritAwardsTable).values(
-        resolvedMembers.map((m) => ({
-          guildId: guild.id,
-          memberId: m.id,
-          memberTag: m.user.tag,
-          amount,
-          proofUrl: `${meritType[0].toUpperCase()}${meritType.slice(1)} (conversational)`,
-          awardedById: message.author.id,
-          awardedByTag: message.author.tag,
-        })),
-      );
+    const recipients = resolvedMembers.map((m) => ({ id: m.id, tag: m.user.tag }));
+    await recordAward({
+      guildId: guild.id,
+      recipients,
+      amount,
+      proofUrl: `${meritTypeLabel(meritType)} (conversational)`,
+      awardedById: message.author.id,
+      awardedByTag: message.author.tag,
     });
-    await writeGenericAuditLog(
+    await auditAward(
       message.client,
-      "JARVIS // MERIT AWARD AUDIT",
-      [
-        {
-          name: "RECIPIENTS",
-          value: resolvedMembers
-            .map((m) => `• ${m.user.tag} (+${amount})`)
-            .join("\n")
-            .slice(0, 1024),
-        },
-        { name: "TYPE", value: meritType },
-        { name: "HOST", value: hostMember.user.tag },
-      ],
+      recipients,
+      amount,
+      meritType,
       message.author.tag,
     );
     return `Recorded **+${amount}** ${meritType} merit${amount === 1 ? "" : "s"} for **${resolvedMembers.length}** member${resolvedMembers.length === 1 ? "" : "s"} (Host: ${hostMember.user.tag}), Sir — logged for owners.`;
   },
 
   remove_merit: async ({ args, message, guild, actorRank }) => {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.advisor)
-      return "Access Denied — Advisor and above only, Sir.";
+    try {
+      assertCanRemove(actorRank);
+    } catch (e) {
+      return e instanceof MeritError ? `${e.message}, Sir.` : "Access Denied, Sir.";
+    }
     const target = await findMember(guild, String(args.username ?? ""));
     if ("error" in target) return target.error;
     const amount = Number(args.amount);
-    if (!amount || amount < 0.1 || amount > 7)
-      return "Amount must be between 0.1 and 7, Sir.";
+    try {
+      assertValidAmount(amount);
+    } catch (e) {
+      return e instanceof MeritError ? `${e.message}, Sir.` : "Invalid amount, Sir.";
+    }
     const reasonText = String(args.reason ?? "").trim();
     if (!reasonText) return "I need a reason for the removal, Sir.";
-    const ownerIdsForRemove = getConfiguredIds("DISCORD_OWNER_USER_IDS");
-    if (isProtectedOwner(actorRank, target.id, ownerIdsForRemove))
-      return "Fire Lord cannot remove merits from the Owner, Sir.";
+    try {
+      assertNotProtectedOwner(actorRank, target.id);
+    } catch (e) {
+      return e instanceof MeritError ? `${e.message}, Sir.` : "Access Denied, Sir.";
+    }
 
-    await db.insert(meritAwardsTable).values({
+    const recipient = { id: target.id, tag: target.user.tag };
+    await recordRemoval({
       guildId: guild.id,
-      memberId: target.id,
-      memberTag: target.user.tag,
-      amount: -amount,
-      proofUrl: reasonText,
+      target: recipient,
+      amount,
+      reason: reasonText,
       awardedById: message.author.id,
       awardedByTag: message.author.tag,
     });
-    await writeGenericAuditLog(
-      message.client,
-      "JARVIS // MERIT REMOVAL AUDIT",
-      [
-        { name: "MEMBER", value: `${target.user.tag} (${target.id})` },
-        { name: "AMOUNT REMOVED", value: `-${amount}` },
-        { name: "REASON", value: reasonText },
-      ],
-      message.author.tag,
-    );
+    await auditRemoval(message.client, recipient, amount, reasonText, message.author.tag);
     return `Recorded **-${amount}** merit${amount === 1 ? "" : "s"} for ${target.user.tag}, Sir — logged for owners.`;
   },
 
@@ -292,33 +279,21 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
     if (usernameArg) {
       const target = await findMember(guild, usernameArg);
       if ("error" in target) return target.error;
-      // Merit is one shared ledger across every server Jarvis is in — not
-      // filtered by guildId, by design.
-      const [result] = await db
-        .select({
-          total: sql<number>`coalesce(sum(${meritAwardsTable.amount}), 0)`,
-        })
-        .from(meritAwardsTable)
-        .where(eq(meritAwardsTable.memberId, target.id));
-      return `${target.user.tag} currently has **${Number(result?.total ?? 0)}** merits, Sir.`;
+      const total = await getMemberTotal(target.id);
+      return `${target.user.tag} currently has **${total}** merits, Sir.`;
     }
-    const leaderboard = await db
-      .select({
-        memberTag: sql<string>`(array_agg(${meritAwardsTable.memberTag} order by ${meritAwardsTable.createdAt} desc))[1]`,
-        total: sql<number>`sum(${meritAwardsTable.amount})`,
-      })
-      .from(meritAwardsTable)
-      .groupBy(meritAwardsTable.memberId)
-      .orderBy(desc(sql`sum(${meritAwardsTable.amount})`))
-      .limit(10);
+    const leaderboard = await getLeaderboard(10);
     if (leaderboard.length === 0)
       return "No merits have been recorded yet, Sir.";
-    return `Top personnel by merit, Sir:\n${leaderboard.map((e, i) => `${i + 1}. ${e.memberTag} — ${Number(e.total)}`).join("\n")}`;
+    return `Top personnel by merit, Sir:\n${leaderboard.map((e, i) => `${i + 1}. ${e.memberTag} — ${e.total}`).join("\n")}`;
   },
 
   get_merit_history: async ({ args, message, guild, actorRank }) => {
-    if (RANK_ORDER[actorRank] < RANK_ORDER.hr)
-      return "Access Denied — HR and above only, Sir.";
+    try {
+      assertCanViewHistory(actorRank);
+    } catch (e) {
+      return e instanceof MeritError ? `${e.message}, Sir.` : "Access Denied, Sir.";
+    }
     const usernameArg = args.username ? String(args.username).trim() : "";
     let target: GuildMember = message.member!;
     if (usernameArg) {
@@ -326,32 +301,23 @@ export const meritToolHandlers: Record<string, ToolHandler> = {
       if ("error" in result) return result.error;
       target = result;
     }
-    const history = await db
-      .select()
-      .from(meritAwardsTable)
-      .where(eq(meritAwardsTable.memberId, target.id))
-      .orderBy(desc(meritAwardsTable.createdAt));
+    const history = await getMemberHistory(target.id);
     if (history.length === 0)
       return `No merit history found for ${target.user.tag}, Sir.`;
     return `Full merit history for ${target.user.tag} (${history.length} total), Sir:\n${history.map((a) => `• ${a.amount > 0 ? "+" : ""}${a.amount} — ${a.proofUrl}`).join("\n")}`;
   },
 
   reset_merit_data: async ({ args, message, guild, actorRank }) => {
-    if (actorRank !== "owner" && actorRank !== "second")
-      return "Access Denied — only the Owner or Fire Lord can reset system data, Sir.";
+    try {
+      assertCanManageData(actorRank);
+    } catch (e) {
+      return e instanceof MeritError ? `${e.message}, Sir.` : "Access Denied, Sir.";
+    }
     if (args.confirmed !== true)
       return "This permanently wipes all merit data, Sir. Please confirm explicitly before I proceed.";
 
-    const { backupLines } = await exportAndResetMeritData(
-      guild.id,
-      message.author.tag,
-    );
-    await writeGenericAuditLog(
-      message.client,
-      "JARVIS // SYSTEM DATA BACKUP & RESET EXPORT",
-      [{ name: "DATA BACKUP AT RESET", value: backupLines.slice(0, 1024) }],
-      message.author.tag,
-    );
+    const { entries } = await resetAllData(guild.id);
+    await auditReset(message.client, entries, message.author.tag);
     return "✅ All merit data has been reset, Sir. A full backup was logged to the owner channel first.";
   },
 };

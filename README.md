@@ -37,7 +37,7 @@ git add dist && git commit -m "Rebuild dist"
 
 ## The database
 
-The bot stores merit awards, member activity, and reminders in Postgres via
+The bot stores merit awards in Postgres via
 Drizzle ORM. bot-hosting.net does not provide a database, so you'll need one
 from an external free-tier provider — e.g. [Neon](https://neon.tech) or
 [Supabase](https://supabase.com) — and put its connection string in

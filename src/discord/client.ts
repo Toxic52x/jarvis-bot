@@ -7,23 +7,14 @@ import {
 } from "discord.js";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { lte } from "drizzle-orm";
-import { PRESENCE_POLL_INTERVAL_MS } from "../config";
-import { db, remindersTable, runMigrations } from "../lib/db";
+import { runMigrations } from "../lib/db";
 import { loadJarvisAccess } from "./accessList";
 import { ALL_COMMANDS } from "./commands/definitions";
 import { handleInteraction } from "./commands/router";
-import {
-  handleMessageCreate,
-  handleMessageDelete,
-  handleReactionAdd,
-} from "./events/messageEvents";
+import { handleMessageCreate } from "./events/messageEvents";
 import { loadTokenUsage } from "./ai/geminiClient";
-import { setBotClient } from "./guard";
-import { loadKnowledge } from "./knowledge";
-import { loadOverwatchFilters } from "./moderation/overwatch";
+import { loadKnowledge } from "../features/knowledge/service";
 import { getOfflineAvatarBuffer, startPresenceLoops } from "./presence";
-import { loadRobloxTracking, pollRobloxPresence, robloxTracking } from "./roblox/tracking";
 import { logger } from "../lib/logger";
 
 export async function startBot(): Promise<void> {
@@ -40,14 +31,8 @@ export async function startBot(): Promise<void> {
       GatewayIntentBits.DirectMessages,
       GatewayIntentBits.MessageContent,
       GatewayIntentBits.GuildMembers,
-      GatewayIntentBits.GuildPresences,
-      GatewayIntentBits.GuildMessageReactions,
     ],
   });
-
-  // Guard requests fetch channels/guilds outside of any interaction, so the
-  // guard module needs the live client the moment it exists.
-  setBotClient(client);
 
   client.once(Events.ClientReady, async (ready) => {
     const commands = ALL_COMMANDS.map((c) => c.toJSON());
@@ -55,8 +40,8 @@ export async function startBot(): Promise<void> {
 
     // ── Command registration — wrapped in try/catch so a failure here
     // (bad payload, permission issue, transient network error) can no
-    // longer silently swallow everything below it (status rotation,
-    // reminder checker, etc). Errors are now logged loudly. ──────────────
+    // longer silently swallow everything below it (status rotation, etc).
+    // Errors are now logged loudly. ─────────────────────────────────────
     const testGuildId = process.env.DISCORD_TEST_GUILD_ID?.trim();
     try {
       if (testGuildId) {
@@ -100,45 +85,6 @@ export async function startBot(): Promise<void> {
     // profile banner all live in presence.ts now.
     await startPresenceLoops(ready);
 
-    // Reminder delivery checker — runs every 30 seconds, queries the DB
-    setInterval(async () => {
-      try {
-        const now = new Date();
-        const due = await db
-          .delete(remindersTable)
-          .where(lte(remindersTable.dueAt, now))
-          .returning();
-        for (const r of due) {
-          try {
-            const user = await ready.users.fetch(r.userId);
-            await user.send(`⏰ Reminder, Sir: **${r.message}**`);
-          } catch {
-            /* user has DMs disabled — silently skip */
-          }
-        }
-      } catch (e) {
-        logger.warn({ err: e }, "Reminder checker failed");
-      }
-    }, 30_000);
-
-    // Roblox presence poller — runs every PRESENCE_POLL_INTERVAL_MS
-    logger.info(
-      { intervalMs: PRESENCE_POLL_INTERVAL_MS },
-      "Roblox presence poller starting",
-    );
-    setInterval(() => {
-      logger.info(
-        { trackedCount: robloxTracking.users.length },
-        "pollRobloxPresence: tick",
-      );
-      pollRobloxPresence(ready).catch((err: unknown) =>
-        logger.error(
-          { err },
-          "pollRobloxPresence: uncaught rejection escaped the poller — this should not happen",
-        ),
-      );
-    }, PRESENCE_POLL_INTERVAL_MS);
-
     logger.info({ botUser: ready.user.tag }, "Jarvis online");
   });
 
@@ -151,18 +97,6 @@ export async function startBot(): Promise<void> {
   client.on(Events.MessageCreate, (message) => {
     void handleMessageCreate(message).catch((e) =>
       logger.error({ err: e }, "MessageCreate handler failed"),
-    );
-  });
-
-  client.on(Events.MessageDelete, (message) => {
-    void handleMessageDelete(message).catch((e) =>
-      logger.error({ err: e }, "MessageDelete handler failed"),
-    );
-  });
-
-  client.on(Events.MessageReactionAdd, (reaction, user) => {
-    void handleReactionAdd(reaction, user, client).catch((e) =>
-      logger.error({ err: e }, "MessageReactionAdd handler failed"),
     );
   });
 
@@ -196,9 +130,7 @@ export async function startBot(): Promise<void> {
   await runMigrations(migrationsDir);
 
   loadKnowledge();
-  loadOverwatchFilters();
   loadJarvisAccess();
-  loadRobloxTracking();
   loadTokenUsage();
 
   await client.login(token);

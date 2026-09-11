@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { logger } from "../lib/logger";
+import { logger } from "../../lib/logger";
 
 /** Escapes a string for safe use inside a RegExp. Shared with Overwatch. */
 
