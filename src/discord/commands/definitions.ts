@@ -112,7 +112,7 @@ export const addMeritCommand = new SlashCommandBuilder()
     sub
       .setName("bonus")
       .setDescription(
-        "Award 0.1–7 bonus merits to one or more members. Advisor and above only.",
+        "Award 0.1–50 bonus merits to one or more members. Advisor and above only.",
       )
       .addStringOption((o) =>
         o
