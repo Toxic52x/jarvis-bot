@@ -123,9 +123,9 @@ export const addMeritCommand = new SlashCommandBuilder()
       .addNumberOption((o) =>
         o
           .setName("amount")
-          .setDescription("Merit amount (0.1–7).")
+          .setDescription("Merit amount (0.1–50).")
           .setMinValue(0.1)
-          .setMaxValue(7)
+          .setMaxValue(50)
           .setRequired(true),
       )
       .addStringOption((o) =>
@@ -150,9 +150,9 @@ export const removeMeritCommand = new SlashCommandBuilder()
   .addNumberOption((o) =>
     o
       .setName("amount")
-      .setDescription("Merit amount to remove (0.1–7).")
+      .setDescription("Merit amount to remove (0.1–50).")
       .setMinValue(0.1)
-      .setMaxValue(7)
+      .setMaxValue(50)
       .setRequired(true),
   )
   .addStringOption((o) =>
